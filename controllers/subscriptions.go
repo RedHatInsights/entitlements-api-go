@@ -1,13 +1,17 @@
 package controllers
 
 import (
+	"time"
 	"crypto/tls"
 	"net/http"
 	"github.com/go-chi/chi"
 	"encoding/json"
+	"github.com/karlseguin/ccache"
 	"cloud.redhat.com/entitlements/types"
 	"cloud.redhat.com/entitlements/config"
 )
+
+var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
 
 func getClient() *http.Client {
 	// Create a HTTPS client and supply the created CA pool and certificate
@@ -20,15 +24,27 @@ func getClient() *http.Client {
 	}
 }
 
-func getSubscriptions() []string {
-	// resp, err := http.Get("http://localhost:8000")
+const customerId string = "6340056"
 
-	resp, err := getClient().Get("https://subscription.api.redhat.com/svcrest/subscription/v5/search/criteria;web_customer_id=6340056;sku=SVC3124;status=active")
+func getSubscriptions() []string {
+	item := cache.Get(customerId)
+
+	if (item != nil && !item.Expired()) {
+		return item.Value().([]string)
+	}
+
+	resp, err := getClient().Get("https://subscription.api.redhat.com" +
+		"/svcrest/subscription/v5/search/criteria" +
+		";web_customer_id=" + customerId +
+		";sku=SVC3124" +
+		";status=active")
+
 	if err != nil { panic(err.Error()) }
 	defer resp.Body.Close()
 
 	var arr []string
 	json.NewDecoder(resp.Body).Decode(&arr)
+	cache.Set(customerId, arr, time.Minute * 10)
 	return arr
 }
 
