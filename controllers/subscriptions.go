@@ -6,31 +6,15 @@ import (
 	"github.com/go-chi/chi"
 	"encoding/json"
 	"cloud.redhat.com/entitlements/types"
+	"cloud.redhat.com/entitlements/config"
 )
-
-var certs *tls.Certificate
-
-func getPath(str string) string {
-	return "/home/iphands/prog/cloud/enc/entitlements-meta/prod/" + str
-}
-
-func getCerts() *tls.Certificate {
-	if (certs == nil) {
-		// Read the key pair to create certificate
-		cert, err := tls.LoadX509KeyPair(getPath("prod-cert.crt"), getPath("prod-cert.key"))
-		if err != nil { panic(err.Error()) }
-		certs = &cert
-	}
-
-	return certs
-}
 
 func getClient() *http.Client {
 	// Create a HTTPS client and supply the created CA pool and certificate
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				Certificates: []tls.Certificate{*getCerts()},
+				Certificates: []tls.Certificate{*config.GetConfig().Certs},
 			},
 		},
 	}
