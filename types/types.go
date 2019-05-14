@@ -1,5 +1,14 @@
 package types
 
+type Internal struct {
+	Org_id string `json:org_id`
+}
+
+type XRhIdentity struct {
+	Account_number string `json:"account_number"`
+	Internal Internal `json:"internal"`
+}
+
 type EntitlementsSection struct {
 	Is_entitled bool `json:"is_entitled"`
 }
