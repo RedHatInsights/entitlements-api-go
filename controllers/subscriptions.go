@@ -31,7 +31,7 @@ func getSubscriptions(orgId string) []string {
 		return item.Value().([]string)
 	}
 
-	resp, err := getClient().Get("https://subscription.api.redhat.com" +
+	resp, err := getClient().Get(config.GetConfig().Options.GetString("SubsHost") +
 		"/svcrest/subscription/v5/search/criteria" +
 		";web_customer_id=" + orgId +
 		";sku=SVC3124" +

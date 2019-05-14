@@ -28,6 +28,7 @@ func getCerts(options *viper.Viper) *tls.Certificate {
 func initialize() {
 	var options *viper.Viper = viper.New()
 	options.SetDefault("Port", "3000")
+	options.SetDefault("SubsHost", "https://subscription.api.redhat.com")
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 
