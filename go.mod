@@ -4,6 +4,8 @@ go 1.12
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/RedHatInsights/entitlements-api-go v0.0.0-20190515162439-18185b1ee700 // indirect
+	github.com/RedHatInsights/platform-go-middlewares v0.0.2 // indirect
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/karlseguin/ccache v2.0.3+incompatible
 	github.com/karlseguin/expect v1.0.1 // indirect
