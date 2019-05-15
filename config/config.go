@@ -1,16 +1,17 @@
 package config
 
 import (
-	"fmt"
 	"crypto/tls"
+	"fmt"
+
 	"github.com/spf13/viper"
 )
 
 var config *EntitlementsConfig
 
 type EntitlementsConfig struct {
-	Certs *tls.Certificate
-	Port string
+	Certs   *tls.Certificate
+	Port    string
 	Options *viper.Viper
 }
 
@@ -20,20 +21,21 @@ func getCerts(options *viper.Viper) *tls.Certificate {
 		options.GetString("CERT"),
 		options.GetString("KEY"),
 	)
-	if err != nil { panic(err.Error()) }
+	if err != nil {
+		panic(err.Error())
+	}
 	return &cert
 }
 
-
 func initialize() {
-	var options *viper.Viper = viper.New()
+	var options = viper.New()
 	options.SetDefault("Port", "3000")
 	options.SetDefault("SubsHost", "https://subscription.api.redhat.com")
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 
-	config = &EntitlementsConfig {
-		Certs: getCerts(options),
+	config = &EntitlementsConfig{
+		Certs:   getCerts(options),
 		Options: options,
 	}
 
@@ -42,7 +44,7 @@ func initialize() {
 }
 
 func GetConfig() *EntitlementsConfig {
-	if (config == nil) {
+	if config == nil {
 		initialize()
 	}
 

@@ -7,6 +7,9 @@ import (
 	"github.com/go-chi/chi/middleware"
 )
 
+// DoRoutes sets up the routes used by the server.
+// First, it sets up the chi router using our middleware.
+// Then it does the actual routing config.
 func DoRoutes() chi.Router {
 	r := chi.NewRouter()
 

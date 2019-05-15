@@ -7,8 +7,9 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 )
 
+// Launch the server.
 func Launch() {
 	r := DoRoutes()
-	var port string = config.GetConfig().Options.GetString("Port")
+	var port = config.GetConfig().Options.GetString("Port")
 	http.ListenAndServe(fmt.Sprintf(":%s", port), r)
 }
