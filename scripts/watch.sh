@@ -7,4 +7,4 @@ else
     source ./config/development.iphands.sh
 fi
 
-GOPATH=~/go ~/go/bin/watcher -run cloud.redhat.com/entitlements
+GOPATH=~/go ~/go/bin/watcher -run github.com/RedHatInsights/entitlements-api-go

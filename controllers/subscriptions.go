@@ -1,14 +1,16 @@
 package controllers
 
 import (
-	"time"
 	"crypto/tls"
-	"net/http"
-	"github.com/go-chi/chi"
 	"encoding/json"
+	"net/http"
+	"time"
+
+	"github.com/RedHatInsights/entitlements-api-go/config"
+	"github.com/RedHatInsights/entitlements-api-go/types"
+
+	"github.com/go-chi/chi"
 	"github.com/karlseguin/ccache"
-	"cloud.redhat.com/entitlements/types"
-	"cloud.redhat.com/entitlements/config"
 )
 
 var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
@@ -27,7 +29,7 @@ func getClient() *http.Client {
 func getSubscriptions(orgId string) []string {
 	item := cache.Get(orgId)
 
-	if (item != nil && !item.Expired()) {
+	if item != nil && !item.Expired() {
 		return item.Value().([]string)
 	}
 
@@ -37,12 +39,14 @@ func getSubscriptions(orgId string) []string {
 		";sku=SVC3124" +
 		";status=active")
 
-	if err != nil { panic(err.Error()) }
+	if err != nil {
+		panic(err.Error())
+	}
 	defer resp.Body.Close()
 
 	var arr []string
 	json.NewDecoder(resp.Body).Decode(&arr)
-	cache.Set(orgId, arr, time.Minute * 10)
+	cache.Set(orgId, arr, time.Minute*10)
 	return arr
 }
 
@@ -51,13 +55,13 @@ func Subscriptions(r chi.Router) {
 		var arr []string = getSubscriptions(req.Context().Value("org_id").(string))
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
-			Hybrid_cloud:    types.EntitlementsSection{ Is_entitled: true },
-			Insights:        types.EntitlementsSection{ Is_entitled: true },
-			Openshift:       types.EntitlementsSection{ Is_entitled: true },
-			Smart_mangement: types.EntitlementsSection{ Is_entitled: (len(arr) > 0) },
+			Hybrid_cloud:    types.EntitlementsSection{Is_entitled: true},
+			Insights:        types.EntitlementsSection{Is_entitled: true},
+			Openshift:       types.EntitlementsSection{Is_entitled: true},
+			Smart_mangement: types.EntitlementsSection{Is_entitled: (len(arr) > 0)},
 		})
 
-		if (err != nil) {
+		if err != nil {
 			panic(err)
 		}
 

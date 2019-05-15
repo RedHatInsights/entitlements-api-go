@@ -1,10 +1,10 @@
 package server
 
 import (
+	"github.com/RedHatInsights/entitlements-api-go/controllers"
+	"github.com/RedHatInsights/platform-go-middlewares/identity"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"cloud.redhat.com/entitlements/controllers"
-	"github.com/RedHatInsights/platform-go-middlewares/identity"
 )
 
 func DoRoutes() chi.Router {

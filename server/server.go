@@ -3,7 +3,8 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"cloud.redhat.com/entitlements/config"
+
+	"github.com/RedHatInsights/entitlements-api-go/config"
 )
 
 func Launch() {

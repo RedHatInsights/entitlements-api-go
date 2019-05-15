@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cloud.redhat.com/entitlements/server"
+	"github.com/RedHatInsights/entitlements-api-go/server"
 )
 
 func main() {
