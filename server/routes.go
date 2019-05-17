@@ -21,7 +21,7 @@ func DoRoutes() chi.Router {
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.Route("/", controllers.LubDub)
-		r.Route("/services", controllers.Subscriptions)
+		r.Get("/services", controllers.Index(nil))
 	})
 
 	return r

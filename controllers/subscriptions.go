@@ -9,9 +9,10 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/types"
 
-	"github.com/go-chi/chi"
 	"github.com/karlseguin/ccache"
 )
+
+type getter func(string) []string
 
 var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
 
@@ -26,7 +27,7 @@ func getClient() *http.Client {
 	}
 }
 
-func getSubscriptions(orgID string) []string {
+var getSubscriptions = func(orgID string) []string {
 	item := cache.Get(orgID)
 
 	if item != nil && !item.Expired() {
@@ -50,9 +51,11 @@ func getSubscriptions(orgID string) []string {
 	return arr
 }
 
-func Subscriptions(r chi.Router) {
-	r.Get("/", func(w http.ResponseWriter, req *http.Request) {
-		var arr = getSubscriptions(req.Context().Value("org_id").(string))
+func Index(getCall func(string) []string) func(http.ResponseWriter, *http.Request) {
+	return func (w http.ResponseWriter, req *http.Request) {
+		if (getCall == nil) { getCall = getSubscriptions }
+
+		var arr = getCall(req.Context().Value("org_id").(string))
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
 			HybridCloud:    types.EntitlementsSection{IsEntitled: true},
@@ -65,6 +68,7 @@ func Subscriptions(r chi.Router) {
 			panic(err)
 		}
 
+		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(obj))
-	})
+	}
 }
