@@ -46,3 +46,8 @@ Now that everything is set up, you can run the application using:
 ```
 sh scripts/watch.sh ./local/development.env.sh
 ```
+
+# Testing Entitlements API with curl
+
+The Entitlements API requires that you pass in a valid x-redhat-identity header or it rejects requests.
+For an example see `cat ./scripts/xrhid_helper.sh`
