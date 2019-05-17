@@ -8,4 +8,5 @@ else
     exit 1
 fi
 
-GOPATH=~/go ~/go/bin/modd
+GOPATH="${GOPATH:-$HOME/go}"
+$GOPATH/bin/modd
