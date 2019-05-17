@@ -29,12 +29,12 @@ To run the Entitlements API locally, you will need an Enterprise Services cert w
 ## Create your config file
 
 You'll need to make a config file specific to your machine.
-Create a file `mkdir -p ./local && ./local/development.env.sh` and enter the following:
-
+Create a local config directory: `mkdir -p ./local`
+Add a file that contains your local configuration options: `$EDITOR ./local/qa.conf.sh`
+The contents should look like:
 ```
 export ENT_KEY=/{path_to_key}.key
 export ENT_CERT=/{path_to_cert}.crt
-export ENT_PORT=3000
 export ENT_SUBSHOST=https://subscription.qa.api.redhat.com
 ```
 
