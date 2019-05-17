@@ -2,7 +2,7 @@
 
 Install Golang:
 ```
-$ sudo dnf install golang
+$ sudo dnf install golang # or brew install go on OSX
 ```
 
 Clone this repo:
