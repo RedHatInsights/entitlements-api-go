@@ -12,7 +12,7 @@ $ git clone git@github.com:RedHatInsights/entitlements-api-go.git
 
 Then, install the project's Go dependencies by running:
 ```
-sudo sh /scripts/dev_deps.sh
+sh ./scripts/dev_deps.sh
 ```
 
 # Certificates and Configuration
@@ -44,7 +44,7 @@ Replace {path_to_key} and {path_to_cert} with the locations of the .key and .crt
 
 Now that everything is set up, you can run the application using:
 ```
-sh scripts/watch.sh ./local/development.env.sh
+sh ./scripts/watch.sh ./local/development.env.sh
 ```
 
 # Testing Entitlements API with curl
