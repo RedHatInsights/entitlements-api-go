@@ -4,11 +4,14 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"net/http"
+	"io/ioutil"
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/types"
+	. "github.com/RedHatInsights/entitlements-api-go/logger"
 
+	"go.uber.org/zap"
 	"github.com/karlseguin/ccache"
 )
 
@@ -27,11 +30,15 @@ func getClient() *http.Client {
 	}
 }
 
-var getSubscriptions = func(orgID string) []string {
+var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
 
 	if item != nil && !item.Expired() {
-		return item.Value().([]string)
+		return types.SubscriptionsResponse {
+			StatusCode: 200,
+			Data: item.Value().([]string),
+			CacheHit: true,
+		}
 	}
 
 	resp, err := getClient().Get(config.GetConfig().Options.GetString("SubsHost") +
@@ -40,33 +47,60 @@ var getSubscriptions = func(orgID string) []string {
 		";sku=SVC3124" +
 		";status=active")
 
-	if err != nil {
-		panic(err.Error())
-	}
-	defer resp.Body.Close()
+	if err != nil { panic(err.Error()) }
+	if resp.StatusCode != 200 {
+		defer resp.Body.Close()
+		body, _ := ioutil.ReadAll(resp.Body)
 
+		Logger().Error("Got back a non 200 status code from Subscriptions Service",
+			zap.Int("code", resp.StatusCode),
+			zap.String("body", string(body)),
+		)
+
+		return types.SubscriptionsResponse {
+			StatusCode: resp.StatusCode,
+			Data: nil,
+			CacheHit: false,
+		}
+	}
+
+
+	defer resp.Body.Close()
 	var arr []string
 	json.NewDecoder(resp.Body).Decode(&arr)
 	cache.Set(orgID, arr, time.Minute*10)
-	return arr
+	return types.SubscriptionsResponse {
+		StatusCode: resp.StatusCode,
+		Data: arr,
+		CacheHit: false,
+	}
 }
 
-func Index(getCall func(string) []string) func(http.ResponseWriter, *http.Request) {
+func Index(getCall func (string) types.SubscriptionsResponse) func (http.ResponseWriter, *http.Request) {
 	return func (w http.ResponseWriter, req *http.Request) {
 		if (getCall == nil) { getCall = getSubscriptions }
 
-		var arr = getCall(req.Context().Value("org_id").(string))
+
+		start := time.Now()
+		var res = getCall(req.Context().Value("org_id").(string))
+		Logger().Info("subs call complete",
+			zap.Duration("subs_call_duration", time.Since(start)),
+			zap.Bool("cache_hit", res.CacheHit),
+		)
+
+		if (res.StatusCode != 200) {
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
 			HybridCloud:    types.EntitlementsSection{IsEntitled: true},
 			Insights:       types.EntitlementsSection{IsEntitled: true},
 			Openshift:      types.EntitlementsSection{IsEntitled: true},
-			SmartMangement: types.EntitlementsSection{IsEntitled: (len(arr) > 0)},
+			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 0)},
 		})
 
-		if err != nil {
-			panic(err)
-		}
+		if err != nil {	panic(err) }
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(obj))
