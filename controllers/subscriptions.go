@@ -9,7 +9,7 @@ import (
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/types"
-	. "github.com/RedHatInsights/entitlements-api-go/logger"
+	l "github.com/RedHatInsights/entitlements-api-go/logger"
 
 	"go.uber.org/zap"
 	"github.com/karlseguin/ccache"
@@ -52,7 +52,7 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
 
-		Log.Error("Got back a non 200 status code from Subscriptions Service",
+		l.Log.Error("Got back a non 200 status code from Subscriptions Service",
 			zap.Int("code", resp.StatusCode),
 			zap.String("body", string(body)),
 		)
@@ -76,6 +76,7 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	}
 }
 
+// Index the handler for GETs to /api/entitlements/v1/services/
 func Index(getCall func (string) types.SubscriptionsResponse) func (http.ResponseWriter, *http.Request) {
 	return func (w http.ResponseWriter, req *http.Request) {
 		if (getCall == nil) { getCall = getSubscriptions }
@@ -83,7 +84,7 @@ func Index(getCall func (string) types.SubscriptionsResponse) func (http.Respons
 
 		start := time.Now()
 		var res = getCall(req.Context().Value("org_id").(string))
-		Log.Info("subs call complete",
+		l.Log.Info("subs call complete",
 			zap.Duration("subs_call_duration", time.Since(start)),
 			zap.Bool("cache_hit", res.CacheHit),
 		)

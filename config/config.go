@@ -7,6 +7,7 @@ import (
 
 var config *EntitlementsConfig
 
+// EntitlementsConfig is a global configuration struct for the API
 type EntitlementsConfig struct {
 	Certs   *tls.Certificate
 	Port    string
@@ -38,6 +39,7 @@ func initialize() {
 	}
 }
 
+// GetConfig provides a singleton global EntitlementsConfig instance
 func GetConfig() *EntitlementsConfig {
 	if config == nil {
 		initialize()

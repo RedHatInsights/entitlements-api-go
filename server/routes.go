@@ -5,8 +5,8 @@ import (
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	. "github.com/RedHatInsights/entitlements-api-go/logger"
-	l "github.com/treastech/logger"
+	log "github.com/RedHatInsights/entitlements-api-go/logger"
+	LogMW "github.com/treastech/logger"
 )
 
 // DoRoutes sets up the routes used by the server.
@@ -19,7 +19,7 @@ func DoRoutes() chi.Router {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
-	r.Use(l.Logger(Log))
+	r.Use(LogMW.Logger(log.Log))
 	r.Use(identity.Identity)
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {

@@ -6,8 +6,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// Log is an instance of the global zap.Logger
 var Log *zap.Logger
 
+// InitLogger initializes the Entitlements API logger
 func InitLogger() *zap.Logger {
 	if (Log == nil) {
 		logLevel := zapcore.InfoLevel
