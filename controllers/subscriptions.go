@@ -20,7 +20,7 @@ type getter func(string) []string
 var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
 
 func getClient() *http.Client {
-	// Create a HTTPS client and supply the created CA pool and certificate
+	// Create a HTTPS client that uses the supplied pub/priv mutual TLS certs
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
