@@ -9,8 +9,8 @@ type EntitlementsSection struct {
 // Suscriptions Service
 type SubscriptionsResponse struct {
 	StatusCode int
-	Data []string
-	CacheHit bool
+	Data       []string
+	CacheHit   bool
 }
 
 // EntitlementsResponse is the struct that is used to marshal/unmarshal the response from Entitlemens API

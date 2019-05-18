@@ -11,9 +11,11 @@ var Log *zap.Logger
 
 // InitLogger initializes the Entitlements API logger
 func InitLogger() *zap.Logger {
-	if (Log == nil) {
+	if Log == nil {
 		logLevel := zapcore.InfoLevel
-		if flag.Lookup("test.v") != nil { logLevel = zapcore.FatalLevel }
+		if flag.Lookup("test.v") != nil {
+			logLevel = zapcore.FatalLevel
+		}
 
 		cfg := zapcore.EncoderConfig{
 			TimeKey:        "ts",
@@ -29,11 +31,11 @@ func InitLogger() *zap.Logger {
 		}
 
 		logger, _ := zap.Config{
-			Encoding:    "json",
-			Level:       zap.NewAtomicLevelAt(logLevel),
-			OutputPaths: []string{"stdout"},
+			Encoding:         "json",
+			Level:            zap.NewAtomicLevelAt(logLevel),
+			OutputPaths:      []string{"stdout"},
 			ErrorOutputPaths: []string{"stderr"},
-			EncoderConfig: cfg,
+			EncoderConfig:    cfg,
 		}.Build()
 
 		defer logger.Sync()

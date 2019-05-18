@@ -5,10 +5,10 @@ import (
 	. "github.com/onsi/gomega"
 
 	"context"
-	"net/http"
-	"net/http/httptest"
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 
 	. "github.com/RedHatInsights/entitlements-api-go/controllers"
 	. "github.com/RedHatInsights/entitlements-api-go/types"
@@ -56,32 +56,32 @@ func expectPass(res *http.Response) {
 
 var _ = Describe("Identity Controller", func() {
 	It("should call GetSubscriptions with the org_id on the context", func() {
-		fakeResponse := SubscriptionsResponse {
+		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
-			Data: []string{"foo", "bar"},
-			CacheHit: false,
+			Data:       []string{"foo", "bar"},
+			CacheHit:   false,
 		}
-		testRequest("GET", "/", "540155",     fakeGetSubscriptions("540155", fakeResponse))
+		testRequest("GET", "/", "540155", fakeGetSubscriptions("540155", fakeResponse))
 		testRequest("GET", "/", "deadbeef12", fakeGetSubscriptions("deadbeef12", fakeResponse))
 	})
 
 	Context("When the Subs API sends back an error", func() {
 		It("should fail the response", func() {
 			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string) SubscriptionsResponse {
-				return SubscriptionsResponse { StatusCode: 500, Data: nil, CacheHit: false }
+				return SubscriptionsResponse{StatusCode: 500, Data: nil, CacheHit: false}
 			})
 
 			Expect(rr.Result().StatusCode).To(Equal(500))
 			Expect(rawBody).To(ContainSubstring(http.StatusText(500)))
 		})
-	});
+	})
 
 	Context("When the Subs API says we have Smart Managment", func() {
 		It("should give back a valid EntitlementsResponse with all is_entitled true", func() {
-			fakeResponse := SubscriptionsResponse {
+			fakeResponse := SubscriptionsResponse{
 				StatusCode: 200,
-				Data: []string{"foo", "bar"},
-				CacheHit: false,
+				Data:       []string{"foo", "bar"},
+				CacheHit:   false,
 			}
 
 			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
@@ -94,10 +94,10 @@ var _ = Describe("Identity Controller", func() {
 	})
 
 	Context("When the Subs API says we *dont* have Smart Managment", func() {
-		fakeResponse := SubscriptionsResponse {
+		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
-			Data: []string{},
-			CacheHit: false,
+			Data:       []string{},
+			CacheHit:   false,
 		}
 
 		It("should give back a valid EntitlementsResponse with smart_management false", func() {

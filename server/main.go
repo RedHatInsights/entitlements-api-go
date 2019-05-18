@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"go.uber.org/zap"
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/logger"
+	"go.uber.org/zap"
 )
 
 // Launch the server.

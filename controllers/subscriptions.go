@@ -3,16 +3,16 @@ package controllers
 import (
 	"crypto/tls"
 	"encoding/json"
-	"net/http"
 	"io/ioutil"
+	"net/http"
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
-	"github.com/RedHatInsights/entitlements-api-go/types"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/RedHatInsights/entitlements-api-go/types"
 
-	"go.uber.org/zap"
 	"github.com/karlseguin/ccache"
+	"go.uber.org/zap"
 )
 
 type getter func(string) []string
@@ -34,10 +34,10 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
 
 	if item != nil && !item.Expired() {
-		return types.SubscriptionsResponse {
+		return types.SubscriptionsResponse{
 			StatusCode: 200,
-			Data: item.Value().([]string),
-			CacheHit: true,
+			Data:       item.Value().([]string),
+			CacheHit:   true,
 		}
 	}
 
@@ -47,7 +47,9 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		";sku=SVC3124" +
 		";status=active")
 
-	if err != nil { panic(err.Error()) }
+	if err != nil {
+		panic(err.Error())
+	}
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
@@ -57,30 +59,30 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 			zap.String("body", string(body)),
 		)
 
-		return types.SubscriptionsResponse {
+		return types.SubscriptionsResponse{
 			StatusCode: resp.StatusCode,
-			Data: nil,
-			CacheHit: false,
+			Data:       nil,
+			CacheHit:   false,
 		}
 	}
-
 
 	defer resp.Body.Close()
 	var arr []string
 	json.NewDecoder(resp.Body).Decode(&arr)
-	cache.Set(orgID, arr, time.Minute * 10)
-	return types.SubscriptionsResponse {
+	cache.Set(orgID, arr, time.Minute*10)
+	return types.SubscriptionsResponse{
 		StatusCode: resp.StatusCode,
-		Data: arr,
-		CacheHit: false,
+		Data:       arr,
+		CacheHit:   false,
 	}
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
-func Index(getCall func (string) types.SubscriptionsResponse) func (http.ResponseWriter, *http.Request) {
-	return func (w http.ResponseWriter, req *http.Request) {
-		if (getCall == nil) { getCall = getSubscriptions }
-
+func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+		if getCall == nil {
+			getCall = getSubscriptions
+		}
 
 		start := time.Now()
 		var res = getCall(req.Context().Value("org_id").(string))
@@ -89,7 +91,7 @@ func Index(getCall func (string) types.SubscriptionsResponse) func (http.Respons
 			zap.Bool("cache_hit", res.CacheHit),
 		)
 
-		if (res.StatusCode != 200) {
+		if res.StatusCode != 200 {
 			http.Error(w, http.StatusText(500), 500)
 			return
 		}
@@ -101,7 +103,9 @@ func Index(getCall func (string) types.SubscriptionsResponse) func (http.Respons
 			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 0)},
 		})
 
-		if err != nil {	panic(err) }
+		if err != nil {
+			panic(err)
+		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(obj))

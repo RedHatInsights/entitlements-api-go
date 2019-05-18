@@ -2,10 +2,10 @@ package server
 
 import (
 	"github.com/RedHatInsights/entitlements-api-go/controllers"
+	log "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	log "github.com/RedHatInsights/entitlements-api-go/logger"
 	LogMW "github.com/treastech/logger"
 )
 
@@ -14,7 +14,6 @@ import (
 // Then it does the actual routing config.
 func DoRoutes() chi.Router {
 	r := chi.NewRouter()
-
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
