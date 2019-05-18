@@ -10,6 +10,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
+	"github.com/RedHatInsights/platform-go-middlewares/identity"
 
 	"github.com/karlseguin/ccache"
 	"go.uber.org/zap"
@@ -85,7 +86,7 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		}
 
 		start := time.Now()
-		var res = getCall(req.Context().Value("org_id").(string))
+		var res = getCall(req.Context().Value(identity.Key).(identity.XRHID).Internal.OrgID)
 		l.Log.Info("subs call complete",
 			zap.Duration("subs_call_duration", time.Since(start)),
 			zap.Bool("cache_hit", res.CacheHit),

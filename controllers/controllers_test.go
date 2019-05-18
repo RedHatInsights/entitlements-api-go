@@ -12,6 +12,7 @@ import (
 
 	. "github.com/RedHatInsights/entitlements-api-go/controllers"
 	. "github.com/RedHatInsights/entitlements-api-go/types"
+	"github.com/RedHatInsights/platform-go-middlewares/identity"
 )
 
 const DEFAULT_ORG_ID string = "4384938490324"
@@ -21,7 +22,13 @@ func testRequest(method string, path string, orgid string, fakeCaller func(strin
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "org_id", orgid)
+	ctx = context.WithValue(ctx, identity.Key, identity.XRHID {
+		AccountNumber: "540155",
+		Internal: identity.Internal {
+			OrgID: orgid,
+		},
+	})
+
 	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
