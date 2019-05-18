@@ -15,11 +15,12 @@ import (
 func DoRoutes() chi.Router {
 	r := chi.NewRouter()
 
+
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
-	r.Use(identity.Identity)
 	r.Use(l.Logger(Log))
+	r.Use(identity.Identity)
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.Route("/", controllers.LubDub)
