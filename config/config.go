@@ -2,8 +2,6 @@ package config
 
 import (
 	"crypto/tls"
-	"fmt"
-
 	"github.com/spf13/viper"
 )
 
@@ -38,9 +36,6 @@ func initialize() {
 		Certs:   getCerts(options),
 		Options: options,
 	}
-
-	fmt.Println("- Starting Entitlements API -")
-	fmt.Println("Will listen on " + options.GetString("PORT"))
 }
 
 func GetConfig() *EntitlementsConfig {

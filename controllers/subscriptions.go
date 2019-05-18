@@ -52,7 +52,7 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
 
-		Logger().Error("Got back a non 200 status code from Subscriptions Service",
+		Log.Error("Got back a non 200 status code from Subscriptions Service",
 			zap.Int("code", resp.StatusCode),
 			zap.String("body", string(body)),
 		)
@@ -83,7 +83,7 @@ func Index(getCall func (string) types.SubscriptionsResponse) func (http.Respons
 
 		start := time.Now()
 		var res = getCall(req.Context().Value("org_id").(string))
-		Logger().Info("subs call complete",
+		Log.Info("subs call complete",
 			zap.Duration("subs_call_duration", time.Since(start)),
 			zap.Bool("cache_hit", res.CacheHit),
 		)

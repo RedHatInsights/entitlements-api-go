@@ -6,11 +6,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var log *zap.Logger
-var logWithStack *zap.Logger
+var Log *zap.Logger
 
-func Logger() *zap.Logger {
-	if (log == nil) {
+func InitLogger() *zap.Logger {
+	if (Log == nil) {
 		logLevel := zapcore.InfoLevel
 		if flag.Lookup("test.v") != nil { logLevel = zapcore.FatalLevel }
 
@@ -36,8 +35,8 @@ func Logger() *zap.Logger {
 		}.Build()
 
 		defer logger.Sync()
-		log = logger
+		Log = logger
 	}
 
-	return log
+	return Log
 }
