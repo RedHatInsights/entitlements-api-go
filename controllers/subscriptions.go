@@ -86,7 +86,7 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		}
 
 		start := time.Now()
-		var res = getCall(req.Context().Value(identity.Key).(identity.XRHID).Internal.OrgID)
+		var res = getCall(req.Context().Value(identity.Key).(identity.XRHID).Identity.Internal.OrgID)
 		l.Log.Info("subs call complete",
 			zap.Duration("subs_call_duration", time.Since(start)),
 			zap.Bool("cache_hit", res.CacheHit),

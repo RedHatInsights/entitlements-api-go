@@ -23,9 +23,11 @@ func testRequest(method string, path string, orgid string, fakeCaller func(strin
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, identity.Key, identity.XRHID {
-		AccountNumber: "540155",
-		Internal: identity.Internal {
-			OrgID: orgid,
+		Identity: identity.Identity {
+			AccountNumber: "540155",
+			Internal: identity.Internal {
+				OrgID: orgid,
+			},
 		},
 	})
 

@@ -19,7 +19,7 @@ func DoRoutes() chi.Router {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(LogMW.Logger(log.Log))
-	r.Use(identity.Identity)
+	r.Use(identity.EnforceIdentity)
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.Route("/", controllers.LubDub)
