@@ -43,7 +43,7 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		}
 	}
 
-	resp, err := getClient().Get(config.GetConfig().Options.GetString("SubsHost") +
+	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/search/criteria" +
 		";web_customer_id=" + orgID +
 		";sku=SVC3124" +

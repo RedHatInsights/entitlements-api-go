@@ -12,7 +12,7 @@ import (
 // Launch the server.
 func Launch() {
 	r := DoRoutes()
-	var port = config.GetConfig().Options.GetString("Port")
+	var port = config.GetConfig().Options.GetString(config.Keys.Port)
 	logger.Log.Info("server starting", zap.String("port", port))
 	err := http.ListenAndServe(fmt.Sprintf(":%s", port), r)
 	logger.Log.Fatal("server stopped",
