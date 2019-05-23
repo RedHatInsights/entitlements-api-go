@@ -3,6 +3,9 @@ package config
 import (
 	"crypto/tls"
 	"github.com/spf13/viper"
+	"crypto/x509"
+	"io/ioutil"
+	"fmt"
  )
 
 var config *EntitlementsConfig
@@ -10,8 +13,34 @@ var config *EntitlementsConfig
 // EntitlementsConfig is a global configuration struct for the API
 type EntitlementsConfig struct {
 	Certs   *tls.Certificate
+	RootCAs *x509.CertPool
 	Port    string
 	Options *viper.Viper
+}
+
+func getRootCAs() *x509.CertPool {
+	const localCertFile = "./resources/ca.crt"
+
+	// force the CA cert
+	rootCAs, err := x509.SystemCertPool()
+	if rootCAs == nil {
+		panic("Could not load system CA certs")
+	}
+
+	if err != nil {
+		panic(fmt.Sprintf("Could not load system CA certs: %v", err))
+	}
+
+	certs, err := ioutil.ReadFile(localCertFile)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to append %q to RootCAs: %v", localCertFile, err))
+	}
+
+	if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
+		panic(fmt.Sprintf("Failed to AppendCertsFromPEM %q to RootCAs", localCertFile))
+	}
+
+	return rootCAs
 }
 
 func loadCerts(options *viper.Viper) (tls.Certificate, error){
@@ -38,7 +67,7 @@ func getCerts(options *viper.Viper) *tls.Certificate {
 
 func initialize() {
 	var options = viper.New()
-	options.SetDefault("CertsFromEnv", true)
+	options.SetDefault("CertsFromEnv", false)
 	options.SetDefault("Port", "3000")
 	options.SetDefault("SubsHost", "https://subscription.api.redhat.com")
 	options.SetEnvPrefix("ENT")
@@ -46,6 +75,7 @@ func initialize() {
 
 	config = &EntitlementsConfig{
 		Certs:   getCerts(options),
+		RootCAs: getRootCAs(),
 		Options: options,
 	}
 }

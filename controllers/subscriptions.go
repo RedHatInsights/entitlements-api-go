@@ -25,6 +25,7 @@ func getClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
+				RootCAs: config.GetConfig().RootCAs,
 				Certificates: []tls.Certificate{*config.GetConfig().Certs},
 			},
 		},
