@@ -25,6 +25,7 @@ type EntitlementsConfigKeysType struct {
 	Port string
 	CertsFromEnv string
 	SubsHost string
+	CaPath string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -34,11 +35,10 @@ var Keys = EntitlementsConfigKeysType {
 	Port: "PORT",
 	CertsFromEnv: "CERTS_FROM_ENV",
 	SubsHost: "SUBS_HOST",
+	CaPath: "CA_PATH",
 }
 
-func getRootCAs() *x509.CertPool {
-	const localCertFile = "./resources/ca.crt"
-
+func getRootCAs(localCertFile string) *x509.CertPool {
 	// force the CA cert
 	rootCAs, err := x509.SystemCertPool()
 	if rootCAs == nil {
@@ -88,12 +88,13 @@ func initialize() {
 	options.SetDefault(Keys.CertsFromEnv, false)
 	options.SetDefault(Keys.Port, "3000")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
+	options.SetDefault(Keys.CaPath, "./resources/ca.crt")
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 
 	config = &EntitlementsConfig{
 		Certs:   getCerts(options),
-		RootCAs: getRootCAs(),
+		RootCAs: getRootCAs(options.GetString(Keys.CaPath)),
 		Options: options,
 	}
 }
