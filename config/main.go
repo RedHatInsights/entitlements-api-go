@@ -3,7 +3,7 @@ package config
 import (
 	"crypto/tls"
 	"github.com/spf13/viper"
-)
+ )
 
 var config *EntitlementsConfig
 
@@ -14,20 +14,31 @@ type EntitlementsConfig struct {
 	Options *viper.Viper
 }
 
+func loadCerts(options *viper.Viper) (tls.Certificate, error){
+	if (options.GetBool("CertsFromEnv")) {
+		return tls.X509KeyPair(
+			[]byte(options.GetString("CERT")),
+			[]byte(options.GetString("KEY")),
+		)
+	}
+
+	return tls.LoadX509KeyPair(options.GetString("CERT"), options.GetString("KEY"))
+}
+
 func getCerts(options *viper.Viper) *tls.Certificate {
 	// Read the key pair to create certificate
-	cert, err := tls.LoadX509KeyPair(
-		options.GetString("CERT"),
-		options.GetString("KEY"),
-	)
+	cert, err := loadCerts(options)
+
 	if err != nil {
 		panic(err.Error())
 	}
+
 	return &cert
 }
 
 func initialize() {
 	var options = viper.New()
+	options.SetDefault("CertsFromEnv", true)
 	options.SetDefault("Port", "3000")
 	options.SetDefault("SubsHost", "https://subscription.api.redhat.com")
 	options.SetEnvPrefix("ENT")
