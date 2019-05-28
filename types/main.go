@@ -9,6 +9,8 @@ type EntitlementsSection struct {
 // Suscriptions Service
 type SubscriptionsResponse struct {
 	StatusCode int
+	Body       string
+	Error      error
 	Data       []string
 	CacheHit   bool
 }

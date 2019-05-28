@@ -50,19 +50,19 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		";status=active")
 
 	if err != nil {
-		panic(err.Error())
+		return types.SubscriptionsResponse{
+			Error: err,
+		}
 	}
+
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
 
-		l.Log.Error("Got back a non 200 status code from Subscriptions Service",
-			zap.Int("code", resp.StatusCode),
-			zap.String("body", string(body)),
-		)
-
 		return types.SubscriptionsResponse{
 			StatusCode: resp.StatusCode,
+			Body:       string(body),
+			Error:      nil,
 			Data:       nil,
 			CacheHit:   false,
 		}
@@ -80,20 +80,32 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
-func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseWriter, *http.Request) {
+func Index(getCall func(string) (types.SubscriptionsResponse)) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if getCall == nil {
 			getCall = getSubscriptions
 		}
 
 		start := time.Now()
-		var res = getCall(req.Context().Value(identity.Key).(identity.XRHID).Identity.Internal.OrgID)
+		res := getCall(req.Context().Value(identity.Key).(identity.XRHID).Identity.Internal.OrgID)
+
+		if res.Error != nil {
+			l.Log.Error("Unexpected error while talking to Subs Service", zap.Error(res.Error))
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
+
 		l.Log.Info("subs call complete",
 			zap.Duration("subs_call_duration", time.Since(start)),
 			zap.Bool("cache_hit", res.CacheHit),
 		)
 
 		if res.StatusCode != 200 {
+			l.Log.Error("Got back a non 200 status code from Subscriptions Service",
+				zap.Int("code", res.StatusCode),
+				zap.String("body", res.Body),
+			)
+
 			http.Error(w, http.StatusText(500), 500)
 			return
 		}
@@ -106,7 +118,9 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		})
 
 		if err != nil {
-			panic(err)
+			l.Log.Error("Unexpected error while unmarshalling JSON data from Subs Service", zap.Error(err))
+			http.Error(w, http.StatusText(500), 500)
+			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
