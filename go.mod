@@ -8,6 +8,7 @@ require (
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/bmatcuk/doublestar v1.1.1 // indirect
+	github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23 // indirect
 	github.com/cortesi/modd v0.0.0-20190303204953-e30792b14081 // indirect
 	github.com/cortesi/moddwatch v0.0.0-20181226031657-d27f53de245e // indirect
 	github.com/cortesi/termlog v0.0.0-20171116205515-87cefd5ac843 // indirect
@@ -16,6 +17,7 @@ require (
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/karlseguin/ccache v2.0.3+incompatible
 	github.com/karlseguin/expect v1.0.1 // indirect
+	github.com/m1ome/zapper v0.0.0-20170328105535-8e169b0c5a1e // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/onsi/ginkgo v1.8.0
