@@ -22,8 +22,8 @@ bash ./scripts/dev_deps.sh
 To run the Entitlements API locally, you will need an Enterprise Services cert with access to the dev subscription endpoint /search/criteria.
 
 * You can request a personal cert by following ALL steps in this [mojo doc](https://mojo.redhat.com/docs/DOC-1144091).
-* You can export your crt and key like so:
-    `openssl pkcs12 -in your-p12-cert.p12 -out your-key.key -nocerts -nodes`
+* You can export your crt and key like so:  
+    `openssl pkcs12 -in your-p12-cert.p12 -out your-key.key -nocerts -nodes`  
     `openssl pkcs12 -in your-p12-cert.p12 -out your-cert-sans-key.crt -clcerts -nokeys`
 
 ## Create your config file
