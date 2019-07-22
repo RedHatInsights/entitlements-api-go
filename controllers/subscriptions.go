@@ -87,7 +87,15 @@ func Index(getCall func(string) (types.SubscriptionsResponse)) func(http.Respons
 		}
 
 		start := time.Now()
-		res := getCall(req.Context().Value(identity.Key).(identity.XRHID).Identity.Internal.OrgID)
+		reqCtx := req.Context().Value(identity.Key).(identity.XRHID).Identity
+		res := getCall(reqCtx.Internal.OrgID)
+		accNum := reqCtx.AccountNumber
+
+		entitleInsights := false
+
+		if !(accNum == "" || accNum == "-1") {
+			entitleInsights = true
+		}
 
 		if res.Error != nil {
 			l.Log.Error("Unexpected error while talking to Subs Service", zap.Error(res.Error))
@@ -112,7 +120,7 @@ func Index(getCall func(string) (types.SubscriptionsResponse)) func(http.Respons
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
 			HybridCloud:    types.EntitlementsSection{IsEntitled: true},
-			Insights:       types.EntitlementsSection{IsEntitled: true},
+			Insights:       types.EntitlementsSection{IsEntitled: entitleInsights},
 			Openshift:      types.EntitlementsSection{IsEntitled: true},
 			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 0)},
 		})
