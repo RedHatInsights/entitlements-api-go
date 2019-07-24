@@ -121,13 +121,17 @@ var _ = Describe("Identity Controller", func() {
 	})
 
 	Context("When the account number is -1 or '' ", func() {
-		It("should give back a valid EntitlementsResponse with insights false", func() {
-			fakeResponse := SubscriptionsResponse{
+		var fakeResponse SubscriptionsResponse
+
+		BeforeEach(func() {
+			fakeResponse = SubscriptionsResponse{
 				StatusCode: 200,
 				Data:       []string{"foo", "bar"},
 				CacheHit:   false,
 			}
+		})
 
+		It("should give back a valid EntitlementsResponse with insights false", func() {
 			// testing with account number "-1"
 			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
@@ -135,15 +139,18 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
-
-			// testing with account number ""
-			rr2, body2, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
-			expectPass(rr2.Result())
-			Expect(body2.Insights.IsEntitled).To(Equal(false), "insights.is_entitled expected to be false")
-			Expect(body2.Openshift.IsEntitled).To(Equal(true))
-			Expect(body2.HybridCloud.IsEntitled).To(Equal(true))
-			Expect(body2.SmartMangement.IsEntitled).To(Equal(true))
 		})
+
+		It("should give back a valid EntitlementsResponse with insights false", func() {
+			// testing with account number ""
+			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body.Insights.IsEntitled).To(Equal(false), "insights.is_entitled expected to be false")
+			Expect(body.Openshift.IsEntitled).To(Equal(true))
+			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+		})
+
 	})
 
 })
