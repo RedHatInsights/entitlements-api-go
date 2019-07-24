@@ -25,7 +25,7 @@ func getClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs: config.GetConfig().RootCAs,
+				RootCAs:      config.GetConfig().RootCAs,
 				Certificates: []tls.Certificate{*config.GetConfig().Certs},
 			},
 		},
@@ -79,8 +79,29 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	}
 }
 
+var checkHybrid = func(orgID string) bool {
+	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
+		"/svcrest/subscription/v5/search/criteria" +
+		";web_customer_id=" + orgID +
+		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567," +
+		";status=active")
+
+	if !(err == nil || resp.StatusCode == 200) {
+		return false
+	}
+
+	var arr []string
+	json.NewDecoder(resp.Body).Decode(&arr)
+
+	if len(arr) > 0 {
+		return true
+	}
+
+	return false
+}
+
 // Index the handler for GETs to /api/entitlements/v1/services/
-func Index(getCall func(string) (types.SubscriptionsResponse)) func(http.ResponseWriter, *http.Request) {
+func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if getCall == nil {
 			getCall = getSubscriptions
@@ -91,6 +112,7 @@ func Index(getCall func(string) (types.SubscriptionsResponse)) func(http.Respons
 		res := getCall(reqCtx.Internal.OrgID)
 		accNum := reqCtx.AccountNumber
 
+		entitleHybrid := checkHybrid(reqCtx.Internal.OrgID)
 		entitleInsights := false
 
 		if !(accNum == "" || accNum == "-1") {
@@ -119,7 +141,7 @@ func Index(getCall func(string) (types.SubscriptionsResponse)) func(http.Respons
 		}
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
-			HybridCloud:    types.EntitlementsSection{IsEntitled: true},
+			HybridCloud:    types.EntitlementsSection{IsEntitled: entitleHybrid},
 			Insights:       types.EntitlementsSection{IsEntitled: entitleInsights},
 			Openshift:      types.EntitlementsSection{IsEntitled: true},
 			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 0)},
