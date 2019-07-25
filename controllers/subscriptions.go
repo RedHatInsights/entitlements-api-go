@@ -98,8 +98,8 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	defer resp.Body.Close()
 	var arr []string
 	json.NewDecoder(resp.Body).Decode(&arr)
-	cache.Set(orgID, arr, time.Minute*10)
 	arr = append(arr, entitleHybrid)
+	cache.Set(orgID, arr, time.Minute*10)
 
 	return types.SubscriptionsResponse{
 		StatusCode: resp.StatusCode,
