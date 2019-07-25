@@ -90,7 +90,7 @@ var _ = Describe("Identity Controller", func() {
 		It("should give back a valid EntitlementsResponse with all is_entitled true", func() {
 			fakeResponse := SubscriptionsResponse{
 				StatusCode: 200,
-				Data:       []string{"foo", "bar"},
+				Data:       []string{"foo", "bar", "EntitleHybrid"},
 				CacheHit:   false,
 			}
 
@@ -106,7 +106,7 @@ var _ = Describe("Identity Controller", func() {
 	Context("When the Subs API says we *dont* have Smart Managment", func() {
 		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
-			Data:       []string{},
+			Data:       []string{"EntitleHybrid"},
 			CacheHit:   false,
 		}
 
@@ -126,7 +126,7 @@ var _ = Describe("Identity Controller", func() {
 		BeforeEach(func() {
 			fakeResponse = SubscriptionsResponse{
 				StatusCode: 200,
-				Data:       []string{"foo", "bar"},
+				Data:       []string{"foo", "bar", "EntitleHybrid"},
 				CacheHit:   false,
 			}
 		})
