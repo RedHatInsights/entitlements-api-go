@@ -32,6 +32,27 @@ func getClient() *http.Client {
 	}
 }
 
+var checkHybrid = func(orgID string) bool {
+	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
+		"/svcrest/subscription/v5/search/criteria" +
+		";web_customer_id=" + orgID +
+		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567," +
+		";status=active")
+
+	if !(err == nil || resp.StatusCode == 200) {
+		return false
+	}
+
+	var arr []string
+	json.NewDecoder(resp.Body).Decode(&arr)
+
+	if len(arr) > 0 {
+		return true
+	}
+
+	return false
+}
+
 var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
 
@@ -68,36 +89,23 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		}
 	}
 
+	entitleHybrid := "NoHybrid"
+
+	if checkHybrid(orgID) {
+		entitleHybrid = "EntitleHybrid"
+	}
+
 	defer resp.Body.Close()
 	var arr []string
 	json.NewDecoder(resp.Body).Decode(&arr)
 	cache.Set(orgID, arr, time.Minute*10)
+	arr = append(arr, entitleHybrid)
+
 	return types.SubscriptionsResponse{
 		StatusCode: resp.StatusCode,
 		Data:       arr,
 		CacheHit:   false,
 	}
-}
-
-var checkHybrid = func(orgID string) bool {
-	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
-		"/svcrest/subscription/v5/search/criteria" +
-		";web_customer_id=" + orgID +
-		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567," +
-		";status=active")
-
-	if !(err == nil || resp.StatusCode == 200) {
-		return false
-	}
-
-	var arr []string
-	json.NewDecoder(resp.Body).Decode(&arr)
-
-	if len(arr) > 0 {
-		return true
-	}
-
-	return false
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
@@ -112,7 +120,6 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		res := getCall(reqCtx.Internal.OrgID)
 		accNum := reqCtx.AccountNumber
 
-		entitleHybrid := checkHybrid(reqCtx.Internal.OrgID)
 		entitleInsights := false
 
 		if !(accNum == "" || accNum == "-1") {
@@ -141,10 +148,10 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		}
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
-			HybridCloud:    types.EntitlementsSection{IsEntitled: entitleHybrid},
+			HybridCloud:    types.EntitlementsSection{IsEntitled: (res.Data[len(res.Data)-1] == "EntitleHybrid")},
 			Insights:       types.EntitlementsSection{IsEntitled: entitleInsights},
 			Openshift:      types.EntitlementsSection{IsEntitled: true},
-			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 0)},
+			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 1)},
 		})
 
 		if err != nil {
