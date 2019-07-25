@@ -16,16 +16,17 @@ import (
 )
 
 const DEFAULT_ORG_ID string = "4384938490324"
+const DEFAULT_ACCOUNT_NUMBER string = "540155"
 
-func testRequest(method string, path string, orgid string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
+func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, identity.Key, identity.XRHID {
-		Identity: identity.Identity {
-			AccountNumber: "540155",
-			Internal: identity.Internal {
+	ctx = context.WithValue(ctx, identity.Key, identity.XRHID{
+		Identity: identity.Identity{
+			AccountNumber: accnum,
+			Internal: identity.Internal{
 				OrgID: orgid,
 			},
 		},
@@ -48,7 +49,7 @@ func testRequest(method string, path string, orgid string, fakeCaller func(strin
 }
 
 func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
-	return testRequest(method, path, DEFAULT_ORG_ID, fakeCaller)
+	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, fakeCaller)
 }
 
 func fakeGetSubscriptions(expetedOrgID string, response SubscriptionsResponse) func(string) SubscriptionsResponse {
@@ -70,8 +71,8 @@ var _ = Describe("Identity Controller", func() {
 			Data:       []string{"foo", "bar"},
 			CacheHit:   false,
 		}
-		testRequest("GET", "/", "540155", fakeGetSubscriptions("540155", fakeResponse))
-		testRequest("GET", "/", "deadbeef12", fakeGetSubscriptions("deadbeef12", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", fakeGetSubscriptions("540155", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", fakeGetSubscriptions("deadbeef12", fakeResponse))
 	})
 
 	Context("When the Subs API sends back an error", func() {
@@ -118,4 +119,38 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.SmartMangement.IsEntitled).To(Equal(false), "smart_management.is_entitled expected to be false")
 		})
 	})
+
+	Context("When the account number is -1 or '' ", func() {
+		var fakeResponse SubscriptionsResponse
+
+		BeforeEach(func() {
+			fakeResponse = SubscriptionsResponse{
+				StatusCode: 200,
+				Data:       []string{"foo", "bar"},
+				CacheHit:   false,
+			}
+		})
+
+		It("should give back a valid EntitlementsResponse with insights false", func() {
+			// testing with account number "-1"
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body.Insights.IsEntitled).To(Equal(false), "insights.is_entitled expected to be false")
+			Expect(body.Openshift.IsEntitled).To(Equal(true))
+			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+		})
+
+		It("should give back a valid EntitlementsResponse with insights false", func() {
+			// testing with account number ""
+			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body.Insights.IsEntitled).To(Equal(false), "insights.is_entitled expected to be false")
+			Expect(body.Openshift.IsEntitled).To(Equal(true))
+			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+		})
+
+	})
+
 })
