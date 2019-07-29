@@ -3,7 +3,6 @@ package controllers
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -68,8 +67,8 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/search/criteria" +
 		";web_customer_id=" + orgID +
-		";sku=SVC3124" +
-		",status=active")
+		//";sku=SVC3124" +
+		";status=active")
 
 	if err != nil {
 		return types.SubscriptionsResponse{
@@ -92,7 +91,15 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	if resp.StatusCode == 200 {
 		//defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println(string(body))
+		// fmt.Println(string(body))
+		var subscriptionBody []types.SubscriptionBody
+		json.Unmarshal(body, &subscriptionBody)
+		//fmt.Println(subscriptionBody)
+
+		// for s := range subscriptionBody {
+		// 	fmt.Printf("Id = %v, MasterEnd %v,CreateadEndSystemName %v, LastUpdateEndSystemName %v,OracleAccountNumber %v, SubscriptionNumber %v,Quantity %v,SubscriptionProducts %v", subscriptionBody[s].ID, subscriptionBody[s].MasterEndSystemName, subscriptionBody[s].CreatedEndSystemName, subscriptionBody[s].LastUpdateEndSystemName, subscriptionBody[s].OracleAccountNumber, subscriptionBody[s].SubscriptionNumber, subscriptionBody[s].Quantity, subscriptionBody[s].SubscriptionProducts)
+		// 	fmt.Println()
+		// }
 	}
 
 	// entitleHybrid := "NoHybrid"
