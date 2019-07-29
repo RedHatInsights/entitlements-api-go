@@ -3,6 +3,7 @@ package controllers
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -32,26 +33,26 @@ func getClient() *http.Client {
 	}
 }
 
-var checkHybrid = func(orgID string) bool {
-	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
-		"/svcrest/subscription/v5/search/criteria" +
-		";web_customer_id=" + orgID +
-		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567," +
-		";status=active")
+// var checkHybrid = func(orgID string) bool {
+// 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
+// 		"/svcrest/subscription/v5/search/criteria" +
+// 		";web_customer_id=" + orgID +
+// 		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567," +
+// 		";status=active")
 
-	if !(err == nil || resp.StatusCode == 200) {
-		return false
-	}
+// 	if !(err == nil || resp.StatusCode == 200) {
+// 		return false
+// 	}
 
-	var arr []string
-	json.NewDecoder(resp.Body).Decode(&arr)
+// 	var arr []string
+// 	json.NewDecoder(resp.Body).Decode(&arr)
 
-	if len(arr) > 0 {
-		return true
-	}
+// 	if len(arr) > 0 {
+// 		return true
+// 	}
 
-	return false
-}
+// 	return false
+// }
 
 var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
@@ -68,7 +69,7 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		"/svcrest/subscription/v5/search/criteria" +
 		";web_customer_id=" + orgID +
 		";sku=SVC3124" +
-		";status=active")
+		",status=active")
 
 	if err != nil {
 		return types.SubscriptionsResponse{
@@ -79,7 +80,6 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
-
 		return types.SubscriptionsResponse{
 			StatusCode: resp.StatusCode,
 			Body:       string(body),
@@ -89,16 +89,22 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		}
 	}
 
-	entitleHybrid := "NoHybrid"
-
-	if checkHybrid(orgID) {
-		entitleHybrid = "EntitleHybrid"
+	if resp.StatusCode == 200 {
+		//defer resp.Body.Close()
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println(string(body))
 	}
+
+	// entitleHybrid := "NoHybrid"
+
+	// if checkHybrid(orgID) {
+	// 	entitleHybrid = "EntitleHybrid"
+	// }
 
 	defer resp.Body.Close()
 	var arr []string
 	json.NewDecoder(resp.Body).Decode(&arr)
-	arr = append(arr, entitleHybrid)
+	// arr = append(arr, entitleHybrid)
 	cache.Set(orgID, arr, time.Minute*10)
 
 	return types.SubscriptionsResponse{
@@ -148,7 +154,7 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		}
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
-			HybridCloud:    types.EntitlementsSection{IsEntitled: (res.Data[len(res.Data)-1] == "EntitleHybrid")},
+			HybridCloud:    types.EntitlementsSection{IsEntitled: true},
 			Insights:       types.EntitlementsSection{IsEntitled: entitleInsights},
 			Openshift:      types.EntitlementsSection{IsEntitled: true},
 			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 1)},
