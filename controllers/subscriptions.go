@@ -68,7 +68,7 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/search/criteria" +
 		";web_customer_id=" + orgID +
-		";sku=SVC3124" +
+		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567,SVC3124" +
 		";status=active")
 
 	if err != nil {
