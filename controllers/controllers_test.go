@@ -121,15 +121,11 @@ var _ = Describe("Identity Controller", func() {
 	})
 
 	Context("When the account number is -1 or '' ", func() {
-		var fakeResponse SubscriptionsResponse
-
-		BeforeEach(func() {
-			fakeResponse = SubscriptionsResponse{
-				StatusCode: 200,
-				Data:       []string{"foo", "bar"},
-				CacheHit:   false,
-			}
-		})
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       []string{"foo", "bar"},
+			CacheHit:   false,
+		}
 
 		It("should give back a valid EntitlementsResponse with insights false", func() {
 			// testing with account number "-1"
