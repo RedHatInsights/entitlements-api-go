@@ -90,7 +90,7 @@ var _ = Describe("Identity Controller", func() {
 		It("should give back a valid EntitlementsResponse with all is_entitled true", func() {
 			fakeResponse := SubscriptionsResponse{
 				StatusCode: 200,
-				Data:       []string{"foo", "bar"},
+				Data:       []string{"foo", "bar", "SVC3851"},
 				CacheHit:   false,
 			}
 
@@ -115,7 +115,7 @@ var _ = Describe("Identity Controller", func() {
 			expectPass(rr.Result())
 			Expect(body.Insights.IsEntitled).To(Equal(true))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
-			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+			Expect(body.HybridCloud.IsEntitled).To(Equal(false), "hybrid_cloud.is_entitled should also be false")
 			Expect(body.SmartMangement.IsEntitled).To(Equal(false), "smart_management.is_entitled expected to be false")
 		})
 	})
@@ -126,7 +126,7 @@ var _ = Describe("Identity Controller", func() {
 		BeforeEach(func() {
 			fakeResponse = SubscriptionsResponse{
 				StatusCode: 200,
-				Data:       []string{"foo", "bar"},
+				Data:       []string{"foo", "bar", "SVC3852"},
 				CacheHit:   false,
 			}
 		})

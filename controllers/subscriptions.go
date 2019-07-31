@@ -3,7 +3,6 @@ package controllers
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -32,27 +31,6 @@ func getClient() *http.Client {
 		},
 	}
 }
-
-// var checkHybrid = func(orgID string) bool {
-// 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
-// 		"/svcrest/subscription/v5/search/criteria" +
-// 		";web_customer_id=" + orgID +
-// 		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567," +
-// 		";status=active")
-
-// 	if !(err == nil || resp.StatusCode == 200) {
-// 		return false
-// 	}
-
-// 	var arr []string
-// 	json.NewDecoder(resp.Body).Decode(&arr)
-
-// 	if len(arr) > 0 {
-// 		return true
-// 	}
-
-// 	return false
-// }
 
 var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
@@ -98,21 +76,36 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	for s := range subscriptionBody {
 		skuValue := subscriptionBody[s].Entries
 		for e := range skuValue {
-			//fmt.Printf("%v", skuValue[e].Value)
 			arr = append(arr, skuValue[e].Value)
 		}
-		// fmt.Println()
 	}
 
 	cache.Set(orgID, arr, time.Minute*10)
-	fmt.Println("array", len(arr))
-	fmt.Println(arr)
 
 	return types.SubscriptionsResponse{
 		StatusCode: resp.StatusCode,
 		Data:       arr,
 		CacheHit:   false,
 	}
+}
+
+// Checks the common strings between two slices of strings and returns a slice of strings
+// with the common skus
+func checkCommon(skus []string, userSkus []string) []string {
+	hash := make(map[string]bool)
+	var common []string
+
+	for sku := range skus {
+		hash[skus[sku]] = true
+	}
+
+	for usku := range userSkus {
+		if _, found := hash[userSkus[usku]]; found {
+			common = append(common, userSkus[usku])
+		}
+	}
+
+	return common
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
@@ -154,8 +147,11 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 			return
 		}
 
+		hybridSKUs := []string{"SVC3851", "SVC3852", "SVCSER0566", "SVCSER0567"}
+		entitleHybrid := len(checkCommon(hybridSKUs, res.Data)) > 0
+
 		obj, err := json.Marshal(types.EntitlementsResponse{
-			HybridCloud:    types.EntitlementsSection{IsEntitled: true},
+			HybridCloud:    types.EntitlementsSection{IsEntitled: entitleHybrid},
 			Insights:       types.EntitlementsSection{IsEntitled: entitleInsights},
 			Openshift:      types.EntitlementsSection{IsEntitled: true},
 			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 0)},
