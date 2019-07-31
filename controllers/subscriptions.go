@@ -69,7 +69,7 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		"/svcrest/subscription/v5/search/criteria" +
 		";web_customer_id=" + orgID +
 		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567,SVC3124" +
-		";status=active")
+		";status=active;/options;proucts=ONLY_MATCHING;/product.sku")
 
 	if err != nil {
 		return types.SubscriptionsResponse{
@@ -89,31 +89,24 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		}
 	}
 
-	if resp.StatusCode == 200 {
-		//defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
-		// fmt.Println(string(body))
-		var subscriptionBody []types.SubscriptionBody
-		json.Unmarshal(body, &subscriptionBody)
-		//fmt.Println(subscriptionBody)
-
-		for s := range subscriptionBody {
-			fmt.Printf("Id = %v, MasterEnd %v,CreatedEndSystemName %v, LastUpdateEndSystemName %v,OracleAccountNumber %v, SubscriptionNumber %v,Quantity %v,SubscriptionProducts %v", subscriptionBody[s].ID, subscriptionBody[s].MasterEndSystemName, subscriptionBody[s].CreatedEndSystemName, subscriptionBody[s].LastUpdateEndSystemName, subscriptionBody[s].OracleAccountNumber, subscriptionBody[s].SubscriptionNumber, subscriptionBody[s].Quantity, subscriptionBody[s].SubscriptionProducts)
-			fmt.Println()
-		}
-	}
-
-	// entitleHybrid := "NoHybrid"
-
-	// if checkHybrid(orgID) {
-	// 	entitleHybrid = "EntitleHybrid"
-	// }
-
 	defer resp.Body.Close()
 	var arr []string
-	json.NewDecoder(resp.Body).Decode(&arr)
-	// arr = append(arr, entitleHybrid)
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	var subscriptionBody []types.SubscriptionBody
+	json.Unmarshal(body, &subscriptionBody)
+	for s := range subscriptionBody {
+		skuValue := subscriptionBody[s].Entries
+		for e := range skuValue {
+			//fmt.Printf("%v", skuValue[e].Value)
+			arr = append(arr, skuValue[e].Value)
+		}
+		// fmt.Println()
+	}
+
 	cache.Set(orgID, arr, time.Minute*10)
+	fmt.Println("array", len(arr))
+	fmt.Println(arr)
 
 	return types.SubscriptionsResponse{
 		StatusCode: resp.StatusCode,
@@ -165,7 +158,7 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 			HybridCloud:    types.EntitlementsSection{IsEntitled: true},
 			Insights:       types.EntitlementsSection{IsEntitled: entitleInsights},
 			Openshift:      types.EntitlementsSection{IsEntitled: true},
-			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 1)},
+			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 0)},
 		})
 
 		if err != nil {

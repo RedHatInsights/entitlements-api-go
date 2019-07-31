@@ -15,17 +15,16 @@ type SubscriptionsResponse struct {
 	CacheHit   bool
 }
 
+// Entries is a struct that is used to unmarshal the entries field that comes back from the
+// response of the Subscription Service
+type Entries struct {
+	Value string //gives the sku of the product
+}
+
 // SubscriptionBody is a struct that is used to unmarshal the data that comes back in the Body
 // of the response of Subscriptions Service
 type SubscriptionBody struct {
-	ID                      int
-	MasterEndSystemName     string
-	CreatedEndSystemName    string
-	LastUpdateEndSystemName string
-	OracleAccountNumber     string
-	SubscriptionNumber      string
-	Quantity                int
-	SubscriptionProducts    string
+	Entries []Entries
 }
 
 // EntitlementsResponse is the struct that is used to marshal/unmarshal the response from Entitlemens API
