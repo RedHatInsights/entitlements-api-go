@@ -131,7 +131,7 @@ var _ = Describe("Identity Controller", func() {
 			// testing with account number "-1"
 			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
-			Expect(body.Insights.IsEntitled).To(Equal(false), "insights.is_entitled expected to be false")
+			Expect(body.Insights.IsEntitled).To(Equal(false))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
@@ -141,7 +141,7 @@ var _ = Describe("Identity Controller", func() {
 			// testing with account number ""
 			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
-			Expect(body.Insights.IsEntitled).To(Equal(false), "insights.is_entitled expected to be false")
+			Expect(body.Insights.IsEntitled).To(Equal(false))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
