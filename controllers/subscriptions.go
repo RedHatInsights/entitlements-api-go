@@ -44,10 +44,10 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	}
 
 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
-		"/svcrest/subscription/v5/search/criteria" +
+		"/svcrest/subscription/v5/searchnested/criteria" +
 		";web_customer_id=" + orgID +
 		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567,SVC3124" +
-		";status=active;/options;products=ALL;")
+		";status=active/options;products=ALL/product.sku")
 
 	if err != nil {
 		return types.SubscriptionsResponse{
@@ -73,13 +73,13 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	// Unmarshaling response from Subscription
 	// Extracting skus and appending them to arr
 	body, _ := ioutil.ReadAll(resp.Body)
-	var subscriptionBody []types.SubscriptionBody
-	json.Unmarshal(body, &subscriptionBody)
+	var SubscriptionDetails []types.SubscriptionDetails
+	json.Unmarshal(body, &SubscriptionDetails)
 
-	for s := range subscriptionBody {
-		skuValue := subscriptionBody[s].SubscriptionProducts
+	for s := range SubscriptionDetails {
+		skuValue := SubscriptionDetails[s].Entries
 		for e := range skuValue {
-			arr = append(arr, skuValue[e].Sku)
+			arr = append(arr, skuValue[e].Value)
 		}
 	}
 

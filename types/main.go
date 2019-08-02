@@ -15,16 +15,16 @@ type SubscriptionsResponse struct {
 	CacheHit   bool
 }
 
-// SubscriptionProducts is a struct that is used to unmarshal the entries field that comes back from the
+// Entries is a struct that is used to unmarshal the entries field that comes back from the
 // response of the Subscription Service
-type SubscriptionProducts struct {
-	Sku string `json:"sku"`
+type Entries struct {
+	Value string
 }
 
-// SubscriptionBody is a struct that is used to unmarshal the data that comes back in the Body
+// SubscriptionDetails is a struct that is used to unmarshal the data that comes back in the Body
 // of the response of Subscriptions Service
-type SubscriptionBody struct {
-	SubscriptionProducts []SubscriptionProducts
+type SubscriptionDetails struct {
+	Entries []Entries
 }
 
 // EntitlementsResponse is the struct that is used to marshal/unmarshal the response from Entitlemens API
