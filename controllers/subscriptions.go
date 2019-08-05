@@ -153,7 +153,7 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		hybridSKUs := []string{"SVC3851", "SVC3852", "SVCSER0566", "SVCSER0567"}
 		entitleHybrid := len(checkCommon(hybridSKUs, res.Data)) > 0
 
-		smartManagementSKU := []string{"SVC3124"}
+		smartManagementSKU := []string{"SVC3124", "RH00068"}
 		entitleSmartManagement := len(checkCommon(smartManagementSKU, res.Data)) > 0
 
 		obj, err := json.Marshal(types.EntitlementsResponse{

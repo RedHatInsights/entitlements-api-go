@@ -103,6 +103,23 @@ var _ = Describe("Identity Controller", func() {
 		})
 	})
 
+	Context("When the Subs API says we have Smart Managment (CMSfR SKU)", func() {
+		It("should give back a valid EntitlementsResponse with smart_management true", func() {
+			fakeResponse := SubscriptionsResponse{
+				StatusCode: 200,
+				Data:       []string{"foo", "bar", "SVC3851", "RH00068"},
+				CacheHit:   false,
+			}
+
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body.Insights.IsEntitled).To(Equal(true))
+			Expect(body.Openshift.IsEntitled).To(Equal(true))
+			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+		})
+	})
+
 	Context("When the Subs API says we *dont* have Smart Managment", func() {
 		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
