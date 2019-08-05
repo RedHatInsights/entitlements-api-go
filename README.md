@@ -51,3 +51,9 @@ bash ./scripts/watch.sh ./local/development.env.sh
 
 The Entitlements API requires that you pass in a valid x-redhat-identity header or it rejects requests.
 For an example see `cat ./scripts/xrhid_helper.sh`
+
+# Running the Unit Tests
+
+* To run the unit tests, execute the following commands from the terminal:    
+    `cd controllers`   
+    `go test`
