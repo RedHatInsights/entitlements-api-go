@@ -47,7 +47,7 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		"/svcrest/subscription/v5/searchnested/criteria" +
 		";web_customer_id=" + orgID +
 		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567,SVC3124" +
-		";status=active/options;products=ALL/product.sku")
+		";/options;products=ALL/product.sku|product.statusCode")
 
 	if err != nil {
 		return types.SubscriptionsResponse{
@@ -78,8 +78,8 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 
 	for s := range SubscriptionDetails {
 		skuValue := SubscriptionDetails[s].Entries
-		for e := range skuValue {
-			arr = append(arr, skuValue[e].Value)
+		if skuValue[1].Value == "" || skuValue[1].Value == "Active" {
+			arr = append(arr, skuValue[0].Value)
 		}
 	}
 
