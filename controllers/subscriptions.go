@@ -153,11 +153,14 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		hybridSKUs := []string{"SVC3851", "SVC3852", "SVCSER0566", "SVCSER0567"}
 		entitleHybrid := len(checkCommon(hybridSKUs, res.Data)) > 0
 
+		smartManagementSKU := []string{"SVC3124"}
+		entitleSmartManagement := len(checkCommon(smartManagementSKU, res.Data)) > 0
+
 		obj, err := json.Marshal(types.EntitlementsResponse{
 			HybridCloud:    types.EntitlementsSection{IsEntitled: entitleHybrid},
 			Insights:       types.EntitlementsSection{IsEntitled: entitleInsights},
 			Openshift:      types.EntitlementsSection{IsEntitled: true},
-			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 0)},
+			SmartMangement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
 		})
 
 		if err != nil {
