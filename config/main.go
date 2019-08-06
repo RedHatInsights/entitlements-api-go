@@ -88,7 +88,7 @@ func initialize() {
 	var options = viper.New()
 	options.SetDefault(Keys.CertsFromEnv, false)
 	options.SetDefault(Keys.Port, "3000")
-	options.SetDefault(Keys.SubsHost, "https://subscription.qa.api.redhat.com") //change this back to non qa when done testing
+	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.CaPath, "./resources/ca.crt")
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
