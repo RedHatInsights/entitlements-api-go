@@ -7,11 +7,11 @@
         },
         {
             "description": "CI entitlements API",
-            "url": "https://ci.cloud.paas.upshift.redhat.com/api/entitlements/v1/"
+            "url": "https://ci.cloud.paas.psi.redhat.com/api/entitlements/v1/"
         },
         {
             "description": "QA entitlements API",
-            "url": "https://qa.cloud.paas.upshift.redhat.com/api/entitlements/v1/"
+            "url": "https://qa.cloud.paas.psi.redhat.com/api/entitlements/v1/"
         },
         {
             "description": "PROD entitlements API",
@@ -41,7 +41,7 @@
         },
         {
             "name": "permissions",
-            "description": "Operations about user"
+            "description": "Operations available to user"
         }
     ],
     "paths": {
