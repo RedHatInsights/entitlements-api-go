@@ -74,7 +74,7 @@
             "ServiceDetails": {
                 "type": "object",
                 "properties": {
-                    "isEntitled": {
+                    "is_entitled": {
                         "type": "boolean",
                         "default": false
                     }
@@ -87,10 +87,10 @@
                 },
                 "example": {
                     "advisor": {
-                        "isEntitled": true
+                        "is_entitled": true
                     },
                     "remediations": {
-                        "isEntitled": false
+                        "is_entitled": false
                     }
                 }
             }

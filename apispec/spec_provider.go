@@ -1,7 +1,6 @@
 package apispec
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -9,17 +8,19 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// OpenApiSpec responds back with the openapi spec
-func OpenApiSpec(r chi.Router) {
-	jsonFile, err := os.Open("./apispec/api.spec.json")
+// OpenAPISpec responds back with the openapi spec
+func OpenAPISpec(r chi.Router) {
+	specFile, err := os.Open("./apispec/api.spec.json")
 
 	if err != nil {
-		fmt.Println(err)
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("OpenApi Spec not available\n"))
+		})
+		return
 	}
 
-	byteVal, _ := ioutil.ReadAll(jsonFile)
-
+	byteArr, _ := ioutil.ReadAll(specFile)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write(byteVal)
+		w.Write(byteArr)
 	})
 }

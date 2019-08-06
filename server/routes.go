@@ -25,7 +25,7 @@ func DoRoutes() chi.Router {
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.Route("/", controllers.LubDub)
 		r.Get("/services", controllers.Index(nil))
-		r.Route("/openapi.json", apispec.OpenApiSpec)
+		r.Route("/openapi.json", apispec.OpenAPISpec)
 	})
 
 	return r
