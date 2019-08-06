@@ -41,7 +41,7 @@
         },
         {
             "name": "permissions",
-            "description": "Operations available to user"
+            "description": "Operations about user"
         }
     ],
     "paths": {
