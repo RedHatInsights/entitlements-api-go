@@ -158,10 +158,10 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		entitleSmartManagement := len(checkCommon(smartManagementSKU, res.Data)) > 0
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
-			HybridCloud:    types.EntitlementsSection{IsEntitled: entitleHybrid},
-			Insights:       types.EntitlementsSection{IsEntitled: entitleInsights},
-			Openshift:      types.EntitlementsSection{IsEntitled: true},
-			SmartMangement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
+			HybridCloud:     types.EntitlementsSection{IsEntitled: entitleHybrid},
+			Insights:        types.EntitlementsSection{IsEntitled: entitleInsights},
+			Openshift:       types.EntitlementsSection{IsEntitled: true},
+			SmartManagement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
 		})
 
 		if err != nil {
