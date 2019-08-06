@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/RedHatInsights/entitlements-api-go/apispec"
 	"github.com/RedHatInsights/entitlements-api-go/controllers"
 	log "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
@@ -24,6 +25,7 @@ func DoRoutes() chi.Router {
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.Route("/", controllers.LubDub)
 		r.Get("/services", controllers.Index(nil))
+		r.Route("/openapi.json", apispec.OpenApiSpec)
 	})
 
 	return r
