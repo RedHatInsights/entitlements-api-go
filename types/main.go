@@ -6,13 +6,25 @@ type EntitlementsSection struct {
 }
 
 // SubscriptionsResponse is a struct that is used to unmarshal the data that comes back from the
-// Suscriptions Service
+// Subscriptions Service
 type SubscriptionsResponse struct {
 	StatusCode int
 	Body       string
 	Error      error
 	Data       []string
 	CacheHit   bool
+}
+
+// Entries is a struct that is used to unmarshal the entries field that comes back from the
+// response of the Subscription Service
+type Entries struct {
+	Value string
+}
+
+// SubscriptionDetails is a struct that is used to unmarshal the data that comes back in the Body
+// of the response of Subscriptions Service
+type SubscriptionDetails struct {
+	Entries []Entries
 }
 
 // EntitlementsResponse is the struct that is used to marshal/unmarshal the response from Entitlemens API

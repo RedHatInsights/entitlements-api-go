@@ -25,7 +25,7 @@ func getClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs: config.GetConfig().RootCAs,
+				RootCAs:      config.GetConfig().RootCAs,
 				Certificates: []tls.Certificate{*config.GetConfig().Certs},
 			},
 		},
@@ -44,10 +44,10 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	}
 
 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
-		"/svcrest/subscription/v5/search/criteria" +
+		"/svcrest/subscription/v5/searchnested/criteria" +
 		";web_customer_id=" + orgID +
-		";sku=SVC3124" +
-		";status=active")
+		";sku=SVC3851,SVC3852,SVCSER0566,SVCSER0567,SVC3124" +
+		";status=active/options;products=ALL/product.sku")
 
 	if err != nil {
 		return types.SubscriptionsResponse{
@@ -58,7 +58,6 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
-
 		return types.SubscriptionsResponse{
 			StatusCode: resp.StatusCode,
 			Body:       string(body),
@@ -70,8 +69,22 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 
 	defer resp.Body.Close()
 	var arr []string
-	json.NewDecoder(resp.Body).Decode(&arr)
+
+	// Unmarshaling response from Subscription
+	// Extracting skus and appending them to arr
+	body, _ := ioutil.ReadAll(resp.Body)
+	var SubscriptionDetails []types.SubscriptionDetails
+	json.Unmarshal(body, &SubscriptionDetails)
+
+	for s := range SubscriptionDetails {
+		skuValue := SubscriptionDetails[s].Entries
+		for e := range skuValue {
+			arr = append(arr, skuValue[e].Value)
+		}
+	}
+
 	cache.Set(orgID, arr, time.Minute*10)
+
 	return types.SubscriptionsResponse{
 		StatusCode: resp.StatusCode,
 		Data:       arr,
@@ -79,8 +92,27 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	}
 }
 
+// Checks the common strings between two slices of strings and returns a slice of strings
+// with the common skus
+func checkCommon(skus []string, userSkus []string) []string {
+	hash := make(map[string]bool)
+	var common []string
+
+	for sku := range skus {
+		hash[skus[sku]] = true
+	}
+
+	for usku := range userSkus {
+		if _, found := hash[userSkus[usku]]; found {
+			common = append(common, userSkus[usku])
+		}
+	}
+
+	return common
+}
+
 // Index the handler for GETs to /api/entitlements/v1/services/
-func Index(getCall func(string) (types.SubscriptionsResponse)) func(http.ResponseWriter, *http.Request) {
+func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if getCall == nil {
 			getCall = getSubscriptions
@@ -118,11 +150,17 @@ func Index(getCall func(string) (types.SubscriptionsResponse)) func(http.Respons
 			return
 		}
 
+		hybridSKUs := []string{"SVC3851", "SVC3852", "SVCSER0566", "SVCSER0567"}
+		entitleHybrid := len(checkCommon(hybridSKUs, res.Data)) > 0
+
+		smartManagementSKU := []string{"SVC3124"}
+		entitleSmartManagement := len(checkCommon(smartManagementSKU, res.Data)) > 0
+
 		obj, err := json.Marshal(types.EntitlementsResponse{
-			HybridCloud:    types.EntitlementsSection{IsEntitled: true},
+			HybridCloud:    types.EntitlementsSection{IsEntitled: entitleHybrid},
 			Insights:       types.EntitlementsSection{IsEntitled: entitleInsights},
 			Openshift:      types.EntitlementsSection{IsEntitled: true},
-			SmartMangement: types.EntitlementsSection{IsEntitled: (len(res.Data) > 0)},
+			SmartMangement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
 		})
 
 		if err != nil {
