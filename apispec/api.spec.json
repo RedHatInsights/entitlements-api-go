@@ -23,7 +23,7 @@
         "version": "1.0.0",
         "title": "Entitlements",
         "contact": {
-            "email": "ihands@redhat.com"
+            "email": "tefaz@redhat.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -86,10 +86,10 @@
                     "$ref": "#/components/schemas/ServiceDetails"
                 },
                 "example": {
-                    "advisor": {
+                    "insights": {
                         "is_entitled": true
                     },
-                    "remediations": {
+                    "smart_management": {
                         "is_entitled": false
                     }
                 }
