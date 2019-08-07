@@ -13,7 +13,7 @@ import (
 // OpenAPISpec responds back with the openapi spec
 func OpenAPISpec(r chi.Router) {
 	currDir, err := os.Getwd()
-	specDir := string(currDir) + "/apispec/Aapi.spec.json"
+	specDir := string(currDir) + "/apispec/api.spec.json"
 	fmt.Println(specDir)
 	specFile, err := os.Open(specDir)
 
