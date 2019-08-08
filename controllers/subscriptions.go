@@ -46,8 +46,8 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/searchnested/criteria" +
 		";web_customer_id=" + orgID +
-		";sku=SVC3124" + //Hybrid SKUs: SVC3851,SVC3852,SVCSER0566,SVCSER0567,
-		";status=active/options;products=ALL/product.sku")
+		";sku=SVC3124,RH00068" + //Hybrid SKUs: SVC3851,SVC3852,SVCSER0566,SVCSER0567
+		";/options;products=ALL/product.sku|product.statusCode")
 
 	if err != nil {
 		return types.SubscriptionsResponse{
@@ -78,8 +78,9 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 
 	for s := range SubscriptionDetails {
 		skuValue := SubscriptionDetails[s].Entries
-		for e := range skuValue {
-			arr = append(arr, skuValue[e].Value)
+		// sku value == "" means it's a parent SKU
+		if skuValue[1].Value == "" || skuValue[1].Value == "Active" {
+			arr = append(arr, skuValue[0].Value)
 		}
 	}
 
@@ -154,14 +155,14 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		//hybridSKUs := []string{"SVC3851", "SVC3852", "SVCSER0566", "SVCSER0567"}
 		//entitleHybrid := len(checkCommon(hybridSKUs, res.Data)) > 0
 
-		smartManagementSKU := []string{"SVC3124"}
+		smartManagementSKU := []string{"SVC3124", "RH00068"}
 		entitleSmartManagement := len(checkCommon(smartManagementSKU, res.Data)) > 0
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
-			HybridCloud:    types.EntitlementsSection{IsEntitled: true}, //set to true until ready for hybrid entitlment checks to be enforced
-			Insights:       types.EntitlementsSection{IsEntitled: entitleInsights},
-			Openshift:      types.EntitlementsSection{IsEntitled: true},
-			SmartMangement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
+			HybridCloud:     types.EntitlementsSection{IsEntitled: true}, //set to true until ready for hybrid entitlment checks to be enforced
+			Insights:        types.EntitlementsSection{IsEntitled: entitleInsights},
+			Openshift:       types.EntitlementsSection{IsEntitled: true},
+			SmartManagement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
 		})
 
 		if err != nil {
