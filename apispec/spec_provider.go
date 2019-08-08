@@ -1,7 +1,6 @@
 package apispec
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,19 +11,8 @@ import (
 
 // OpenAPISpec responds back with the openapi spec
 func OpenAPISpec(r chi.Router) {
-	// currDir, err := os.Getwd()
-	// currDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	// fmt.Println(currDir)
-	// var specDir string
-	// var options = viper.New()
-	// options.SetDefault(specDir, "./apispec/api.spec.json")
-	// options.SetEnvPrefix("ENT")
-	// options.AutomaticEnv()
-	keysPath := config.GetConfig().Options.GetString(config.Keys.CaPath)
-	fmt.Println(keysPath)
-	pathpath := config.GetConfig().Options.GetString(config.Keys.OpenSpecPath)
-	fmt.Println(pathpath)
-	specFile, err := ioutil.ReadFile(pathpath)
+	specFilePath := config.GetConfig().Options.GetString(config.Keys.OpenAPISpecPath)
+	specFile, err := ioutil.ReadFile(specFilePath)
 	if err != nil {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("OpenApi Spec not available\n"))
@@ -33,7 +21,6 @@ func OpenAPISpec(r chi.Router) {
 		return
 	}
 
-	//byteArr, _ := ioutil.ReadAll(specFile)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(specFile)
 	})
