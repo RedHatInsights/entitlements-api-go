@@ -39,7 +39,8 @@ var Keys = EntitlementsConfigKeysType{
 	CaPath:       "CA_PATH",
 }
 
-var OpenApiSpecFilePath string
+// OpenAPISpecFilePath is a blah blah blah
+var OpenAPISpecFilePath = "OPENAPI_SPEC_PATH"
 
 func getRootCAs(localCertFile string) *x509.CertPool {
 	// force the CA cert
@@ -92,7 +93,7 @@ func initialize() {
 	options.SetDefault(Keys.Port, "3000")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.CaPath, "./resources/ca.crt")
-	options.SetDefault(OpenApiSpecFilePath, "./apispec/api.spec.json")
+	options.SetDefault(OpenAPISpecFilePath, "./apispec/api.spec.json")
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 
