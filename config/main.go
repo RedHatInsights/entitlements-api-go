@@ -43,8 +43,8 @@ type EntitlementsOpenAPISpec struct {
 	FilePath string
 }
 
-var SpecFile = EntitlementsOpenAPISpec {
-	FilePath: "OPENAPI_SPEC_PATH"
+var SpecFile = EntitlementsOpenAPISpec{
+	FilePath: "OPENAPI_SPEC_PATH",
 }
 
 // OpenAPISpecFilePath is a blah blah blah
