@@ -18,6 +18,7 @@ func OpenAPISpec(r chi.Router) {
 	var specDir string
 	var options = viper.New()
 	options.SetDefault(specDir, "./apispec/api.spec.json")
+	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 	specFile, err := ioutil.ReadFile(options.GetString(specDir))
 	fmt.Println(options.GetString(specDir))
