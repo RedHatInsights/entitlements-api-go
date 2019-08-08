@@ -20,6 +20,8 @@ func OpenAPISpec(r chi.Router) {
 	// options.SetDefault(specDir, "./apispec/api.spec.json")
 	// options.SetEnvPrefix("ENT")
 	// options.AutomaticEnv()
+	keysPath := config.GetConfig().Options.GetString(config.Keys.CaPath)
+	fmt.Println(keysPath)
 	pathpath := config.GetConfig().Options.GetString(config.OpenApiSpecFilePath)
 	fmt.Println(pathpath)
 	specFile, err := ioutil.ReadFile(pathpath)
