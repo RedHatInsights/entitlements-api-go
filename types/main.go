@@ -29,8 +29,8 @@ type SubscriptionDetails struct {
 
 // EntitlementsResponse is the struct that is used to marshal/unmarshal the response from Entitlemens API
 type EntitlementsResponse struct {
-	HybridCloud    EntitlementsSection `json:"hybrid_cloud"`
-	Insights       EntitlementsSection `json:"insights"`
-	Openshift      EntitlementsSection `json:"openshift"`
-	SmartMangement EntitlementsSection `json:"smart_management"`
+	HybridCloud     EntitlementsSection `json:"hybrid_cloud"`
+	Insights        EntitlementsSection `json:"insights"`
+	Openshift       EntitlementsSection `json:"openshift"`
+	SmartManagement EntitlementsSection `json:"smart_management"`
 }
