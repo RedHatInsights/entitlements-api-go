@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/go-chi/chi"
@@ -13,8 +14,10 @@ import (
 // OpenAPISpec responds back with the openapi spec
 func OpenAPISpec(r chi.Router) {
 	// currDir, err := os.Getwd()
+	currDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	fmt.Println(currDir)
 	specDir, _ := filepath.Abs("./apispec/api.spec.json")
-	fmt.Println(specDir)
+	// fmt.Println(specDir)
 	specFile, err := ioutil.ReadFile(specDir)
 
 	if err != nil {
