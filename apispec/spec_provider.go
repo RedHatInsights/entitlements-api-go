@@ -22,7 +22,7 @@ func OpenAPISpec(r chi.Router) {
 	// options.AutomaticEnv()
 	keysPath := config.GetConfig().Options.GetString(config.Keys.CaPath)
 	fmt.Println(keysPath)
-	pathpath := config.GetConfig().Options.GetString(config.SpecFile.FilePath)
+	pathpath := config.GetConfig().Options.GetString(config.Keys.OpenSpecPath)
 	fmt.Println(pathpath)
 	specFile, err := ioutil.ReadFile(pathpath)
 	if err != nil {
