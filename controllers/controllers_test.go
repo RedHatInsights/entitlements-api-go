@@ -86,7 +86,7 @@ var _ = Describe("Identity Controller", func() {
 		})
 	})
 
-	Context("When the Subs API says we have Smart Managment", func() {
+	Context("When the Subs API says we have Smart Management", func() {
 		It("should give back a valid EntitlementsResponse with smart_management true", func() {
 			fakeResponse := SubscriptionsResponse{
 				StatusCode: 200,
@@ -99,11 +99,28 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Insights.IsEntitled).To(Equal(true))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
 		})
 	})
 
-	Context("When the Subs API says we *dont* have Smart Managment", func() {
+	Context("When the Subs API says we have Smart Management (CMSfR SKU)", func() {
+		It("should give back a valid EntitlementsResponse with smart_management true", func() {
+			fakeResponse := SubscriptionsResponse{
+				StatusCode: 200,
+				Data:       []string{"foo", "bar", "SVC3851", "RH00068"},
+				CacheHit:   false,
+			}
+
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body.Insights.IsEntitled).To(Equal(true))
+			Expect(body.Openshift.IsEntitled).To(Equal(true))
+			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
+		})
+	})
+
+	Context("When the Subs API says we *dont* have Smart Management", func() {
 		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
 			Data:       []string{"SVC3852"},
@@ -116,7 +133,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Insights.IsEntitled).To(Equal(true))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-			Expect(body.SmartMangement.IsEntitled).To(Equal(false))
+			Expect(body.SmartManagement.IsEntitled).To(Equal(false))
 		})
 	})
 
@@ -134,7 +151,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Insights.IsEntitled).To(Equal(false))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
 		})
 
 		It("should give back a valid EntitlementsResponse with insights false", func() {
@@ -144,43 +161,46 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Insights.IsEntitled).To(Equal(false))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
 		})
 
 	})
 
-	Context("When the Subs API says we have Hybrid", func() {
-		It("should give back a valid EntitlementsResponse with all is_entitled true", func() {
-			fakeResponse := SubscriptionsResponse{
-				StatusCode: 200,
-				Data:       []string{"SVCSER0566", "SVC3124", "SVC3852"},
-				CacheHit:   false,
-			}
+	//tests disabled while not enforcing entitlements for hybrid cloud
+	/*
+		Context("When the Subs API says we have Hybrid", func() {
+			It("should give back a valid EntitlementsResponse with all is_entitled true", func() {
+				fakeResponse := SubscriptionsResponse{
+					StatusCode: 200,
+					Data:       []string{"SVCSER0566", "SVC3124", "SVC3852"},
+					CacheHit:   false,
+				}
 
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
-			expectPass(rr.Result())
-			Expect(body.Insights.IsEntitled).To(Equal(true))
-			Expect(body.Openshift.IsEntitled).To(Equal(true))
-			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+				rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+				expectPass(rr.Result())
+				Expect(body.Insights.IsEntitled).To(Equal(true))
+				Expect(body.Openshift.IsEntitled).To(Equal(true))
+				Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+				Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+			})
 		})
-	})
 
-	Context("When the Subs API says we *dont* have Hybrid", func() {
-		It("should give back a valid EntitlementsResponse with hybrid is_entitled false", func() {
-			fakeResponse := SubscriptionsResponse{
-				StatusCode: 200,
-				Data:       []string{"SVC1234", "SVC3124", "SVC5678"},
-				CacheHit:   false,
-			}
+		Context("When the Subs API says we *dont* have Hybrid", func() {
+			It("should give back a valid EntitlementsResponse with hybrid is_entitled false", func() {
+				fakeResponse := SubscriptionsResponse{
+					StatusCode: 200,
+					Data:       []string{"SVC1234", "SVC3124", "SVC5678"},
+					CacheHit:   false,
+				}
 
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
-			expectPass(rr.Result())
-			Expect(body.Insights.IsEntitled).To(Equal(true))
-			Expect(body.Openshift.IsEntitled).To(Equal(true))
-			Expect(body.HybridCloud.IsEntitled).To(Equal(false))
-			Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+				rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+				expectPass(rr.Result())
+				Expect(body.Insights.IsEntitled).To(Equal(true))
+				Expect(body.Openshift.IsEntitled).To(Equal(true))
+				Expect(body.HybridCloud.IsEntitled).To(Equal(false))
+				Expect(body.SmartMangement.IsEntitled).To(Equal(true))
+			})
 		})
-	})
+	*/
 
 })
