@@ -180,7 +180,7 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		smartManagementSKU := []string{"SVC3124", "RH00068"}
 		entitleSmartManagement := len(checkCommon(smartManagementSKU, res.Data)) > 0
 
-		ansibleSKU := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "RH00068", "MCT3695", "MCT3696"}
+		ansibleSKU := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
 		entitleAnsible := validAccNum && len(checkCommon(ansibleSKU, res.Data)) > 0
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
