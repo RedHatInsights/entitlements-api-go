@@ -43,10 +43,14 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		}
 	}
 
+	smartManagementChecks := "SVC3124,RH00068,"
+	//hybridChecks := "SVC3851,SVC3852,SVCSER0566,SVCSER0567,"
+	ansibleChecks := "MCT3691,MCT3692,MCT3693,,MCT3694,MCT3695,MCT3696"
+
 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/searchnested/criteria" +
 		";web_customer_id=" + orgID +
-		";sku=SVC3124,RH00068" + //Hybrid SKUs: SVC3851,SVC3852,SVCSER0566,SVCSER0567
+		";sku=" + smartManagementChecks + ansibleChecks + //hybridChecks +
 		";/options;products=ALL/product.sku|product.statusCode")
 
 	if err != nil {
@@ -178,11 +182,15 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		smartManagementSKU := []string{"SVC3124", "RH00068"}
 		entitleSmartManagement := len(checkCommon(smartManagementSKU, res.Data)) > 0
 
+		ansibleSKU := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
+		entitleAnsible := len(checkCommon(ansibleSKU, res.Data)) > 0
+
 		obj, err := json.Marshal(types.EntitlementsResponse{
 			HybridCloud:     types.EntitlementsSection{IsEntitled: true}, //set to true until ready for hybrid entitlment checks to be enforced
 			Insights:        types.EntitlementsSection{IsEntitled: entitleInsights},
 			Openshift:       types.EntitlementsSection{IsEntitled: true},
 			SmartManagement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
+			Ansible:         types.EntitlementsSection{IsEntitled: entitleAnsible},
 		})
 
 		if err != nil {
