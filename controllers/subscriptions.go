@@ -148,11 +148,7 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		res := getCall(reqCtx.Internal.OrgID)
 		accNum := reqCtx.AccountNumber
 
-		entitleInsights := false
-
-		if !(accNum == "" || accNum == "-1") {
-			entitleInsights = true
-		}
+		validAccNum := !(accNum == "" || accNum == "-1")
 
 		if res.Error != nil {
 			l.Log.Error("Unexpected error while talking to Subs Service", zap.Error(res.Error))
@@ -179,11 +175,13 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		//hybridSKUs := []string{"SVC3851", "SVC3852", "SVCSER0566", "SVCSER0567"}
 		//entitleHybrid := len(checkCommon(hybridSKUs, res.Data)) > 0
 
+		entitleInsights := validAccNum
+
 		smartManagementSKU := []string{"SVC3124", "RH00068"}
 		entitleSmartManagement := len(checkCommon(smartManagementSKU, res.Data)) > 0
 
-		ansibleSKU := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
-		entitleAnsible := len(checkCommon(ansibleSKU, res.Data)) > 0
+		ansibleSKU := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "RH00068", "MCT3695", "MCT3696"}
+		entitleAnsible := validAccNum && len(checkCommon(ansibleSKU, res.Data)) > 0
 
 		obj, err := json.Marshal(types.EntitlementsResponse{
 			HybridCloud:     types.EntitlementsSection{IsEntitled: true}, //set to true until ready for hybrid entitlment checks to be enforced
