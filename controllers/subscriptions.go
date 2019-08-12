@@ -80,26 +80,6 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	var SubscriptionDetails []types.SubscriptionDetails
 	json.Unmarshal(body, &SubscriptionDetails)
 
-	/*
-		Sample response from Subscription Service
-
-		[
-			{
-				"entries": [
-					{
-						"key": "sku",
-						"value": "SVC3124"
-					},
-					{
-						"key": "statusCode",
-						"value": "Active"
-					}
-				],
-				"nested": []
-			}
-		]
-	*/
-
 	for s := range SubscriptionDetails {
 		skuValue := SubscriptionDetails[s].Entries
 		// sku value == "" means it's a parent SKU
