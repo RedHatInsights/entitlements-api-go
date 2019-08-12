@@ -90,7 +90,7 @@ var _ = Describe("Identity Controller", func() {
 		It("should give back a valid EntitlementsResponse with smart_management true", func() {
 			fakeResponse := SubscriptionsResponse{
 				StatusCode: 200,
-				Data:       []string{"foo", "bar", "SVC3124", "SVC3851"},
+				Data:       []string{"foo", "bar", "SVC3124", "SVC3851", "MCT3691"},
 				CacheHit:   false,
 			}
 
@@ -100,6 +100,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
+			Expect(body.Ansible.IsEntitled).To(Equal(true))
 		})
 	})
 
@@ -107,7 +108,7 @@ var _ = Describe("Identity Controller", func() {
 		It("should give back a valid EntitlementsResponse with smart_management true", func() {
 			fakeResponse := SubscriptionsResponse{
 				StatusCode: 200,
-				Data:       []string{"foo", "bar", "SVC3851", "RH00068"},
+				Data:       []string{"foo", "bar", "SVC3851", "RH00068", "MCT3692"},
 				CacheHit:   false,
 			}
 
@@ -117,13 +118,14 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
+			Expect(body.Ansible.IsEntitled).To(Equal(true))
 		})
 	})
 
 	Context("When the Subs API says we *dont* have Smart Management", func() {
 		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
-			Data:       []string{"SVC3852"},
+			Data:       []string{"SVC3852", "MCT3693"},
 			CacheHit:   false,
 		}
 
@@ -134,17 +136,18 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(false))
+			Expect(body.Ansible.IsEntitled).To(Equal(true))
 		})
 	})
 
 	Context("When the account number is -1 or '' ", func() {
 		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
-			Data:       []string{"foo", "bar", "SVC3852", "SVC3124"},
+			Data:       []string{"foo", "bar", "SVC3852", "SVC3124", "MCT3694"},
 			CacheHit:   false,
 		}
 
-		It("should give back a valid EntitlementsResponse with insights false", func() {
+		It("should give back a valid EntitlementsResponse with insights and ansible false", func() {
 			// testing with account number "-1"
 			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
@@ -152,9 +155,10 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
+			Expect(body.Ansible.IsEntitled).To(Equal(false))
 		})
 
-		It("should give back a valid EntitlementsResponse with insights false", func() {
+		It("should give back a valid EntitlementsResponse with insights and ansible false", func() {
 			// testing with account number ""
 			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
@@ -162,8 +166,45 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
+			Expect(body.Ansible.IsEntitled).To(Equal(false))
 		})
 
+	})
+
+	Context("When the Subs API says we have Ansible", func() {
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       []string{"SVC3852", "MCT3695", "MCT3696"},
+			CacheHit:   false,
+		}
+
+		It("should give back a valid EntitlementsResponse with ansible true", func() {
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body.Insights.IsEntitled).To(Equal(true))
+			Expect(body.Openshift.IsEntitled).To(Equal(true))
+			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+			Expect(body.SmartManagement.IsEntitled).To(Equal(false))
+			Expect(body.Ansible.IsEntitled).To(Equal(true))
+		})
+	})
+
+	Context("When the Subs API says we *dont* have Ansible", func() {
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       []string{"SVC3852"},
+			CacheHit:   false,
+		}
+
+		It("should give back a valid EntitlementsResponse with ansible false", func() {
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body.Insights.IsEntitled).To(Equal(true))
+			Expect(body.Openshift.IsEntitled).To(Equal(true))
+			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+			Expect(body.SmartManagement.IsEntitled).To(Equal(false))
+			Expect(body.Ansible.IsEntitled).To(Equal(false))
+		})
 	})
 
 	//tests disabled while not enforcing entitlements for hybrid cloud
@@ -184,7 +225,7 @@ var _ = Describe("Identity Controller", func() {
 				Expect(body.SmartMangement.IsEntitled).To(Equal(true))
 			})
 		})
-    
+
 		Context("When the Subs API says we *dont* have Hybrid", func() {
 			It("should give back a valid EntitlementsResponse with hybrid is_entitled false", func() {
 				fakeResponse := SubscriptionsResponse{

@@ -33,4 +33,5 @@ type EntitlementsResponse struct {
 	Insights        EntitlementsSection `json:"insights"`
 	Openshift       EntitlementsSection `json:"openshift"`
 	SmartManagement EntitlementsSection `json:"smart_management"`
+	Ansible         EntitlementsSection `json:"ansible"`
 }
