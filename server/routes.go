@@ -20,12 +20,11 @@ func DoRoutes() chi.Router {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(LogMW.Logger(log.Log))
-	r.Use(identity.EnforceIdentity)
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
-		r.Route("/", controllers.LubDub)
+		r.With(identity.EnforceIdentity).Route("/", controllers.LubDub)
 		r.Route("/openapi.json", apispec.OpenAPISpec)
-		r.Get("/services", controllers.Index(nil))
+		r.With(identity.EnforceIdentity).Get("/services", controllers.Index(nil))
 	})
 
 	return r
