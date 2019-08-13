@@ -101,6 +101,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
 			Expect(body.Ansible.IsEntitled).To(Equal(true))
+			Expect(body.Migrations.IsEntitled).To(Equal(true))
 		})
 	})
 
@@ -119,6 +120,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
 			Expect(body.Ansible.IsEntitled).To(Equal(true))
+			Expect(body.Migrations.IsEntitled).To(Equal(true))
 		})
 	})
 
@@ -137,6 +139,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(false))
 			Expect(body.Ansible.IsEntitled).To(Equal(true))
+			Expect(body.Migrations.IsEntitled).To(Equal(true))
 		})
 	})
 
@@ -147,7 +150,7 @@ var _ = Describe("Identity Controller", func() {
 			CacheHit:   false,
 		}
 
-		It("should give back a valid EntitlementsResponse with insights and ansible false", func() {
+		It("should give back a valid EntitlementsResponse with insights, ansible and migrations false", func() {
 			// testing with account number "-1"
 			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
@@ -156,9 +159,10 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
 			Expect(body.Ansible.IsEntitled).To(Equal(false))
+			Expect(body.Migrations.IsEntitled).To(Equal(false))
 		})
 
-		It("should give back a valid EntitlementsResponse with insights and ansible false", func() {
+		It("should give back a valid EntitlementsResponse with insights, ansible and migrations false", func() {
 			// testing with account number ""
 			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
@@ -167,6 +171,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(true))
 			Expect(body.Ansible.IsEntitled).To(Equal(false))
+			Expect(body.Migrations.IsEntitled).To(Equal(false))
 		})
 
 	})
@@ -186,6 +191,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(false))
 			Expect(body.Ansible.IsEntitled).To(Equal(true))
+			Expect(body.Migrations.IsEntitled).To(Equal(true))
 		})
 	})
 
@@ -204,6 +210,26 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(false))
 			Expect(body.Ansible.IsEntitled).To(Equal(false))
+			Expect(body.Migrations.IsEntitled).To(Equal(true))
+		})
+	})
+
+	Context("When the Subs API says we have Migrations", func() {
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       []string{},
+			CacheHit:   false,
+		}
+
+		It("should give back a valid EntitlementsResponse with migrations true", func() {
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body.Insights.IsEntitled).To(Equal(true))
+			Expect(body.Openshift.IsEntitled).To(Equal(true))
+			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+			Expect(body.SmartManagement.IsEntitled).To(Equal(false))
+			Expect(body.Ansible.IsEntitled).To(Equal(false))
+			Expect(body.Migrations.IsEntitled).To(Equal(true))
 		})
 	})
 
