@@ -163,12 +163,15 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		ansibleSKU := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
 		entitleAnsible := validAccNum && len(checkCommon(ansibleSKU, res.Data)) > 0
 
+		entitleMigrations := validAccNum
+
 		obj, err := json.Marshal(types.EntitlementsResponse{
 			HybridCloud:     types.EntitlementsSection{IsEntitled: true}, //set to true until ready for hybrid entitlment checks to be enforced
 			Insights:        types.EntitlementsSection{IsEntitled: entitleInsights},
 			Openshift:       types.EntitlementsSection{IsEntitled: true},
 			SmartManagement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
 			Ansible:         types.EntitlementsSection{IsEntitled: entitleAnsible},
+			Migrations:      types.EntitlementsSection{IsEntitled: entitleMigrations},
 		})
 
 		if err != nil {
