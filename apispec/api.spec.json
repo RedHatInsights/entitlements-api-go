@@ -1,23 +1,5 @@
 {
     "openapi": "3.0.0",
-    "servers": [
-        {
-            "description": "Local entitlements API",
-            "url": "/api/entitlements/v1/"
-        },
-        {
-            "description": "CI entitlements API",
-            "url": "https://ci.cloud.paas.psi.redhat.com/api/entitlements/v1/"
-        },
-        {
-            "description": "QA entitlements API",
-            "url": "https://qa.cloud.paas.psi.redhat.com/api/entitlements/v1/"
-        },
-        {
-            "description": "PROD entitlements API",
-            "url": "https://cloud.redhat.com/api/entitlements/v1/"
-        }
-    ],
     "info": {
         "description": "Service for determining subscriptions in cloud management\n[cloud.redhat.com](http://cloud.redhat.com/api/v1/entitlements)\n",
         "version": "1.0.0",
