@@ -6,14 +6,6 @@
             "url": "/api/entitlements/v1/"
         },
         {
-            "description": "CI entitlements API",
-            "url": "https://ci.cloud.paas.psi.redhat.com/api/entitlements/v1/"
-        },
-        {
-            "description": "QA entitlements API",
-            "url": "https://qa.cloud.paas.psi.redhat.com/api/entitlements/v1/"
-        },
-        {
             "description": "PROD entitlements API",
             "url": "https://cloud.redhat.com/api/entitlements/v1/"
         }
