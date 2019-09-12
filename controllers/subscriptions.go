@@ -83,7 +83,7 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	for s := range SubscriptionDetails {
 		skuValue := SubscriptionDetails[s].Entries
 		// sku value == "" means it's a parent SKU
-		if skuValue[1].Value == "" || skuValue[1].Value == "Active" {
+		if skuValue[1].Value == "" || skuValue[1].Value == "Active" || skuValue[1].Value == "Temporary" {
 			arr = append(arr, skuValue[0].Value)
 		}
 	}
