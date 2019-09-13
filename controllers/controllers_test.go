@@ -195,24 +195,24 @@ var _ = Describe("Identity Controller", func() {
 		})
 	})
 
-	// Context("When the Subs API says we *dont* have Ansible", func() {
-	// 	fakeResponse := SubscriptionsResponse{
-	// 		StatusCode: 200,
-	// 		Data:       []string{"SVC3852"},
-	// 		CacheHit:   false,
-	// 	}
+	Context("When the Subs API says we *dont* have Ansible", func() {
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       []string{"SVC3852"},
+			CacheHit:   false,
+		}
 
-	// 	It("should give back a valid EntitlementsResponse with ansible false", func() {
-	// 		rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
-	// 		expectPass(rr.Result())
-	// 		Expect(body.Insights.IsEntitled).To(Equal(true))
-	// 		Expect(body.Openshift.IsEntitled).To(Equal(true))
-	// 		Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-	// 		Expect(body.SmartManagement.IsEntitled).To(Equal(false))
-	// 		Expect(body.Ansible.IsEntitled).To(Equal(false))
-	// 		Expect(body.Migrations.IsEntitled).To(Equal(true))
-	// 	})
-	// })
+		It("should give back a valid EntitlementsResponse with ansible false", func() {
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body.Insights.IsEntitled).To(Equal(true))
+			Expect(body.Openshift.IsEntitled).To(Equal(true))
+			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
+			Expect(body.SmartManagement.IsEntitled).To(Equal(false))
+			Expect(body.Ansible.IsEntitled).To(Equal(false))
+			Expect(body.Migrations.IsEntitled).To(Equal(true))
+		})
+	})
 
 	Context("When the Subs API says we have Migrations", func() {
 		fakeResponse := SubscriptionsResponse{
@@ -228,7 +228,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
 			Expect(body.HybridCloud.IsEntitled).To(Equal(true))
 			Expect(body.SmartManagement.IsEntitled).To(Equal(false))
-			Expect(body.Ansible.IsEntitled).To(Equal(true))
+			Expect(body.Ansible.IsEntitled).To(Equal(false))
 			Expect(body.Migrations.IsEntitled).To(Equal(true))
 		})
 	})
