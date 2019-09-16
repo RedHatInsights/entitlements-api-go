@@ -44,8 +44,8 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	}
 
 	smartManagementChecks := "SVC3124,RH00068,"
-	//hybridChecks := "SVC3851,SVC3852,SVCSER0566,SVCSER0567,"
 	ansibleChecks := "MCT3691,MCT3692,MCT3693,MCT3694,MCT3695,MCT3696"
+	//hybridChecks := "SVC3851,SVC3852,SVCSER0566,SVCSER0567,"
 
 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/searchnested/criteria" +
@@ -81,10 +81,12 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	json.Unmarshal(body, &SubscriptionDetails)
 
 	for s := range SubscriptionDetails {
-		skuValue := SubscriptionDetails[s].Entries
-		// sku value == "" means it's a parent SKU
-		if skuValue[1].Value == "" || skuValue[1].Value == "Active" || skuValue[1].Value == "Temporary" {
-			arr = append(arr, skuValue[0].Value)
+		skuInfo := SubscriptionDetails[s].Entries
+		skuName := skuInfo[0].Value
+		skuStatus := skuInfo[1].Value
+		// sku status == "" means it's a parent SKU
+		if skuStatus == "" || skuStatus == "Active" || skuStatus == "Temporary" {
+			arr = append(arr, skuName)
 		}
 	}
 
@@ -99,21 +101,21 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 
 // Checks the common strings between two slices of strings and returns a slice of strings
 // with the common skus
-func checkCommon(skus []string, userSkus []string) []string {
-	hash := make(map[string]bool)
-	var common []string
+func checkCommonSkus(skus []string, userSkus []string) []string {
+	skuHash := make(map[string]bool)
+	var commonSKUs []string
 
 	for sku := range skus {
-		hash[skus[sku]] = true
+		skuHash[skus[sku]] = true
 	}
 
 	for usku := range userSkus {
-		if _, found := hash[userSkus[usku]]; found {
-			common = append(common, userSkus[usku])
+		if _, found := skuHash[userSkus[usku]]; found {
+			commonSKUs = append(commonSKUs, userSkus[usku])
 		}
 	}
 
-	return common
+	return commonSKUs
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
@@ -153,15 +155,15 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 
 		//Commented out until hybrid is ready and all teams that need access have the correct SKUs
 		//hybridSKUs := []string{"SVC3851", "SVC3852", "SVCSER0566", "SVCSER0567"}
-		//entitleHybrid := len(checkCommon(hybridSKUs, res.Data)) > 0
+		//entitleHybrid := len(checkCommonSkus(hybridSKUs, res.Data)) > 0
 
 		entitleInsights := validAccNum
 
-		smartManagementSKU := []string{"SVC3124", "RH00068"}
-		entitleSmartManagement := len(checkCommon(smartManagementSKU, res.Data)) > 0
+		smartManagementSKUs := []string{"SVC3124", "RH00068"}
+		entitleSmartManagement := len(checkCommonSkus(smartManagementSKUs, res.Data)) > 0
 
-		ansibleSKU := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
-		entitleAnsible := validAccNum && len(checkCommon(ansibleSKU, res.Data)) > 0
+		ansibleSKUs := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
+		entitleAnsible := validAccNum && len(checkCommonSkus(ansibleSKUs, res.Data)) > 0
 
 		entitleMigrations := validAccNum
 
