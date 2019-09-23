@@ -98,14 +98,6 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 	}
 }
 
-var hotfixGetSubscriptions = func(orgID string) types.SubscriptionsResponse {
-	return types.SubscriptionsResponse{
-		StatusCode: 200,
-		Data:       []string{"SVC3124", "MCT3691"},
-		CacheHit:   false,
-	}
-}
-
 // Checks the common strings between two slices of strings and returns a slice of strings
 // with the common skus
 func checkCommonSkus(skus []string, userSkus []string) []string {
@@ -129,7 +121,7 @@ func checkCommonSkus(skus []string, userSkus []string) []string {
 func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if getCall == nil {
-			getCall = hotfixGetSubscriptions
+			getCall = getSubscriptions
 		}
 
 		start := time.Now()
