@@ -1,5 +1,6 @@
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/RedHatInsights/entitlements-api v0.0.0-20190509222021-d9ad7efd3bfe h1:hAmi2D8ylCzzH32zHe2oh0KnkFyqCCKF8iv1XFaHZ/k=
 github.com/RedHatInsights/entitlements-api-go v0.0.0-20190515162439-18185b1ee700 h1:Db+sXjebNV2e5DpXsQ3kpmKT5Ub0FXog/jruQeYO6LA=
 github.com/RedHatInsights/entitlements-api-go v0.0.0-20190515162439-18185b1ee700/go.mod h1:1bi4YO+aEPP7SkGdgQAebj5bEU23dOvUvDS5Q0iEDM4=
 github.com/RedHatInsights/platform-go-middlewares v0.0.2 h1:jIGnb12JKhqEbmP6ACU0Y61OJXOY1HFqOAQRJz0gX8E=
