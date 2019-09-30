@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
+
 	"github.com/go-chi/chi"
 )
 
