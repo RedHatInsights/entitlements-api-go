@@ -158,9 +158,8 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 		smartManagementSKUs := []string{"SVC3124", "RH00068"}
 		entitleSmartManagement := len(checkCommonSkus(smartManagementSKUs, res.Data)) > 0
 
-		// ansibleSKUs := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
-		// entitleAnsible := validAccNum && len(checkCommonSkus(ansibleSKUs, res.Data)) > 0
-		entitleAnsible := validAccNum
+		ansibleSKUs := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
+		entitleAnsible := validAccNum && len(checkCommonSkus(ansibleSKUs, res.Data)) > 0
 
 		entitleMigrations := validAccNum
 
