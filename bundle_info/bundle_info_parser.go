@@ -10,13 +10,13 @@ import (
 
 // BundleInfo provides Bundle names and SKUs
 func BundleInfo() {
-	specFilePath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
-	specFile, err := ioutil.ReadFile(specFilePath)
+	bundlesYaml := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
+	bundlesYaml, err := ioutil.ReadFile(bundlesYaml)
 
 	if err != nil {
 		log.Panic(err)
 		return
 	}
 
-	fmt.Println(specFile)
+	fmt.Println(bundlesYaml)
 }
