@@ -26,5 +26,5 @@ func BundleInfo() {
     if err != nil {
         log.Fatalf("error: %v", err)
     }
-	fmt.Printf("Name: ", y)
+	fmt.Println("Name: ", y)
 }
