@@ -22,6 +22,8 @@ func OpenAPISpec(r chi.Router) {
 		return
 	}
 
+	bundles.BundleInfo()
+
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(specFile)
 	})

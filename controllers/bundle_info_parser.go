@@ -1,4 +1,4 @@
-package bundles
+package controllers
 
 import (
 	"fmt"
