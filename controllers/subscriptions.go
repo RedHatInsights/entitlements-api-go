@@ -12,7 +12,7 @@ import (
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
-	
+
 	"github.com/karlseguin/ccache"
 	"go.uber.org/zap"
 )

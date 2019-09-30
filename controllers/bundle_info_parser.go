@@ -6,17 +6,25 @@ import (
 	"log"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
+	"github.com/RedHatInsights/entitlements-api-go/types"
+
+	"gopkg.in/yaml.v2"
 )
 
 // BundleInfo provides Bundle names and SKUs
 func BundleInfo() {
-	bundlesYamlPath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
-	bundlesYaml, err := ioutil.ReadFile(bundlesYamlPath)
+	yamlPath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
+	bundlesYaml, err := ioutil.ReadFile(yamlPath)
 
 	if err != nil {
 		log.Panic(err)
 		return
 	}
 
-	fmt.Println(bundlesYaml)
+	y := types.BundleDetails{}
+	err = yaml.Unmarshal([]byte(bundlesYaml), &y)
+    if err != nil {
+        log.Fatalf("error: %v", err)
+    }
+	fmt.Printf("Name: ", y)
 }

@@ -36,3 +36,10 @@ type EntitlementsResponse struct {
 	Ansible         EntitlementsSection `json:"ansible"`
 	Migrations      EntitlementsSection `json:"migrations"`
 }
+
+// BundleDetails is a struct that is used to unmarshal the bundle info from bundles.yml
+type BundleDetails struct {
+	Name           string
+	ValidAccNum    bool
+	Skus           []string
+}
