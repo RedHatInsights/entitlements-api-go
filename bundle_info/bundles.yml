@@ -1,0 +1,35 @@
+ansible:
+  valid_acc_num: true
+  skus:
+    - MCT3691
+    - MCT3692
+    - MCT3693
+    - MCT3694
+    - MCT3695
+    - MCT3696
+
+hybrid_cloud:
+  valid_acc_num: false
+  skus:
+    - Null
+
+insights:
+  valid_acc_num: true
+  skus:
+    - Null
+
+migrations:
+  valid_acc_num: true
+  skus:
+    - Null
+
+openshift:
+  valid_acc_num: false
+  skus:
+    - Null
+
+smart_management:
+  valid_acc_num: false
+  skus:
+    - SVC3124
+    - RH00068
