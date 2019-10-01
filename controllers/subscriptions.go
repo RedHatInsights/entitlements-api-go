@@ -156,6 +156,19 @@ func Index(getCall func(string, string) types.SubscriptionsResponse) func(http.R
 			return
 		}
 
+		entitlementsResponse := make(map[string]types.EntitlementsSection)
+		for b := range bundleInfo {
+			entitle := true
+			if len(bundleInfo[b].Skus) > 0 {
+				entitle = len(checkCommonSkus(bundleInfo[b].Skus, res.Data)) > 0
+			}
+
+			if bundleInfo[b].ValidAccNum {
+				entitle = validAccNum && entitle
+			}
+			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle}
+		}
+
 		entitleInsights := validAccNum
 
 		smartManagementSKUs := []string{"SVC3124", "RH00068"}
