@@ -21,10 +21,14 @@ func BundleInfo() {
 		return
 	}
 
-	y := types.BundleDetails{}
-	err = yaml.Unmarshal([]byte(bundlesYaml), &y)
-    if err != nil {
-        log.Fatalf("error: %v", err)
-    }
-	fmt.Println("Name: ", y)
+	var bundles []types.Bundle
+
+	err = yaml.Unmarshal([]byte(bundlesYaml), &bundles)
+	if err != nil {
+		log.Fatalf("error: %+v", err)
+	}
+
+	for bundle := range bundles {
+		fmt.Printf("%+v\n", bundles[bundle].Skus)
+	}
 }

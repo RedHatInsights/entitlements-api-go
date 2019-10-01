@@ -38,8 +38,8 @@ type EntitlementsResponse struct {
 }
 
 // BundleDetails is a struct that is used to unmarshal the bundle info from bundles.yml
-type BundleDetails struct {
-	Name           string
-	ValidAccNum    bool
-	Skus           []string
+type Bundle struct {
+	Name        string   `yaml:"name"`
+	ValidAccNum bool     `yaml:"valid_acc_num"`
+	Skus        []string `yaml:"skus"`
 }
