@@ -18,7 +18,7 @@ import (
 const DEFAULT_ORG_ID string = "4384938490324"
 const DEFAULT_ACCOUNT_NUMBER string = "540155"
 
-func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
+func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string, string) SubscriptionsResponse) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
@@ -48,12 +48,12 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 	return rr, ret, string(out)
 }
 
-func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
+func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
 	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, fakeCaller)
 }
 
-func fakeGetSubscriptions(expetedOrgID string, response SubscriptionsResponse) func(string) SubscriptionsResponse {
-	return func(orgID string) SubscriptionsResponse {
+func fakeGetSubscriptions(expetedOrgID string, test string, response SubscriptionsResponse) func(string, string) SubscriptionsResponse {
+	return func(orgID string, t string) SubscriptionsResponse {
 		Expect(expetedOrgID).To(Equal(orgID))
 		return response
 	}
@@ -71,13 +71,13 @@ var _ = Describe("Identity Controller", func() {
 			Data:       []string{"foo", "bar"},
 			CacheHit:   false,
 		}
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", fakeGetSubscriptions("540155", fakeResponse))
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", fakeGetSubscriptions("deadbeef12", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", fakeGetSubscriptions("540155", "test", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", fakeGetSubscriptions("deadbeef12", "test", fakeResponse))
 	})
 
 	Context("When the Subs API sends back an error", func() {
 		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string) SubscriptionsResponse {
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string, string) SubscriptionsResponse {
 				return SubscriptionsResponse{StatusCode: 500, Data: nil, CacheHit: false}
 			})
 
@@ -94,7 +94,7 @@ var _ = Describe("Identity Controller", func() {
 				CacheHit:   false,
 			}
 
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body.Insights.IsEntitled).To(Equal(true))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
@@ -113,7 +113,7 @@ var _ = Describe("Identity Controller", func() {
 				CacheHit:   false,
 			}
 
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body.Insights.IsEntitled).To(Equal(true))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
@@ -132,7 +132,7 @@ var _ = Describe("Identity Controller", func() {
 		}
 
 		It("should give back a valid EntitlementsResponse with smart_management false", func() {
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body.Insights.IsEntitled).To(Equal(true))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
@@ -152,7 +152,7 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with insights, ansible and migrations false", func() {
 			// testing with account number "-1"
-			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body.Insights.IsEntitled).To(Equal(false))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
@@ -164,7 +164,7 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with insights, ansible and migrations false", func() {
 			// testing with account number ""
-			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body.Insights.IsEntitled).To(Equal(false))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
@@ -184,7 +184,7 @@ var _ = Describe("Identity Controller", func() {
 		}
 
 		It("should give back a valid EntitlementsResponse with ansible true", func() {
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body.Insights.IsEntitled).To(Equal(true))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
@@ -203,7 +203,7 @@ var _ = Describe("Identity Controller", func() {
 		}
 
 		It("should give back a valid EntitlementsResponse with ansible false", func() {
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body.Insights.IsEntitled).To(Equal(true))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
@@ -222,7 +222,7 @@ var _ = Describe("Identity Controller", func() {
 		}
 
 		It("should give back a valid EntitlementsResponse with migrations true", func() {
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, fakeResponse))
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body.Insights.IsEntitled).To(Equal(true))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))

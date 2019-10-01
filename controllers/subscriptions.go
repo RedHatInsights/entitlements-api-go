@@ -33,7 +33,7 @@ func getClient() *http.Client {
 	}
 }
 
-var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
+var getSubscriptions = func(orgID string, skus string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
 
 	if item != nil && !item.Expired() {
@@ -44,13 +44,10 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		}
 	}
 
-	smartManagementChecks := "SVC3124,RH00068,"
-	ansibleChecks := "MCT3691,MCT3692,MCT3693,MCT3694,MCT3695,MCT3696"
-
 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/searchnested/criteria" +
 		";web_customer_id=" + orgID +
-		";sku=" + smartManagementChecks + ansibleChecks +
+		";sku=" + skus +
 		";/options;products=ALL/product.sku|product.statusCode")
 
 	if err != nil {
@@ -119,15 +116,21 @@ func checkCommonSkus(skus []string, userSkus []string) []string {
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
-func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseWriter, *http.Request) {
+func Index(getCall func(string, string) types.SubscriptionsResponse) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if getCall == nil {
 			getCall = getSubscriptions
 		}
 
+		bundleInfo := BundleInfo()
+		var skus []string
+		for b := range bundleInfo {
+			skus = append(skus, bundleInfo[b].Skus...)
+		}
+
 		start := time.Now()
 		reqCtx := req.Context().Value(identity.Key).(identity.XRHID).Identity
-		res := getCall(reqCtx.Internal.OrgID)
+		res := getCall(reqCtx.Internal.OrgID, strings.Join(skus, ","))
 		accNum := reqCtx.AccountNumber
 
 		validAccNum := !(accNum == "" || accNum == "-1")

@@ -10,23 +10,15 @@
 
 - name: hybrid_cloud
   valid_acc_num: false
-  skus:
-    - Null
 
 - name: insights
   valid_acc_num: true
-  skus:
-    - Null
 
 - name: migrations
   valid_acc_num: true
-  skus:
-    - Null
 
 - name: openshift
   valid_acc_num: false
-  skus:
-    - Null
 
 - name: smart_management
   valid_acc_num: false
