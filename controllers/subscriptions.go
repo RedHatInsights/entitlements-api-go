@@ -3,6 +3,7 @@ package controllers
 import (
 	"crypto/tls"
 	"encoding/json"
+
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/karlseguin/ccache"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 )
 
 type getter func(string) []string
@@ -96,6 +98,24 @@ var getSubscriptions = func(orgID string, skus string) types.SubscriptionsRespon
 	}
 }
 
+// BundleInfo provides Bundle names and SKUs
+func BundleInfo(yamlFilePath string) []types.Bundle {
+	var bundles []types.Bundle
+	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
+
+	if err != nil {
+		l.Log.Error("Unexpected error while opening YAML file", zap.Error(err))
+		return bundles
+	}
+
+	err = yaml.Unmarshal([]byte(bundlesYaml), &bundles)
+	if err != nil {
+		l.Log.Error("Unexpected Unmarshaling Yaml file", zap.Error(err))
+	}
+
+	return bundles
+}
+
 // Checks the common strings between two slices of strings and returns a slice of strings
 // with the common skus
 func checkCommonSkus(skus []string, userSkus []string) []string {
@@ -122,7 +142,8 @@ func Index(getCall func(string, string) types.SubscriptionsResponse) func(http.R
 			getCall = getSubscriptions
 		}
 
-		bundleInfo := BundleInfo()
+		bundleInfo := BundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml))
+
 		var skus []string
 		for b := range bundleInfo {
 			skus = append(skus, bundleInfo[b].Skus...)
@@ -159,6 +180,7 @@ func Index(getCall func(string, string) types.SubscriptionsResponse) func(http.R
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
 		for b := range bundleInfo {
 			entitle := true
+
 			if len(bundleInfo[b].Skus) > 0 {
 				entitle = len(checkCommonSkus(bundleInfo[b].Skus, res.Data)) > 0
 			}
@@ -169,24 +191,26 @@ func Index(getCall func(string, string) types.SubscriptionsResponse) func(http.R
 			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle}
 		}
 
-		entitleInsights := validAccNum
+		// entitleInsights := validAccNum
 
-		smartManagementSKUs := []string{"SVC3124", "RH00068"}
-		entitleSmartManagement := len(checkCommonSkus(smartManagementSKUs, res.Data)) > 0
+		// smartManagementSKUs := []string{"SVC3124", "RH00068"}
+		// entitleSmartManagement := len(checkCommonSkus(smartManagementSKUs, res.Data)) > 0
 
-		ansibleSKUs := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
-		entitleAnsible := validAccNum && len(checkCommonSkus(ansibleSKUs, res.Data)) > 0
+		// ansibleSKUs := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
+		// entitleAnsible := validAccNum && len(checkCommonSkus(ansibleSKUs, res.Data)) > 0
 
-		entitleMigrations := validAccNum
+		// entitleMigrations := validAccNum
 
-		obj, err := json.Marshal(types.EntitlementsResponse{
-			HybridCloud:     types.EntitlementsSection{IsEntitled: true}, //set to true until ready for hybrid entitlment checks to be enforced
-			Insights:        types.EntitlementsSection{IsEntitled: entitleInsights},
-			Openshift:       types.EntitlementsSection{IsEntitled: true},
-			SmartManagement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
-			Ansible:         types.EntitlementsSection{IsEntitled: entitleAnsible},
-			Migrations:      types.EntitlementsSection{IsEntitled: entitleMigrations},
-		})
+		// obj, err := json.Marshal(types.EntitlementsResponse{
+		// 	HybridCloud:     types.EntitlementsSection{IsEntitled: true}, //set to true until ready for hybrid entitlment checks to be enforced
+		// 	Insights:        types.EntitlementsSection{IsEntitled: entitleInsights},
+		// 	Openshift:       types.EntitlementsSection{IsEntitled: true},
+		// 	SmartManagement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
+		// 	Ansible:         types.EntitlementsSection{IsEntitled: entitleAnsible},
+		// 	Migrations:      types.EntitlementsSection{IsEntitled: entitleMigrations},
+		// })
+
+		obj, err := json.Marshal(entitlementsResponse)
 
 		if err != nil {
 			l.Log.Error("Unexpected error while unmarshalling JSON data from Subs Service", zap.Error(err))

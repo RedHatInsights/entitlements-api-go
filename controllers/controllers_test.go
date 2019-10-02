@@ -52,9 +52,9 @@ func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(str
 	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, fakeCaller)
 }
 
-func fakeGetSubscriptions(expetedOrgID string, test string, response SubscriptionsResponse) func(string, string) SubscriptionsResponse {
-	return func(orgID string, t string) SubscriptionsResponse {
-		Expect(expetedOrgID).To(Equal(orgID))
+func fakeGetSubscriptions(expectedOrgID string, expectedSkus string, response SubscriptionsResponse) func(string, string) SubscriptionsResponse {
+	return func(orgID string, skus string) SubscriptionsResponse {
+		Expect(expectedOrgID).To(Equal(orgID))
 		return response
 	}
 }
@@ -71,8 +71,8 @@ var _ = Describe("Identity Controller", func() {
 			Data:       []string{"foo", "bar"},
 			CacheHit:   false,
 		}
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", fakeGetSubscriptions("540155", "test", fakeResponse))
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", fakeGetSubscriptions("deadbeef12", "test", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", fakeGetSubscriptions("540155", "", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", fakeGetSubscriptions("deadbeef12", "", fakeResponse))
 	})
 
 	Context("When the Subs API sends back an error", func() {
@@ -94,7 +94,7 @@ var _ = Describe("Identity Controller", func() {
 				CacheHit:   false,
 			}
 
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "SVC3124,MCT3691", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body.Insights.IsEntitled).To(Equal(true))
 			Expect(body.Openshift.IsEntitled).To(Equal(true))
