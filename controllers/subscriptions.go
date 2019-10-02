@@ -12,11 +12,11 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
+	"github.com/RedHatInsights/entitlements-api-go/bundles"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
 
 	"github.com/karlseguin/ccache"
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v2"
 )
 
 type getter func(string) []string
@@ -98,24 +98,6 @@ var getSubscriptions = func(orgID string, skus string) types.SubscriptionsRespon
 	}
 }
 
-// BundleInfo provides Bundle names and SKUs
-func BundleInfo(yamlFilePath string) []types.Bundle {
-	var bundles []types.Bundle
-	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
-
-	if err != nil {
-		l.Log.Error("Unexpected error while opening YAML file", zap.Error(err))
-		return bundles
-	}
-
-	err = yaml.Unmarshal([]byte(bundlesYaml), &bundles)
-	if err != nil {
-		l.Log.Error("Unexpected Unmarshaling Yaml file", zap.Error(err))
-	}
-
-	return bundles
-}
-
 // Checks the common strings between two slices of strings and returns a slice of strings
 // with the common skus
 func checkCommonSkus(skus []string, userSkus []string) []string {
@@ -136,13 +118,23 @@ func checkCommonSkus(skus []string, userSkus []string) []string {
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
-func Index(getCall func(string, string) types.SubscriptionsResponse) func(http.ResponseWriter, *http.Request) {
+func Index(getCall func(string, string) types.SubscriptionsResponse, getBundleInfo func(string) []types.Bundle) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if getCall == nil {
 			getCall = getSubscriptions
 		}
 
-		bundleInfo := BundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml))
+		var bundleInfo []types.Bundle
+		if getBundleInfo == nil {
+			getBundleInfo = bundles.BundleInfo
+		}
+		bundleInfo = getBundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml))
+
+		if bundleInfo[0].Error != nil {
+			l.Log.Error("Error fetching bundles info", zap.Error(bundleInfo[0].Error))
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
 
 		var skus []string
 		for b := range bundleInfo {
