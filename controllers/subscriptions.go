@@ -199,7 +199,7 @@ func Index(getCall func(string, string) types.SubscriptionsResponse, getBundleIn
 				entitle = len(checkCommonSkus(bundleInfo[b].Skus, res.Data)) > 0
 			}
 
-			if bundleInfo[b].ValidAccNum {
+			if bundleInfo[b].UseValidAccNum {
 				entitle = validAccNum && entitle
 			}
 			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle}

@@ -62,17 +62,17 @@ func fakeGetSubscriptions(expectedOrgID string, expectedSkus string, response Su
 func fakeBundleInfo() func() []Bundle {
 	fakeBundle1 := Bundle{
 		Name: "TestBundle1",
-		ValidAccNum: true,
+		UseValidAccNum: true,
 		Skus: []string{"SVC123","SVC456","MCT789"},
 	}
 	fakeBundle2 := Bundle{
 		Name: "TestBundle2",
-		ValidAccNum: true,
+		UseValidAccNum: true,
 		Skus: []string{"MCT1122","SVC3344"},
 	}
 	fakeBundle3 := Bundle{
 		Name: "TestBundle3",
-		ValidAccNum: false,
+		UseValidAccNum: false,
 		Skus: []string{"MCT5566","SVC7788"},
 	}
 

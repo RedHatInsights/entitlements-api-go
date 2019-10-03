@@ -1,5 +1,5 @@
 - name: ansible
-  valid_acc_num: true
+  use_valid_acc_num: true
   skus:
     - MCT3691
     - MCT3692
@@ -9,19 +9,19 @@
     - MCT3696
 
 - name: hybrid_cloud
-  valid_acc_num: false
+  use_valid_acc_num: false
 
 - name: insights
-  valid_acc_num: true
+  use_valid_acc_num: true
 
 - name: migrations
-  valid_acc_num: true
+  use_valid_acc_num: true
 
 - name: openshift
-  valid_acc_num: false
+  use_valid_acc_num: false
 
 - name: smart_management
-  valid_acc_num: false
+  use_valid_acc_num: false
   skus:
     - SVC3124
     - RH00068
