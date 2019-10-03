@@ -37,9 +37,10 @@ type EntitlementsResponse struct {
 	Migrations      EntitlementsSection `json:"migrations"`
 }
 
-// BundleDetails is a struct that is used to unmarshal the bundle info from bundles.yml
+// Bundle is a struct that is used to unmarshal the bundle info from bundles.yml
 type Bundle struct {
 	Name        string   `yaml:"name"`
 	ValidAccNum bool     `yaml:"valid_acc_num"`
 	Skus        []string `yaml:"skus"`
+	Error		error
 }
