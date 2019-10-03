@@ -62,21 +62,22 @@ func fakeGetSubscriptions(expectedOrgID string, expectedSkus string, response Su
 func fakeBundleInfo() func() []Bundle {
 	fakeBundle1 := Bundle{
 		Name: "TestBundle1",
-		UseValidAccNum: true,
 		Skus: []string{"SVC123","SVC456","MCT789"},
 	}
 	fakeBundle2 := Bundle{
 		Name: "TestBundle2",
-		UseValidAccNum: true,
 		Skus: []string{"MCT1122","SVC3344"},
 	}
 	fakeBundle3 := Bundle{
 		Name: "TestBundle3",
 		UseValidAccNum: false,
-		Skus: []string{"MCT5566","SVC7788"},
+	}
+	fakeBundle4 := Bundle{
+		Name: "TestBundle4",
+		UseValidAccNum: true,
 	}
 
-	fakeBundles := []Bundle{fakeBundle1, fakeBundle2, fakeBundle3}
+	fakeBundles := []Bundle{fakeBundle1, fakeBundle2, fakeBundle3, fakeBundle4}
 
 	return func() []Bundle {
 		return fakeBundles
@@ -162,6 +163,25 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+		})
+
+	})
+
+	Context("When a bundle uses only Valid Account Number", func() {
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       []string{},
+			CacheHit:   false,
+		}
+
+		It("should give back a valid EntitlementsResponse with that bundle true", func() {
+			// testing with account number ""
+			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse), fakeBundleInfo())
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle4"].IsEntitled).To(Equal(true))
 		})
 
 	})

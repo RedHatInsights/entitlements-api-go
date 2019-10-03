@@ -32,5 +32,5 @@ type Bundle struct {
 	Name            string   `yaml:"name"`
 	UseValidAccNum  bool     `yaml:"use_valid_acc_num"`
 	Skus            []string `yaml:"skus"`
-	Error		    error
+	Error           error
 }

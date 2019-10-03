@@ -1,5 +1,4 @@
 - name: ansible
-  use_valid_acc_num: true
   skus:
     - MCT3691
     - MCT3692
@@ -21,7 +20,6 @@
   use_valid_acc_num: false
 
 - name: smart_management
-  use_valid_acc_num: false
   skus:
     - SVC3124
     - RH00068
