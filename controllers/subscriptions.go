@@ -12,11 +12,12 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
-	"github.com/RedHatInsights/entitlements-api-go/bundles"
+	//"github.com/RedHatInsights/entitlements-api-go/bundles"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
 
 	"github.com/karlseguin/ccache"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 )
 
 type getter func(string) []string
@@ -33,6 +34,30 @@ func getClient() *http.Client {
 			},
 		},
 	}
+}
+
+// BundleInfo returns the bundle information
+var BundleInfo = func () []types.Bundle {
+	var bundles []types.Bundle
+	yamlFilePath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
+	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
+
+	if err != nil {
+		bundles = append(bundles,types.Bundle{
+			Error: err,
+		})
+		return bundles
+	}
+
+	err = yaml.Unmarshal([]byte(bundlesYaml), &bundles)
+	if err != nil {
+		bundles = append(bundles,types.Bundle{
+			Error: err,
+		})
+		return bundles
+	}
+
+	return bundles
 }
 
 var getSubscriptions = func(orgID string, skus string) types.SubscriptionsResponse {
@@ -118,17 +143,16 @@ func checkCommonSkus(skus []string, userSkus []string) []string {
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
-func Index(getCall func(string, string) types.SubscriptionsResponse, getBundleInfo func(string) []types.Bundle) func(http.ResponseWriter, *http.Request) {
+func Index(getCall func(string, string) types.SubscriptionsResponse, getBundleInfo func() []types.Bundle) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if getCall == nil {
 			getCall = getSubscriptions
 		}
 
-		var bundleInfo []types.Bundle
 		if getBundleInfo == nil {
-			getBundleInfo = bundles.BundleInfo
+			getBundleInfo = BundleInfo
 		}
-		bundleInfo = getBundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml))
+		bundleInfo := getBundleInfo()
 
 		if bundleInfo[0].Error != nil {
 			l.Log.Error("Error fetching bundles info", zap.Error(bundleInfo[0].Error))

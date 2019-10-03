@@ -9,19 +9,16 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"fmt"
 
 	. "github.com/RedHatInsights/entitlements-api-go/controllers"
 	. "github.com/RedHatInsights/entitlements-api-go/types"
-	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
 )
 
 const DEFAULT_ORG_ID string = "4384938490324"
 const DEFAULT_ACCOUNT_NUMBER string = "540155"
 
-func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string, string) SubscriptionsResponse, mockBundleInfo func(string) []Bundle) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
+func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func() []Bundle) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
@@ -38,12 +35,12 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 	
-	dir, err := os.Getwd()
-	fmt.Println("Working dir: ",dir)
+	// dir, err := os.Getwd()
+	// fmt.Println("Working dir: ",dir)
 	
-	fmt.Println("Bundle File: ", config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml))
+	// fmt.Println("Bundle File: ", config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml))
 
-	Index(fakeCaller, mockBundleInfo)(rr, req)
+	Index(fakeCaller, fakeBundleInfo)(rr, req)
 
 	out, err := ioutil.ReadAll(rr.Result().Body)
 	Expect(err).To(BeNil(), "ioutil.ReadAll error was not nil")
@@ -56,7 +53,7 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 	return rr, ret, string(out)
 }
 
-func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func(string) []Bundle) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
+func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func() []Bundle) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
 	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, fakeCaller, fakeBundleInfo)
 }
 
@@ -64,6 +61,12 @@ func fakeGetSubscriptions(expectedOrgID string, expectedSkus string, response Su
 	return func(orgID string, skus string) SubscriptionsResponse {
 		Expect(expectedOrgID).To(Equal(orgID))
 		return response
+	}
+}
+
+func fakeBundleInfo(bundles []Bundle) func() []Bundle {
+	return func() []Bundle {
+		return bundles
 	}
 }
 
@@ -77,15 +80,15 @@ var _ = Describe("Identity Controller", func() {
 		fakeBundle := Bundle{
 			Name: "TestBundle",
 		}
-		fakeBundleInfo := []Bundle{fakeBundle}
+		fakeBundles := []Bundle{fakeBundle}
 
 		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
 			Data:       []string{"foo", "bar"},
 			CacheHit:   false,
 		}
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", fakeGetSubscriptions("540155", "", fakeResponse), fakeBundleInfo)
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", fakeGetSubscriptions("deadbeef12", "", fakeResponse), fakeBundleInfo)
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", fakeGetSubscriptions("540155", "", fakeResponse), fakeBundleInfo(fakeBundles))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", fakeGetSubscriptions("deadbeef12", "", fakeResponse), fakeBundleInfo(fakeBundles))
 	})
 
 	// Context("When the Subs API sends back an error", func() {
