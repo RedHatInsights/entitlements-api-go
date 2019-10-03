@@ -18,7 +18,7 @@ import (
 const DEFAULT_ORG_ID string = "4384938490324"
 const DEFAULT_ACCOUNT_NUMBER string = "540155"
 
-func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func() []Bundle) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
+func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func() []Bundle) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
@@ -42,13 +42,14 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 
 	rr.Result().Body.Close()
 
-	var ret EntitlementsResponse
+	//var ret EntitlementsResponse
+	var ret map[string]EntitlementsSection
 	json.Unmarshal(out, &ret)
 
 	return rr, ret, string(out)
 }
 
-func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func() []Bundle) (*httptest.ResponseRecorder, EntitlementsResponse, string) {
+func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func() []Bundle) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, fakeCaller, fakeBundleInfo)
 }
 
@@ -60,11 +61,23 @@ func fakeGetSubscriptions(expectedOrgID string, expectedSkus string, response Su
 }
 
 func fakeBundleInfo() func() []Bundle {
-	fakeBundle := Bundle{
-		Name: "TestBundle",
+	fakeBundle1 := Bundle{
+		Name: "TestBundle1",
+		ValidAccNum: true,
+		Skus: []string{"SVC123","SVC456","MCT789"},
+	}
+	fakeBundle2 := Bundle{
+		Name: "TestBundle2",
+		ValidAccNum: true,
+		Skus: []string{"MCT1122","SVC3344"},
+	}
+	fakeBundle3 := Bundle{
+		Name: "TestBundle3",
+		ValidAccNum: false,
+		Skus: []string{"MCT5566","SVC7788"},
 	}
 
-	fakeBundles := []Bundle{fakeBundle}
+	fakeBundles := []Bundle{fakeBundle1, fakeBundle2, fakeBundle3}
 
 	return func() []Bundle {
 		return fakeBundles
@@ -98,151 +111,60 @@ var _ = Describe("Identity Controller", func() {
 		})
 	})
 
-	// Context("When the Subs API says we have Smart Management", func() {
-	// 	It("should give back a valid EntitlementsResponse with smart_management true", func() {
-	// 		fakeResponse := SubscriptionsResponse{
-	// 			StatusCode: 200,
-	// 			Data:       []string{"foo", "bar", "SVC3124", "SVC3851", "MCT3691"},
-	// 			CacheHit:   false,
-	// 		}
+	Context("When the Subs API says we have SKUs to a Bundle", func() {
+		It("should give back a valid EntitlementsResponse with that bundle true", func() {
+			fakeResponse := SubscriptionsResponse{
+				StatusCode: 200,
+				Data:       []string{"SVC123", "SVC3851", "MCT3691"},
+				CacheHit:   false,
+			}
 
-	// 		rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "SVC3124,MCT3691", fakeResponse))
-	// 		expectPass(rr.Result())
-	// 		Expect(body.Insights.IsEntitled).To(Equal(true))
-	// 		Expect(body.Openshift.IsEntitled).To(Equal(true))
-	// 		Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-	// 		Expect(body.SmartManagement.IsEntitled).To(Equal(true))
-	// 		Expect(body.Ansible.IsEntitled).To(Equal(true))
-	// 		Expect(body.Migrations.IsEntitled).To(Equal(true))
-	// 	})
-	// })
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "SVC3124,MCT3691", fakeResponse), fakeBundleInfo())
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(true))
+		})
+	})
 
-	// Context("When the Subs API says we have Smart Management (CMSfR SKU)", func() {
-	// 	It("should give back a valid EntitlementsResponse with smart_management true", func() {
-	// 		fakeResponse := SubscriptionsResponse{
-	// 			StatusCode: 200,
-	// 			Data:       []string{"foo", "bar", "SVC3851", "RH00068", "MCT3692"},
-	// 			CacheHit:   false,
-	// 		}
+	Context("When the Subs API says we *dont* have SKUs to a Bundle", func() {
+		It("should give back a valid EntitlementsResponse with that bundle true", func() {
+			fakeResponse := SubscriptionsResponse{
+				StatusCode: 200,
+				Data:       []string{"SVC123", "SVC3851", "MCT3691"},
+				CacheHit:   false,
+			}
 
-	// 		rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
-	// 		expectPass(rr.Result())
-	// 		Expect(body.Insights.IsEntitled).To(Equal(true))
-	// 		Expect(body.Openshift.IsEntitled).To(Equal(true))
-	// 		Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-	// 		Expect(body.SmartManagement.IsEntitled).To(Equal(true))
-	// 		Expect(body.Ansible.IsEntitled).To(Equal(true))
-	// 		Expect(body.Migrations.IsEntitled).To(Equal(true))
-	// 	})
-	// })
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "SVC3124,MCT3691", fakeResponse), fakeBundleInfo())
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+		})
+	})
 
-	// Context("When the Subs API says we *dont* have Smart Management", func() {
-	// 	fakeResponse := SubscriptionsResponse{
-	// 		StatusCode: 200,
-	// 		Data:       []string{"SVC3852", "MCT3693"},
-	// 		CacheHit:   false,
-	// 	}
+	Context("When the account number is -1 or '' ", func() {
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       []string{"SVC123", "MCT1122", "SVC7788"},
+			CacheHit:   false,
+		}
 
-	// 	It("should give back a valid EntitlementsResponse with smart_management false", func() {
-	// 		rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
-	// 		expectPass(rr.Result())
-	// 		Expect(body.Insights.IsEntitled).To(Equal(true))
-	// 		Expect(body.Openshift.IsEntitled).To(Equal(true))
-	// 		Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-	// 		Expect(body.SmartManagement.IsEntitled).To(Equal(false))
-	// 		Expect(body.Ansible.IsEntitled).To(Equal(true))
-	// 		Expect(body.Migrations.IsEntitled).To(Equal(true))
-	// 	})
-	// })
+		It("should give back a valid EntitlementsResponse with bundles using Valid Account Number false", func() {
+			// testing with account number "-1"
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse), fakeBundleInfo())
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+		})
 
-	// Context("When the account number is -1 or '' ", func() {
-	// 	fakeResponse := SubscriptionsResponse{
-	// 		StatusCode: 200,
-	// 		Data:       []string{"foo", "bar", "SVC3852", "SVC3124", "MCT3694"},
-	// 		CacheHit:   false,
-	// 	}
+		It("should give back a valid EntitlementsResponse with bundles using Valid Account Number false", func() {
+			// testing with account number ""
+			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse), fakeBundleInfo())
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+		})
 
-	// 	It("should give back a valid EntitlementsResponse with insights, ansible and migrations false", func() {
-	// 		// testing with account number "-1"
-	// 		rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
-	// 		expectPass(rr.Result())
-	// 		Expect(body.Insights.IsEntitled).To(Equal(false))
-	// 		Expect(body.Openshift.IsEntitled).To(Equal(true))
-	// 		Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-	// 		Expect(body.SmartManagement.IsEntitled).To(Equal(true))
-	// 		Expect(body.Ansible.IsEntitled).To(Equal(false))
-	// 		Expect(body.Migrations.IsEntitled).To(Equal(false))
-	// 	})
-
-	// 	It("should give back a valid EntitlementsResponse with insights, ansible and migrations false", func() {
-	// 		// testing with account number ""
-	// 		rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
-	// 		expectPass(rr.Result())
-	// 		Expect(body.Insights.IsEntitled).To(Equal(false))
-	// 		Expect(body.Openshift.IsEntitled).To(Equal(true))
-	// 		Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-	// 		Expect(body.SmartManagement.IsEntitled).To(Equal(true))
-	// 		Expect(body.Ansible.IsEntitled).To(Equal(false))
-	// 		Expect(body.Migrations.IsEntitled).To(Equal(false))
-	// 	})
-
-	// })
-
-	// Context("When the Subs API says we have Ansible", func() {
-	// 	fakeResponse := SubscriptionsResponse{
-	// 		StatusCode: 200,
-	// 		Data:       []string{"SVC3852", "MCT3695", "MCT3696"},
-	// 		CacheHit:   false,
-	// 	}
-
-	// 	It("should give back a valid EntitlementsResponse with ansible true", func() {
-	// 		rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
-	// 		expectPass(rr.Result())
-	// 		Expect(body.Insights.IsEntitled).To(Equal(true))
-	// 		Expect(body.Openshift.IsEntitled).To(Equal(true))
-	// 		Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-	// 		Expect(body.SmartManagement.IsEntitled).To(Equal(false))
-	// 		Expect(body.Ansible.IsEntitled).To(Equal(true))
-	// 		Expect(body.Migrations.IsEntitled).To(Equal(true))
-	// 	})
-	// })
-
-	// Context("When the Subs API says we *dont* have Ansible", func() {
-	// 	fakeResponse := SubscriptionsResponse{
-	// 		StatusCode: 200,
-	// 		Data:       []string{"SVC3852"},
-	// 		CacheHit:   false,
-	// 	}
-
-	// 	It("should give back a valid EntitlementsResponse with ansible false", func() {
-	// 		rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
-	// 		expectPass(rr.Result())
-	// 		Expect(body.Insights.IsEntitled).To(Equal(true))
-	// 		Expect(body.Openshift.IsEntitled).To(Equal(true))
-	// 		Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-	// 		Expect(body.SmartManagement.IsEntitled).To(Equal(false))
-	// 		Expect(body.Ansible.IsEntitled).To(Equal(false))
-	// 		Expect(body.Migrations.IsEntitled).To(Equal(true))
-	// 	})
-	// })
-
-	// Context("When the Subs API says we have Migrations", func() {
-	// 	fakeResponse := SubscriptionsResponse{
-	// 		StatusCode: 200,
-	// 		Data:       []string{},
-	// 		CacheHit:   false,
-	// 	}
-
-	// 	It("should give back a valid EntitlementsResponse with migrations true", func() {
-	// 		rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
-	// 		expectPass(rr.Result())
-	// 		Expect(body.Insights.IsEntitled).To(Equal(true))
-	// 		Expect(body.Openshift.IsEntitled).To(Equal(true))
-	// 		Expect(body.HybridCloud.IsEntitled).To(Equal(true))
-	// 		Expect(body.SmartManagement.IsEntitled).To(Equal(false))
-	// 		Expect(body.Ansible.IsEntitled).To(Equal(false))
-	// 		Expect(body.Migrations.IsEntitled).To(Equal(true))
-	// 	})
-	// })
+	})
 
 })

@@ -12,7 +12,6 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
-	//"github.com/RedHatInsights/entitlements-api-go/bundles"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
 
 	"github.com/karlseguin/ccache"
@@ -206,25 +205,6 @@ func Index(getCall func(string, string) types.SubscriptionsResponse, getBundleIn
 			}
 			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle}
 		}
-
-		// entitleInsights := validAccNum
-
-		// smartManagementSKUs := []string{"SVC3124", "RH00068"}
-		// entitleSmartManagement := len(checkCommonSkus(smartManagementSKUs, res.Data)) > 0
-
-		// ansibleSKUs := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
-		// entitleAnsible := validAccNum && len(checkCommonSkus(ansibleSKUs, res.Data)) > 0
-
-		// entitleMigrations := validAccNum
-
-		// obj, err := json.Marshal(types.EntitlementsResponse{
-		// 	HybridCloud:     types.EntitlementsSection{IsEntitled: true}, //set to true until ready for hybrid entitlment checks to be enforced
-		// 	Insights:        types.EntitlementsSection{IsEntitled: entitleInsights},
-		// 	Openshift:       types.EntitlementsSection{IsEntitled: true},
-		// 	SmartManagement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
-		// 	Ansible:         types.EntitlementsSection{IsEntitled: entitleAnsible},
-		// 	Migrations:      types.EntitlementsSection{IsEntitled: entitleMigrations},
-		// })
 
 		obj, err := json.Marshal(entitlementsResponse)
 
