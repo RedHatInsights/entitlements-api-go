@@ -154,6 +154,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle4"].IsEntitled).To(Equal(false))
 		})
 
 		It("should give back a valid EntitlementsResponse with bundles using Valid Account Number false", func() {
@@ -163,6 +164,7 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle4"].IsEntitled).To(Equal(false))
 		})
 
 	})
