@@ -27,16 +27,6 @@ type SubscriptionDetails struct {
 	Entries []Entries
 }
 
-// EntitlementsResponse is the struct that is used to marshal/unmarshal the response from Entitlemens API
-type EntitlementsResponse struct {
-	HybridCloud     EntitlementsSection `json:"hybrid_cloud"`
-	Insights        EntitlementsSection `json:"insights"`
-	Openshift       EntitlementsSection `json:"openshift"`
-	SmartManagement EntitlementsSection `json:"smart_management"`
-	Ansible         EntitlementsSection `json:"ansible"`
-	Migrations      EntitlementsSection `json:"migrations"`
-}
-
 // Bundle is a struct that is used to unmarshal the bundle info from bundles.yml
 type Bundle struct {
 	Name        string   `yaml:"name"`

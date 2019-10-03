@@ -3,7 +3,6 @@ package controllers
 import (
 	"crypto/tls"
 	"encoding/json"
-
 	"io/ioutil"
 	"net/http"
 	"strings"

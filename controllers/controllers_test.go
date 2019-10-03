@@ -42,7 +42,6 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 
 	rr.Result().Body.Close()
 
-	//var ret EntitlementsResponse
 	var ret map[string]EntitlementsSection
 	json.Unmarshal(out, &ret)
 
