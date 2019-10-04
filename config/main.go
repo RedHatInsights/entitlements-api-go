@@ -95,7 +95,7 @@ func initialize() {
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.CaPath, "./resources/ca.crt")
 	options.SetDefault(Keys.OpenAPISpecPath, "./apispec/api.spec.json")
-	options.SetDefault(Keys.BundleInfoYaml, "./controllers/bundles.yml")
+	options.SetDefault(Keys.BundleInfoYaml, "./bundles/bundles.yml")
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 
