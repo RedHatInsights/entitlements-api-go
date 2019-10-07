@@ -11,6 +11,7 @@ require (
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/karlseguin/ccache v2.0.3+incompatible
 	github.com/karlseguin/expect v1.0.1 // indirect
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/m1ome/zapper v0.0.0-20170328105535-8e169b0c5a1e // indirect
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
