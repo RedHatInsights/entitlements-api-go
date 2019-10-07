@@ -1,4 +1,4 @@
-package controllers_test
+package controllers
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	. "github.com/RedHatInsights/entitlements-api-go/controllers"
 	. "github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
 )
@@ -35,7 +34,10 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
-	Index(fakeCaller, fakeBundleInfo)(rr, req)
+	GetBundleInfo = fakeBundleInfo
+	GetSubscriptions = fakeCaller
+
+	Index()(rr, req)
 
 	out, err := ioutil.ReadAll(rr.Result().Body)
 	Expect(err).To(BeNil(), "ioutil.ReadAll error was not nil")
@@ -62,18 +64,18 @@ func fakeGetSubscriptions(expectedOrgID string, expectedSkus string, response Su
 func fakeBundleInfo() func() []Bundle {
 	fakeBundle1 := Bundle{
 		Name: "TestBundle1",
-		Skus: []string{"SVC123","SVC456","MCT789"},
+		Skus: []string{"SVC123", "SVC456", "MCT789"},
 	}
 	fakeBundle2 := Bundle{
 		Name: "TestBundle2",
-		Skus: []string{"MCT1122","SVC3344"},
+		Skus: []string{"MCT1122", "SVC3344"},
 	}
 	fakeBundle3 := Bundle{
-		Name: "TestBundle3",
+		Name:           "TestBundle3",
 		UseValidAccNum: false,
 	}
 	fakeBundle4 := Bundle{
-		Name: "TestBundle4",
+		Name:           "TestBundle4",
 		UseValidAccNum: true,
 	}
 

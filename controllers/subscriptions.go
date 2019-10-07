@@ -34,14 +34,14 @@ func getClient() *http.Client {
 	}
 }
 
-// BundleInfo returns the bundle information
-var BundleInfo = func () []types.Bundle {
+// GetBundleInfo returns the bundle information fetched from the YAML
+var GetBundleInfo = func() []types.Bundle {
 	var bundles []types.Bundle
 	yamlFilePath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
 	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
 
 	if err != nil {
-		bundles = append(bundles,types.Bundle{
+		bundles = append(bundles, types.Bundle{
 			Error: err,
 		})
 		return bundles
@@ -49,7 +49,7 @@ var BundleInfo = func () []types.Bundle {
 
 	err = yaml.Unmarshal([]byte(bundlesYaml), &bundles)
 	if err != nil {
-		bundles = append(bundles,types.Bundle{
+		bundles = append(bundles, types.Bundle{
 			Error: err,
 		})
 		return bundles
@@ -58,7 +58,8 @@ var BundleInfo = func () []types.Bundle {
 	return bundles
 }
 
-var getSubscriptions = func(orgID string, skus string) types.SubscriptionsResponse {
+// GetSubscriptions calls the Subs service and returns the SKUs the user has
+var GetSubscriptions = func(orgID string, skus string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
 
 	if item != nil && !item.Expired() {
@@ -141,16 +142,9 @@ func checkCommonSkus(skus []string, userSkus []string) []string {
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
-func Index(getCall func(string, string) types.SubscriptionsResponse, getBundleInfo func() []types.Bundle) func(http.ResponseWriter, *http.Request) {
+func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		if getCall == nil {
-			getCall = getSubscriptions
-		}
-
-		if getBundleInfo == nil {
-			getBundleInfo = BundleInfo
-		}
-		bundleInfo := getBundleInfo()
+		bundleInfo := GetBundleInfo()
 
 		if bundleInfo[0].Error != nil {
 			l.Log.Error("Error fetching bundles info", zap.Error(bundleInfo[0].Error))
@@ -165,7 +159,7 @@ func Index(getCall func(string, string) types.SubscriptionsResponse, getBundleIn
 
 		start := time.Now()
 		reqCtx := req.Context().Value(identity.Key).(identity.XRHID).Identity
-		res := getCall(reqCtx.Internal.OrgID, strings.Join(skus, ","))
+		res := GetSubscriptions(reqCtx.Internal.OrgID, strings.Join(skus, ","))
 		accNum := reqCtx.AccountNumber
 
 		validAccNum := !(accNum == "" || accNum == "-1")
