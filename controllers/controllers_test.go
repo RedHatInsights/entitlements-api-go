@@ -6,6 +6,7 @@ import (
 
 	"context"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -108,6 +109,22 @@ var _ = Describe("Identity Controller", func() {
 				return SubscriptionsResponse{StatusCode: 500, Data: nil, CacheHit: false}
 			}, fakeBundleInfo())
 
+			Expect(rr.Result().StatusCode).To(Equal(500))
+			Expect(rawBody).To(ContainSubstring(http.StatusText(500)))
+		})
+	})
+
+	Context("When the bundles.yml isn't available", func() {
+		It("should fail the response", func() {
+			fakeResponse := SubscriptionsResponse{
+				StatusCode: 200,
+				Data:       []string{"foo", "bar"},
+				CacheHit:   false,
+			}
+
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions("540155", "", fakeResponse), func() []Bundle {
+				return []Bundle{Bundle{Error: errors.New("bundles.yml unavailable")}}
+			})
 			Expect(rr.Result().StatusCode).To(Equal(500))
 			Expect(rawBody).To(ContainSubstring(http.StatusText(500)))
 		})
