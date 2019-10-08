@@ -3,6 +3,7 @@ package controllers
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -20,8 +21,13 @@ import (
 
 type getter func(string) []string
 
-var fileCache = ccache.New(ccache.Configure().MaxSize(50))
 var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
+
+var bundleInfo []types.Bundle
+
+func init() {
+	bundleInfo = GetBundleInfo()
+}
 
 func getClient() *http.Client {
 	// Create a HTTPS client that uses the supplied pub/priv mutual TLS certs
@@ -37,14 +43,9 @@ func getClient() *http.Client {
 
 // GetBundleInfo returns the bundle information fetched from the YAML
 var GetBundleInfo = func() []types.Bundle {
-	yamlFilePath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
-
-	fileInfo := fileCache.Get(yamlFilePath)
-	if fileInfo != nil && !fileInfo.Expired() {
-		return fileInfo.Value().([]types.Bundle)
-	}
-
+	fmt.Println("Opening in Index")
 	var bundles []types.Bundle
+	yamlFilePath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
 	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
 
 	if err != nil {
@@ -62,7 +63,6 @@ var GetBundleInfo = func() []types.Bundle {
 		return bundles
 	}
 
-	fileCache.Set(yamlFilePath, bundles, time.Minute*60)
 	return bundles
 }
 
@@ -152,8 +152,6 @@ func checkCommonSkus(skus []string, userSkus []string) []string {
 // Index the handler for GETs to /api/entitlements/v1/services/
 func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		bundleInfo := GetBundleInfo()
-
 		if bundleInfo[0].Error != nil {
 			l.Log.Error("Error fetching bundles info", zap.Error(bundleInfo[0].Error))
 			http.Error(w, http.StatusText(500), 500)

@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -18,7 +20,16 @@ import (
 const DEFAULT_ORG_ID string = "4384938490324"
 const DEFAULT_ACCOUNT_NUMBER string = "540155"
 
-func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func() []Bundle) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+// func TestMain(m *testing.M) {
+// 	bundleInfo = fakeBundleInfo()
+// }
+
+func init() {
+	fmt.Println("Opening in test")
+	bundleInfo = fakeBundleInfo()
+}
+
+func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo []Bundle) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
@@ -35,7 +46,7 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
-	GetBundleInfo = fakeBundleInfo
+	//GetBundleInfo = fakeGetBundle
 	GetSubscriptions = fakeCaller
 
 	Index()(rr, req)
@@ -51,7 +62,7 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 	return rr, ret, string(out)
 }
 
-func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func() []Bundle) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo []Bundle) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, fakeCaller, fakeBundleInfo)
 }
 
@@ -62,7 +73,7 @@ func fakeGetSubscriptions(expectedOrgID string, expectedSkus string, response Su
 	}
 }
 
-func fakeBundleInfo() func() []Bundle {
+func fakeBundleInfo() []Bundle {
 	fakeBundle1 := Bundle{
 		Name: "TestBundle1",
 		Skus: []string{"SVC123", "SVC456", "MCT789"},
@@ -82,9 +93,7 @@ func fakeBundleInfo() func() []Bundle {
 
 	fakeBundles := []Bundle{fakeBundle1, fakeBundle2, fakeBundle3, fakeBundle4}
 
-	return func() []Bundle {
-		return fakeBundles
-	}
+	return fakeBundles
 }
 
 func expectPass(res *http.Response) {
@@ -122,9 +131,8 @@ var _ = Describe("Identity Controller", func() {
 				CacheHit:   false,
 			}
 
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions("540155", "", fakeResponse), func() []Bundle {
-				return []Bundle{Bundle{Error: errors.New("bundles.yml unavailable")}}
-			})
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions("540155", "", fakeResponse), []Bundle{
+				Bundle{Error: errors.New("bundles.yml unavailable")}})
 			Expect(rr.Result().StatusCode).To(Equal(500))
 			Expect(rawBody).To(ContainSubstring(http.StatusText(500)))
 		})
