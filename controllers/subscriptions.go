@@ -20,6 +20,7 @@ import (
 
 type getter func(string) []string
 
+var fileCache = ccache.New(ccache.Configure().MaxSize(50))
 var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
 
 func getClient() *http.Client {
@@ -36,8 +37,14 @@ func getClient() *http.Client {
 
 // GetBundleInfo returns the bundle information fetched from the YAML
 var GetBundleInfo = func() []types.Bundle {
-	var bundles []types.Bundle
 	yamlFilePath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
+
+	fileInfo := fileCache.Get(yamlFilePath)
+	if fileInfo != nil && !fileInfo.Expired() {
+		return fileInfo.Value().([]types.Bundle)
+	}
+
+	var bundles []types.Bundle
 	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
 
 	if err != nil {
@@ -55,6 +62,7 @@ var GetBundleInfo = func() []types.Bundle {
 		return bundles
 	}
 
+	fileCache.Set(yamlFilePath, bundles, time.Minute*60)
 	return bundles
 }
 
