@@ -5,21 +5,14 @@ go 1.12
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/RedHatInsights/platform-go-middlewares v0.3.0
-	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
-	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
-	github.com/bmatcuk/doublestar v1.1.1 // indirect
 	github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23 // indirect
-	github.com/cortesi/modd v0.0.0-20190303204953-e30792b14081 // indirect
-	github.com/cortesi/moddwatch v0.0.0-20181226031657-d27f53de245e // indirect
-	github.com/cortesi/termlog v0.0.0-20171116205515-87cefd5ac843 // indirect
-	github.com/fatih/color v1.7.0 // indirect
+	github.com/cortesi/modd v0.0.0-20190816110347-45e41bb091af // indirect
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/karlseguin/ccache v2.0.3+incompatible
 	github.com/karlseguin/expect v1.0.1 // indirect
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/m1ome/zapper v0.0.0-20170328105535-8e169b0c5a1e // indirect
-	github.com/mattn/go-colorable v0.1.1 // indirect
-	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
 	github.com/pkg/errors v0.8.1 // indirect
@@ -30,14 +23,13 @@ require (
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.10.0
-	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
-	golang.org/x/lint v0.0.0-20190409202823-959b441ac422 // indirect
-	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
-	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
-	golang.org/x/text v0.3.2 // indirect
-	golang.org/x/tools v0.0.0-20190711191110-9a621aea19f8 // indirect
-	gopkg.in/alecthomas/kingpin.v2 v2.2.6 // indirect
+	golang.org/x/crypto v0.0.0-20191001170739-f9e2070545dc // indirect
+	golang.org/x/lint v0.0.0-20190930215403-16217165b5de // indirect
+	golang.org/x/net v0.0.0-20191002035440-2ec189313ef0
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
+	golang.org/x/sys v0.0.0-20191002091554-b397fe3ad8ed // indirect
+	golang.org/x/tools v0.0.0-20191001184121-329c8d646ebe // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
-	mvdan.cc/sh v2.6.4+incompatible // indirect
+	gopkg.in/yaml.v2 v2.2.3
 )

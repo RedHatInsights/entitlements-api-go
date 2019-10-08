@@ -28,6 +28,7 @@ type EntitlementsConfigKeysType struct {
 	SubsHost        string
 	CaPath          string
 	OpenAPISpecPath string
+	BundleInfoYaml  string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -39,6 +40,7 @@ var Keys = EntitlementsConfigKeysType{
 	SubsHost:        "SUBS_HOST",
 	CaPath:          "CA_PATH",
 	OpenAPISpecPath: "OPENAPI_SPEC_PATH",
+	BundleInfoYaml:  "BUNDLE_INFO_YAML",
 }
 
 func getRootCAs(localCertFile string) *x509.CertPool {
@@ -93,6 +95,7 @@ func initialize() {
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.CaPath, "./resources/ca.crt")
 	options.SetDefault(Keys.OpenAPISpecPath, "./apispec/api.spec.json")
+	options.SetDefault(Keys.BundleInfoYaml, "./bundles/bundles.yml")
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 

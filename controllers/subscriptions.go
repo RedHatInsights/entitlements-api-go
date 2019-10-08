@@ -15,6 +15,7 @@ import (
 
 	"github.com/karlseguin/ccache"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 )
 
 type getter func(string) []string
@@ -33,7 +34,32 @@ func getClient() *http.Client {
 	}
 }
 
-var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
+// GetBundleInfo returns the bundle information fetched from the YAML
+var GetBundleInfo = func() []types.Bundle {
+	var bundles []types.Bundle
+	yamlFilePath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
+	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
+
+	if err != nil {
+		bundles = append(bundles, types.Bundle{
+			Error: err,
+		})
+		return bundles
+	}
+
+	err = yaml.Unmarshal([]byte(bundlesYaml), &bundles)
+	if err != nil {
+		bundles = append(bundles, types.Bundle{
+			Error: err,
+		})
+		return bundles
+	}
+
+	return bundles
+}
+
+// GetSubscriptions calls the Subs service and returns the SKUs the user has
+var GetSubscriptions = func(orgID string, skus string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
 
 	if item != nil && !item.Expired() {
@@ -44,13 +70,10 @@ var getSubscriptions = func(orgID string) types.SubscriptionsResponse {
 		}
 	}
 
-	smartManagementChecks := "SVC3124,RH00068,"
-	ansibleChecks := "MCT3691,MCT3692,MCT3693,MCT3694,MCT3695,MCT3696"
-
 	resp, err := getClient().Get(config.GetConfig().Options.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/searchnested/criteria" +
 		";web_customer_id=" + orgID +
-		";sku=" + smartManagementChecks + ansibleChecks +
+		";sku=" + skus +
 		";/options;products=ALL/product.sku|product.statusCode")
 
 	if err != nil {
@@ -119,15 +142,24 @@ func checkCommonSkus(skus []string, userSkus []string) []string {
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
-func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseWriter, *http.Request) {
+func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		if getCall == nil {
-			getCall = getSubscriptions
+		bundleInfo := GetBundleInfo()
+
+		if bundleInfo[0].Error != nil {
+			l.Log.Error("Error fetching bundles info", zap.Error(bundleInfo[0].Error))
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
+
+		var skus []string
+		for b := range bundleInfo {
+			skus = append(skus, bundleInfo[b].Skus...)
 		}
 
 		start := time.Now()
 		reqCtx := req.Context().Value(identity.Key).(identity.XRHID).Identity
-		res := getCall(reqCtx.Internal.OrgID)
+		res := GetSubscriptions(reqCtx.Internal.OrgID, strings.Join(skus, ","))
 		accNum := reqCtx.AccountNumber
 
 		validAccNum := !(accNum == "" || accNum == "-1")
@@ -153,24 +185,21 @@ func Index(getCall func(string) types.SubscriptionsResponse) func(http.ResponseW
 			return
 		}
 
-		entitleInsights := validAccNum
+		entitlementsResponse := make(map[string]types.EntitlementsSection)
+		for b := range bundleInfo {
+			entitle := true
 
-		smartManagementSKUs := []string{"SVC3124", "RH00068"}
-		entitleSmartManagement := len(checkCommonSkus(smartManagementSKUs, res.Data)) > 0
+			if len(bundleInfo[b].Skus) > 0 {
+				entitle = validAccNum && len(checkCommonSkus(bundleInfo[b].Skus, res.Data)) > 0
+			}
 
-		ansibleSKUs := []string{"MCT3691", "MCT3692", "MCT3693", "MCT3694", "MCT3695", "MCT3696"}
-		entitleAnsible := validAccNum && len(checkCommonSkus(ansibleSKUs, res.Data)) > 0
+			if bundleInfo[b].UseValidAccNum {
+				entitle = validAccNum && entitle
+			}
+			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle}
+		}
 
-		entitleMigrations := validAccNum
-
-		obj, err := json.Marshal(types.EntitlementsResponse{
-			HybridCloud:     types.EntitlementsSection{IsEntitled: true}, //set to true until ready for hybrid entitlment checks to be enforced
-			Insights:        types.EntitlementsSection{IsEntitled: entitleInsights},
-			Openshift:       types.EntitlementsSection{IsEntitled: true},
-			SmartManagement: types.EntitlementsSection{IsEntitled: entitleSmartManagement},
-			Ansible:         types.EntitlementsSection{IsEntitled: entitleAnsible},
-			Migrations:      types.EntitlementsSection{IsEntitled: entitleMigrations},
-		})
+		obj, err := json.Marshal(entitlementsResponse)
 
 		if err != nil {
 			l.Log.Error("Unexpected error while unmarshalling JSON data from Subs Service", zap.Error(err))
