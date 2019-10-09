@@ -38,7 +38,6 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
-	//GetBundleInfo = fakeGetBundle
 	GetSubscriptions = fakeCaller
 
 	Index()(rr, req)
