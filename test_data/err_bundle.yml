@@ -1,0 +1,5 @@
+foo: TestBundle1
+  bar:
+    - SVC123
+    - SVC456
+    - MCT789
