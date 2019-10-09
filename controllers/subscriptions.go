@@ -3,7 +3,6 @@ package controllers
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -26,7 +25,7 @@ var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
 var bundleInfo []types.Bundle
 
 func init() {
-	bundleInfo = GetBundleInfo()
+	bundleInfo = GetBundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml))
 }
 
 func getClient() *http.Client {
@@ -42,10 +41,8 @@ func getClient() *http.Client {
 }
 
 // GetBundleInfo returns the bundle information fetched from the YAML
-var GetBundleInfo = func() []types.Bundle {
-	fmt.Println("Opening in Index")
+func GetBundleInfo(yamlFilePath string) []types.Bundle {
 	var bundles []types.Bundle
-	yamlFilePath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
 	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
 
 	if err != nil {
