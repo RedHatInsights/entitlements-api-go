@@ -8,5 +8,7 @@ else
     exit 1
 fi
 
+export ENT_CA_PATH=./resources/ca.crt
+
 GOPATH="${GOPATH:-$HOME/go}"
 $GOPATH/bin/modd
