@@ -25,6 +25,7 @@ var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
 var bundleInfo []types.Bundle
 
 func init() {
+	// Reads the yaml file at process startup
 	bundleInfo = GetBundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml))
 }
 
