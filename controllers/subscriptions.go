@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -47,18 +48,12 @@ func GetBundleInfo(yamlFilePath string) []types.Bundle {
 	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
 
 	if err != nil {
-		bundles = append(bundles, types.Bundle{
-			Error: err,
-		})
-		return bundles
+		log.Fatal("Error opening bundles.yml ", zap.Error(err))
 	}
 
 	err = yaml.Unmarshal([]byte(bundlesYaml), &bundles)
 	if err != nil {
-		bundles = append(bundles, types.Bundle{
-			Error: err,
-		})
-		return bundles
+		log.Fatal("Error unmarshaling bundles.yml ", err)
 	}
 
 	return bundles
