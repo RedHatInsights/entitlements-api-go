@@ -22,6 +22,13 @@ type getter func(string) []string
 
 var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
 
+var bundleInfo []types.Bundle
+
+func init() {
+	// Reads the yaml file at process startup
+	bundleInfo = GetBundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml))
+}
+
 func getClient() *http.Client {
 	// Create a HTTPS client that uses the supplied pub/priv mutual TLS certs
 	return &http.Client{
@@ -35,9 +42,8 @@ func getClient() *http.Client {
 }
 
 // GetBundleInfo returns the bundle information fetched from the YAML
-var GetBundleInfo = func() []types.Bundle {
+func GetBundleInfo(yamlFilePath string) []types.Bundle {
 	var bundles []types.Bundle
-	yamlFilePath := config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)
 	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
 
 	if err != nil {
@@ -144,8 +150,6 @@ func checkCommonSkus(skus []string, userSkus []string) []string {
 // Index the handler for GETs to /api/entitlements/v1/services/
 func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		bundleInfo := GetBundleInfo()
-
 		if bundleInfo[0].Error != nil {
 			l.Log.Error("Error fetching bundles info", zap.Error(bundleInfo[0].Error))
 			http.Error(w, http.StatusText(500), 500)

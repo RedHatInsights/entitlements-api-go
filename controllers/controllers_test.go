@@ -6,7 +6,6 @@ import (
 
 	"context"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +17,11 @@ import (
 const DEFAULT_ORG_ID string = "4384938490324"
 const DEFAULT_ACCOUNT_NUMBER string = "540155"
 
-func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func() []Bundle) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func init() {
+	bundleInfo = GetBundleInfo("../test_data/test_bundle.yml")
+}
+
+func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string, string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
@@ -35,7 +38,6 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
-	GetBundleInfo = fakeBundleInfo
 	GetSubscriptions = fakeCaller
 
 	Index()(rr, req)
@@ -51,39 +53,14 @@ func testRequest(method string, path string, accnum string, orgid string, fakeCa
 	return rr, ret, string(out)
 }
 
-func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse, fakeBundleInfo func() []Bundle) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
-	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, fakeCaller, fakeBundleInfo)
+func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, fakeCaller)
 }
 
 func fakeGetSubscriptions(expectedOrgID string, expectedSkus string, response SubscriptionsResponse) func(string, string) SubscriptionsResponse {
 	return func(orgID string, skus string) SubscriptionsResponse {
 		Expect(expectedOrgID).To(Equal(orgID))
 		return response
-	}
-}
-
-func fakeBundleInfo() func() []Bundle {
-	fakeBundle1 := Bundle{
-		Name: "TestBundle1",
-		Skus: []string{"SVC123", "SVC456", "MCT789"},
-	}
-	fakeBundle2 := Bundle{
-		Name: "TestBundle2",
-		Skus: []string{"MCT1122", "SVC3344"},
-	}
-	fakeBundle3 := Bundle{
-		Name:           "TestBundle3",
-		UseValidAccNum: false,
-	}
-	fakeBundle4 := Bundle{
-		Name:           "TestBundle4",
-		UseValidAccNum: true,
-	}
-
-	fakeBundles := []Bundle{fakeBundle1, fakeBundle2, fakeBundle3, fakeBundle4}
-
-	return func() []Bundle {
-		return fakeBundles
 	}
 }
 
@@ -99,34 +76,32 @@ var _ = Describe("Identity Controller", func() {
 			Data:       []string{"foo", "bar"},
 			CacheHit:   false,
 		}
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", fakeGetSubscriptions("540155", "", fakeResponse), fakeBundleInfo())
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", fakeGetSubscriptions("deadbeef12", "", fakeResponse), fakeBundleInfo())
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", fakeGetSubscriptions("540155", "", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", fakeGetSubscriptions("deadbeef12", "", fakeResponse))
 	})
 
 	Context("When the Subs API sends back an error", func() {
 		It("should fail the response", func() {
 			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string, string) SubscriptionsResponse {
 				return SubscriptionsResponse{StatusCode: 500, Data: nil, CacheHit: false}
-			}, fakeBundleInfo())
+			})
 
 			Expect(rr.Result().StatusCode).To(Equal(500))
 			Expect(rawBody).To(ContainSubstring(http.StatusText(500)))
 		})
 	})
 
-	Context("When the bundles.yml isn't available", func() {
-		It("should fail the response", func() {
-			fakeResponse := SubscriptionsResponse{
-				StatusCode: 200,
-				Data:       []string{"foo", "bar"},
-				CacheHit:   false,
-			}
+	Context("When the bundles.yml has errors", func() {
+		It("should include errors when file is not available", func() {
+			bundles := GetBundleInfo("no_such_file")
+			Expect(len(bundles)).To(Equal(1))
+			Expect(bundles[0].Error).ToNot(Equal(nil))
+		})
 
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions("540155", "", fakeResponse), func() []Bundle {
-				return []Bundle{Bundle{Error: errors.New("bundles.yml unavailable")}}
-			})
-			Expect(rr.Result().StatusCode).To(Equal(500))
-			Expect(rawBody).To(ContainSubstring(http.StatusText(500)))
+		It("should include error for yaml parse errors", func() {
+			bundles := GetBundleInfo("../test_data/err_bundle.yml")
+			Expect(len(bundles)).To(Equal(1))
+			Expect(bundles[0].Error).ToNot(Equal(nil))
 		})
 	})
 
@@ -138,7 +113,7 @@ var _ = Describe("Identity Controller", func() {
 				CacheHit:   false,
 			}
 
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "SVC3124,MCT3691", fakeResponse), fakeBundleInfo())
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "SVC3124,MCT3691", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(true))
 		})
@@ -152,7 +127,7 @@ var _ = Describe("Identity Controller", func() {
 				CacheHit:   false,
 			}
 
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "SVC3124,MCT3691", fakeResponse), fakeBundleInfo())
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "SVC3124,MCT3691", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(true))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
@@ -168,7 +143,7 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with bundles using Valid Account Number false", func() {
 			// testing with account number "-1"
-			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse), fakeBundleInfo())
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
@@ -178,14 +153,13 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with bundles using Valid Account Number false", func() {
 			// testing with account number ""
-			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse), fakeBundleInfo())
+			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
 			Expect(body["TestBundle4"].IsEntitled).To(Equal(false))
 		})
-
 	})
 
 	Context("When a bundle uses only Valid Account Number", func() {
@@ -197,7 +171,7 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with that bundle true", func() {
 			// testing with account number ""
-			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse), fakeBundleInfo())
+			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
@@ -206,5 +180,4 @@ var _ = Describe("Identity Controller", func() {
 		})
 
 	})
-
 })
