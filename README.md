@@ -41,7 +41,7 @@ The contents should look like this:
 ```sh
 export ENT_KEY=/{path_to_key}.key
 export ENT_CERT=/{path_to_cert}.crt
-export ENT_SUBSHOST=https://subscription.qa.api.redhat.com
+export ENT_SUBS_HOST=https://subscription.qa.api.redhat.com
 ```
 
 Replace {path_to_key} and {path_to_cert} with the locations of the .key and .crt files from the previous section.
