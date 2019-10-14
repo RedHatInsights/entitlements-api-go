@@ -28,6 +28,9 @@ var bundleInfo []types.Bundle
 func init() {
 	// Reads the yaml file at process startup
 	bundleInfo = GetBundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml))
+	if bundleInfo[0].Error != nil {
+		log.Fatal("Error reading bundles.yml ", zap.Error(bundleInfo[0].Error))
+	}
 }
 
 func getClient() *http.Client {
@@ -48,12 +51,18 @@ func GetBundleInfo(yamlFilePath string) []types.Bundle {
 	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
 
 	if err != nil {
-		log.Fatal("Error opening bundles.yml ", zap.Error(err))
+		bundles = append(bundles, types.Bundle{
+			Error: err,
+		})
+		return bundles
 	}
 
 	err = yaml.Unmarshal([]byte(bundlesYaml), &bundles)
 	if err != nil {
-		log.Fatal("Error unmarshaling bundles.yml ", err)
+		bundles = append(bundles, types.Bundle{
+			Error: err,
+		})
+		return bundles
 	}
 
 	return bundles

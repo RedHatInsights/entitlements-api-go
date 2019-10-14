@@ -97,7 +97,7 @@ func initialize() {
 	options.SetDefault(Keys.Cert, "../test_data/test.cert") // default values of Cert and Key are for testing purposes only
 	options.SetDefault(Keys.Key, "../test_data/test.key")
 	options.SetDefault(Keys.OpenAPISpecPath, "./apispec/api.spec.json")
-	options.SetDefault(Keys.BundleInfoYaml, "./bundles/bundles.yml")
+	options.SetDefault(Keys.BundleInfoYaml, "../bundles/bundles.yml")
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 
