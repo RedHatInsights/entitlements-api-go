@@ -1,9 +1,6 @@
 package controllers
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-
 	"context"
 	"encoding/json"
 	"io/ioutil"
@@ -12,14 +9,12 @@ import (
 
 	. "github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 const DEFAULT_ORG_ID string = "4384938490324"
 const DEFAULT_ACCOUNT_NUMBER string = "540155"
-
-func init() {
-	bundleInfo = GetBundleInfo("../test_data/test_bundle.yml")
-}
 
 func testRequest(method string, path string, accnum string, orgid string, fakeCaller func(string, string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	req, err := http.NewRequest(method, path, nil)
@@ -70,6 +65,14 @@ func expectPass(res *http.Response) {
 }
 
 var _ = Describe("Identity Controller", func() {
+
+	BeforeEach(func() {
+		bundleInfo = []Bundle{}
+		if err := SetBundleInfo("../test_data/test_bundle.yml"); err != nil {
+			panic("should not error here")
+		}
+	})
+
 	It("should call GetSubscriptions with the org_id on the context", func() {
 		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
@@ -93,15 +96,17 @@ var _ = Describe("Identity Controller", func() {
 
 	Context("When the bundles.yml has errors", func() {
 		It("should include errors when file is not available", func() {
-			bundles := GetBundleInfo("no_such_file")
-			Expect(len(bundles)).To(Equal(1))
-			Expect(bundles[0].Error).ToNot(Equal(nil))
+			bundleInfo = []Bundle{}
+			err := SetBundleInfo("no_such_file")
+			Expect(len(bundleInfo)).To(Equal(0))
+			Expect(err).ToNot(Equal(nil))
 		})
 
-		It("should include error for yaml parse errors", func() {
-			bundles := GetBundleInfo("../test_data/err_bundle.yml")
-			Expect(len(bundles)).To(Equal(1))
-			Expect(bundles[0].Error).ToNot(Equal(nil))
+		It("should return error for yaml parse errors", func() {
+			bundleInfo = []Bundle{}
+			err := SetBundleInfo("../test_data/err_bundle.yml")
+			Expect(len(bundleInfo)).To(Equal(0))
+			Expect(err).ToNot(Equal(nil))
 		})
 	})
 
