@@ -9,7 +9,6 @@ else
 fi
 
 export ENT_CA_PATH=./resources/ca.crt
-export ENT_BUNDLE_INFO_YAML=./bundles/bundles.yml
 
 GOPATH="${GOPATH:-$HOME/go}"
 $GOPATH/bin/modd

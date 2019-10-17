@@ -29,8 +29,7 @@ type SubscriptionDetails struct {
 
 // Bundle is a struct that is used to unmarshal the bundle info from bundles.yml
 type Bundle struct {
-	Name            string   `yaml:"name"`
-	UseValidAccNum  bool     `yaml:"use_valid_acc_num"`
-	Skus            []string `yaml:"skus"`
-	Error           error
+	Name           string   `yaml:"name"`
+	UseValidAccNum bool     `yaml:"use_valid_acc_num"`
+	Skus           []string `yaml:"skus"`
 }
