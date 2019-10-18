@@ -33,3 +33,15 @@ type Bundle struct {
 	UseValidAccNum bool     `yaml:"use_valid_acc_num"`
 	Skus           []string `yaml:"skus"`
 }
+
+type DependencyErrorDetails struct {
+	DependencyFailure bool   `json:"dependency_failure"`
+	Service 					string `json:"service"`
+	Status 						int    `json:"status"`
+	Endpoint					string `json:"endpoint"`
+	Message 					string `json:"message"`
+}
+
+type DependencyErrorResponse struct {
+	Error DependencyErrorDetails `json:error`
+}
