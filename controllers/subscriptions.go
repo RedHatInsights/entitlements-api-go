@@ -152,8 +152,21 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		validAccNum := !(accNum == "" || accNum == "-1")
 
 		if res.Error != nil {
-			l.Log.Error("Unexpected error while talking to Subs Service", zap.Error(res.Error))
-			http.Error(w, http.StatusText(500), 500)
+			errMsg := "Unexpected error while talking to Subs Service"
+			l.Log.Error(errMsg, zap.Error(res.Error))
+
+			dependencyError := types.DependencyErrorDetails{
+				DependencyFailure:  true,
+				Service:  					"Subscriptions Service",
+				Status: 						res.StatusCode,
+				Endpoint: 					config.GetConfig().Options.GetString(config.Keys.SubsHost),
+				Message:  					errMsg,
+			}
+
+			errorResponse := types.DependencyErrorResponse{Error: dependencyError}
+			errorResponsejson, _ := json.Marshal(errorResponse)
+
+			http.Error(w, string(errorResponsejson), 500)
 			return
 		}
 
