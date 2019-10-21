@@ -37,15 +37,15 @@ type Bundle struct {
 // DependencyErrorDetails is a struct that is used to marshal failure details
 // from failed requests to the subscriptions service
 type DependencyErrorDetails struct {
-    DependencyFailure bool   `json:"dependency_failure"`
-    Service           string `json:"service"`
-    Status            int    `json:"status"`
-    Endpoint          string `json:"endpoint"`
-    Message           string `json:"message"`
+	DependencyFailure bool   `json:"dependency_failure"`
+	Service           string `json:"service"`
+	Status            int    `json:"status"`
+	Endpoint          string `json:"endpoint"`
+	Message           string `json:"message"`
 }
 
 // DependencyErrorResponse is a struct that is used to marshal an error response
 // based on details from a failed request to the subscriptions service
 type DependencyErrorResponse struct {
-    Error DependencyErrorDetails `json:"error"`
+	Error DependencyErrorDetails `json:"error"`
 }
