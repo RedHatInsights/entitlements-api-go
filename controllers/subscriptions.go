@@ -135,6 +135,21 @@ func checkCommonSkus(skus []string, userSkus []string) []string {
 	return commonSKUs
 }
 
+func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w http.ResponseWriter) {
+	dependencyError := types.DependencyErrorDetails{
+		DependencyFailure: true,
+		Service:           "Subscriptions Service",
+		Status:            res.StatusCode,
+		Endpoint:          config.GetConfig().Options.GetString(config.Keys.SubsHost),
+		Message:           errMsg,
+	}
+
+	errorResponse := types.DependencyErrorResponse{Error: dependencyError}
+	errorResponsejson, _ := json.Marshal(errorResponse)
+
+	http.Error(w, string(errorResponsejson), 500)
+}
+
 // Index the handler for GETs to /api/entitlements/v1/services/
 func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -152,8 +167,9 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		validAccNum := !(accNum == "" || accNum == "-1")
 
 		if res.Error != nil {
-			l.Log.Error("Unexpected error while talking to Subs Service", zap.Error(res.Error))
-			http.Error(w, http.StatusText(500), 500)
+			errMsg := "Unexpected error while talking to Subs Service"
+			l.Log.Error(errMsg, zap.Error(res.Error))
+			failOnDependencyError(errMsg, res, w)
 			return
 		}
 
@@ -163,12 +179,12 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		)
 
 		if res.StatusCode != 200 {
-			l.Log.Error("Got back a non 200 status code from Subscriptions Service",
+			errMsg := "Got back a non 200 status code from Subscriptions Service"
+			l.Log.Error(errMsg,
 				zap.Int("code", res.StatusCode),
 				zap.String("body", res.Body),
 			)
-
-			http.Error(w, http.StatusText(500), 500)
+			failOnDependencyError(errMsg, res, w)
 			return
 		}
 

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"errors"
 
 	. "github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
@@ -83,14 +84,39 @@ var _ = Describe("Identity Controller", func() {
 		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", fakeGetSubscriptions("deadbeef12", "", fakeResponse))
 	})
 
+	Context("When the Subs API sends back a non-200", func() {
+		It("should fail the response", func() {
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string, string) SubscriptionsResponse {
+				return SubscriptionsResponse{StatusCode: 503, Data: nil, CacheHit: false}
+			})
+
+			var jsonResponse DependencyErrorResponse
+			json.Unmarshal([]byte(rawBody), &jsonResponse)
+
+			Expect(rr.Result().StatusCode).To(Equal(500))
+			Expect(jsonResponse.Error.DependencyFailure).To(Equal(true))
+			Expect(jsonResponse.Error.Service).To(Equal("Subscriptions Service"))
+			Expect(jsonResponse.Error.Status).To(Equal(503))
+			Expect(jsonResponse.Error.Endpoint).To(Equal("https://subscription.api.redhat.com"))
+			Expect(jsonResponse.Error.Message).To(Equal("Got back a non 200 status code from Subscriptions Service"))
+		})
+	})
+
 	Context("When the Subs API sends back an error", func() {
 		It("should fail the response", func() {
 			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string, string) SubscriptionsResponse {
-				return SubscriptionsResponse{StatusCode: 500, Data: nil, CacheHit: false}
+				return SubscriptionsResponse{StatusCode: 503, Data: nil, CacheHit: false, Error: errors.New("Sub Failure")}
 			})
 
+			var jsonResponse DependencyErrorResponse
+			json.Unmarshal([]byte(rawBody), &jsonResponse)
+
 			Expect(rr.Result().StatusCode).To(Equal(500))
-			Expect(rawBody).To(ContainSubstring(http.StatusText(500)))
+			Expect(jsonResponse.Error.DependencyFailure).To(Equal(true))
+			Expect(jsonResponse.Error.Service).To(Equal("Subscriptions Service"))
+			Expect(jsonResponse.Error.Status).To(Equal(503))
+			Expect(jsonResponse.Error.Endpoint).To(Equal("https://subscription.api.redhat.com"))
+			Expect(jsonResponse.Error.Message).To(Equal("Unexpected error while talking to Subs Service"))
 		})
 	})
 
