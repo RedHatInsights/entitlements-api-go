@@ -6,6 +6,8 @@
     - MCT3694
     - MCT3695
     - MCT3696
+    - SER0496
+    - SER0497
 
 - name: cost_management
   use_valid_acc_num: false
