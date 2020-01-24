@@ -29,6 +29,11 @@ type EntitlementsConfigKeysType struct {
 	CaPath          string
 	OpenAPISpecPath string
 	BundleInfoYaml  string
+	CwLogGroup      string
+	CwLogStream     string
+	CwRegion        string
+	CwKey         	string
+	CwSecret        string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -41,6 +46,11 @@ var Keys = EntitlementsConfigKeysType{
 	CaPath:          "CA_PATH",
 	OpenAPISpecPath: "OPENAPI_SPEC_PATH",
 	BundleInfoYaml:  "BUNDLE_INFO_YAML",
+	CwLogGroup:      "CW_LOG_GROUP",
+	CwLogStream:     "CW_LOG_STEAM",
+	CwRegion:        "CW_REGION",
+	CwKey:           "CW_KEY",
+	CwSecret:        "CW_SECRET",
 }
 
 func getRootCAs(localCertFile string) *x509.CertPool {
@@ -98,6 +108,10 @@ func initialize() {
 	options.SetDefault(Keys.Key, "../test_data/test.key")
 	options.SetDefault(Keys.OpenAPISpecPath, "./apispec/api.spec.json")
 	options.SetDefault(Keys.BundleInfoYaml, "./bundles/bundles.yml")
+	options.SetDefault(Keys.CwLogGroup, "platform-dev")
+	options.SetDefault(Keys.CwLogStream, "entitlements-test")
+	options.SetDefault(Keys.CwRegion, "us-east-1")
+
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 
