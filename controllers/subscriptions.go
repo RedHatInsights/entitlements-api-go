@@ -14,7 +14,7 @@ import (
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
 
 	"github.com/karlseguin/ccache"
-	"go.uber.org/zap"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -168,22 +168,16 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 		if res.Error != nil {
 			errMsg := "Unexpected error while talking to Subs Service"
-			l.Log.Error(errMsg, zap.Error(res.Error))
+			l.Log.WithFields(logrus.Fields{"error": res.Error}).Error(errMsg)
 			failOnDependencyError(errMsg, res, w)
 			return
 		}
 
-		l.Log.Info("subs call complete",
-			zap.Duration("subs_call_duration", time.Since(start)),
-			zap.Bool("cache_hit", res.CacheHit),
-		)
+		l.Log.WithFields(logrus.Fields{"subs_call_duration": time.Since(start), "cache_hit": res.CacheHit}).Info("subs call complete")
 
 		if res.StatusCode != 200 {
 			errMsg := "Got back a non 200 status code from Subscriptions Service"
-			l.Log.Error(errMsg,
-				zap.Int("code", res.StatusCode),
-				zap.String("body", res.Body),
-			)
+			l.Log.WithFields(logrus.Fields{"code": res.StatusCode, "body": res.Body}).Error(errMsg)
 			failOnDependencyError(errMsg, res, w)
 			return
 		}
@@ -205,7 +199,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		obj, err := json.Marshal(entitlementsResponse)
 
 		if err != nil {
-			l.Log.Error("Unexpected error while unmarshalling JSON data from Subs Service", zap.Error(err))
+			l.Log.WithFields(logrus.Fields{"error": err}).Error("Unexpected error while unmarshalling JSON data from Subs Service")
 			http.Error(w, http.StatusText(500), 500)
 			return
 		}

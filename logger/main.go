@@ -1,45 +1,35 @@
 package logger
 
 import (
-	"flag"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
-// Log is an instance of the global zap.Logger
-var Log *zap.Logger
+// Log is an instance of the global logrus.Logger
+var Log *logrus.Logger
 
 // InitLogger initializes the Entitlements API logger
-func InitLogger() *zap.Logger {
+func InitLogger() *logrus.Logger {
 	if Log == nil {
-		logLevel := zapcore.InfoLevel
-		if flag.Lookup("test.v") != nil {
-			logLevel = zapcore.FatalLevel
+		logLevel := logrus.InfoLevel
+
+		Log = &logrus.Logger{
+			Out: os.Stdout,
+			Level: logLevel,
+			ReportCaller: true,
 		}
 
-		cfg := zapcore.EncoderConfig{
-			TimeKey:        "ts",
-			LevelKey:       "level",
-			NameKey:        "logger",
-			CallerKey:      "caller",
-			MessageKey:     "msg",
-			LineEnding:     zapcore.DefaultLineEnding,
-			EncodeLevel:    zapcore.LowercaseLevelEncoder,
-			EncodeTime:     zapcore.EpochTimeEncoder,
-			EncodeDuration: zapcore.SecondsDurationEncoder,
-			EncodeCaller:   zapcore.ShortCallerEncoder,
+		formatter := &logrus.JSONFormatter{
+			FieldMap: logrus.FieldMap{
+				logrus.FieldKeyTime: "ts",
+				logrus.FieldKeyFunc: "caller",
+				logrus.FieldKeyLevel: "level",
+				logrus.FieldKeyMsg: "msg",
+			},
 		}
 
-		logger, _ := zap.Config{
-			Encoding:         "json",
-			Level:            zap.NewAtomicLevelAt(logLevel),
-			OutputPaths:      []string{"stdout"},
-			ErrorOutputPaths: []string{"stderr"},
-			EncoderConfig:    cfg,
-		}.Build()
-
-		defer logger.Sync()
-		Log = logger
+		Log.SetFormatter(formatter)
 	}
 
 	return Log
