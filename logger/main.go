@@ -2,6 +2,8 @@ package logger
 
 import (
 	"os"
+	"flag"
+	"io/ioutil"
 
 	"github.com/sirupsen/logrus"
 )
@@ -18,6 +20,11 @@ func InitLogger() *logrus.Logger {
 			Out: os.Stdout,
 			Level: logLevel,
 			ReportCaller: true,
+		}
+
+		// Disable app logs while running tests
+		if flag.Lookup("test.v") != nil {
+			Log.Out = ioutil.Discard
 		}
 
 		formatter := &logrus.JSONFormatter{
