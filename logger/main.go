@@ -21,11 +21,13 @@ func InitLogger() *logrus.Logger {
 	if Log == nil {
 		logLevel := logrus.InfoLevel
 		test := flag.Lookup("test.v") != nil
-		cwKey := config.GetConfig().Options.GetString(config.Keys.CwKey)
-		cwSecret := config.GetConfig().Options.GetString(config.Keys.CwSecret)
-		cwRegion := config.GetConfig().Options.GetString(config.Keys.CwRegion)
-		cwLogGroup := config.GetConfig().Options.GetString(config.Keys.CwLogGroup)
-		cwLogStream := config.GetConfig().Options.GetString(config.Keys.CwLogStream)
+		confOpts := config.GetConfig().Options
+
+		cwKey := confOpts.GetString(config.Keys.CwKey)
+		cwSecret := confOpts.GetString(config.Keys.CwSecret)
+		cwRegion := confOpts.GetString(config.Keys.CwRegion)
+		cwLogGroup := confOpts.GetString(config.Keys.CwLogGroup)
+		cwLogStream := confOpts.GetString(config.Keys.CwLogStream)
 
 		Log = &logrus.Logger{
 			Out:          os.Stdout,
