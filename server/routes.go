@@ -7,7 +7,7 @@ import (
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	LogMW "github.com/treastech/logger"
+	"github.com/766b/chi-logger"
 )
 
 // DoRoutes sets up the routes used by the server.
@@ -19,7 +19,7 @@ func DoRoutes() chi.Router {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
-	r.Use(LogMW.Logger(log.Log))
+	r.Use(chilogger.NewLogrusMiddleware("router", log.Log))
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.With(identity.EnforceIdentity).Route("/", controllers.LubDub)

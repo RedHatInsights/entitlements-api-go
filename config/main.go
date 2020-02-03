@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -29,6 +30,11 @@ type EntitlementsConfigKeysType struct {
 	CaPath          string
 	OpenAPISpecPath string
 	BundleInfoYaml  string
+	CwLogGroup      string
+	CwLogStream     string
+	CwRegion        string
+	CwKey         	string
+	CwSecret        string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -41,6 +47,11 @@ var Keys = EntitlementsConfigKeysType{
 	CaPath:          "CA_PATH",
 	OpenAPISpecPath: "OPENAPI_SPEC_PATH",
 	BundleInfoYaml:  "BUNDLE_INFO_YAML",
+	CwLogGroup:      "CW_LOG_GROUP",
+	CwLogStream:     "CW_LOG_STEAM",
+	CwRegion:        "CW_REGION",
+	CwKey:           "CW_KEY",
+	CwSecret:        "CW_SECRET",
 }
 
 func getRootCAs(localCertFile string) *x509.CertPool {
@@ -90,6 +101,12 @@ func getCerts(options *viper.Viper) *tls.Certificate {
 
 func initialize() {
 	var options = viper.New()
+	hostname, err := os.Hostname()
+
+	if err != nil {
+		hostname = "entitlements"
+	}
+
 	options.SetDefault(Keys.CertsFromEnv, false)
 	options.SetDefault(Keys.Port, "3000")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
@@ -98,6 +115,10 @@ func initialize() {
 	options.SetDefault(Keys.Key, "../test_data/test.key")
 	options.SetDefault(Keys.OpenAPISpecPath, "./apispec/api.spec.json")
 	options.SetDefault(Keys.BundleInfoYaml, "./bundles/bundles.yml")
+	options.SetDefault(Keys.CwLogGroup, "platform-dev")
+	options.SetDefault(Keys.CwLogStream, hostname)
+	options.SetDefault(Keys.CwRegion, "us-east-1")
+
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 
