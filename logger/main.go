@@ -45,7 +45,7 @@ func InitLogger() *logrus.Logger {
 			FieldMap: logrus.FieldMap{
 				logrus.FieldKeyTime:  "ts",
 				logrus.FieldKeyFunc:  "caller",
-				logrus.FieldKeyLevel: "level",
+				logrus.FieldKeyLevel: "logLevel",
 				logrus.FieldKeyMsg:   "msg",
 			},
 		}
