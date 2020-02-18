@@ -12,7 +12,47 @@
     - SER0569
 
 - name: cost_management
-  use_valid_acc_num: false
+  skus:
+    - MW00454
+    - MW00455
+    - MW00456
+    - MW00457
+    - MW00458
+    - MW00459
+    - MW00448
+    - MW00449
+    - MW00450
+    - MW00451
+    - MW00452
+    - MW00453
+    - MW00373
+    - MW00374
+    - MW00375
+    - MW00376
+    - MW00377
+    - MW00378
+    - MW00361
+    - MW00362
+    - MW00363
+    - MW00364
+    - MW00365
+    - MW00366
+    - MCT2735
+    - MCT2736
+    - MCT3489
+    - MCT3490
+    - MCT3753
+    - MCT3754
+    - MCT3759
+    - MCT3760
+    - MCT3822
+    - MCT3823
+    - MW00329
+    - MW00330
+    - MW00331
+    - MW00332
+    - MW00421
+    - MW00422
 
 - name: insights
   use_valid_acc_num: true
