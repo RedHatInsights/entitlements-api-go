@@ -53,6 +53,8 @@
     - MW00332
     - MW00421
     - MW00422
+    - MCT2862
+    - MCT2863
 
 - name: insights
   use_valid_acc_num: true
