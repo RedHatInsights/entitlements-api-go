@@ -62,6 +62,12 @@
 - name: migrations
   use_valid_acc_num: true
 
+- name: subscriptions
+  use_valid_acc_num: true
+
+- name: settings
+  use_valid_acc_num: true
+
 - name: openshift
   use_valid_acc_num: false
 
