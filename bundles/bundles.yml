@@ -60,7 +60,8 @@
   use_valid_acc_num: true
 
 - name: migrations
-  use_valid_acc_num: true
+  skus:
+    - SER0584
 
 - name: subscriptions
   use_valid_acc_num: true
