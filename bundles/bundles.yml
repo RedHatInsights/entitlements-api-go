@@ -1,15 +1,55 @@
 - name: ansible
   skus:
     - MCT3691
+    - MCT3691RN
+    - MCT3691F3
+    - MCT3691F3RN
+    - MCT3691S
     - MCT3692
+    - MCT3692RN
+    - MCT3692F3
+    - MCT3692F3RN
+    - MCT3692S
     - MCT3693
+    - MCT3693RN
+    - MCT3693F3
+    - MCT3693F3RN
+    - MCT3693S
     - MCT3694
+    - MCT3694RN
+    - MCT3694F3
+    - MCT3694F3RN
+    - MCT3694S
     - MCT3695
+    - MCT3695RN
+    - MCT3695F3
+    - MCT3695F3RN
+    - MCT3695S
     - MCT3696
+    - MCT3696RN
+    - MCT3696F3
+    - MCT3696F3RN
+    - MCT3696S
     - MCT3733
+    - MCT3733RN
+    - MCT3733F3
+    - MCT3733F3RN
+    - MCT3733S
     - SER0496
+    - SER0496RN
+    - SER0496F3
+    - SER0496F3RN
+    - SER0496S
     - SER0497
+    - SER0497RN
+    - SER0497F3
+    - SER0497F3RN
+    - SER0497S
     - SER0569
+    - SER0569RN
+    - SER0569F3
+    - SER0569F3RN
+    - SER0569S
 
 - name: cost_management
   skus:
