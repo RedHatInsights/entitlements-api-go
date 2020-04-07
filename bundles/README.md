@@ -1,0 +1,4 @@
+- The `bundles.example.yml` file in this directory is for **local testing only**
+- To run the app, be sure to copy `bundles.example.yml` to `bundles.yml`
+- Any changes here will be ignored once deployed
+- To make SKU changes for the live service, see the `entitlements-config` repository: https://github.com/RedHatInsights/entitlements-config
