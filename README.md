@@ -1,5 +1,10 @@
 # Entitlements Service
 
+## SKU/Bundle changes
+- The `/bundles/bundles.example.yml` file in this repo is for **local testing only**
+- To run the app, be sure to copy `/bundles/bundles.example.yml` to `/bundles/bundles.yml`
+- To make SKU changes for the live service, see the `entitlements-config` repository: https://github.com/RedHatInsights/entitlements-config
+
 ## Application Setup
 
 Install Golang:
@@ -27,8 +32,8 @@ bash ./scripts/dev_deps.sh
 To run the Entitlements API locally, you will need an Enterprise Services cert with access to the dev subscription endpoint /search/criteria.
 
 * You can request a personal cert by following ALL steps in this [mojo doc](https://mojo.redhat.com/docs/DOC-1144091).
-* You can export your crt and key like so:  
-    `openssl pkcs12 -in your-p12-cert.p12 -out your-key.key -nocerts -nodes`  
+* You can export your crt and key like so:
+    `openssl pkcs12 -in your-p12-cert.p12 -out your-key.key -nocerts -nodes`
     `openssl pkcs12 -in your-p12-cert.p12 -out your-cert-sans-key.crt -clcerts -nokeys`
 
 ### Create your config file
@@ -45,6 +50,11 @@ export ENT_SUBS_HOST=https://subscription.qa.api.redhat.com
 ```
 
 Replace {path_to_key} and {path_to_cert} with the locations of the .key and .crt files from the previous section.
+
+### Set up your local entitlement bundles
+
+Copy the `/bundles/bundles.example.yml` to `/bundles/bundles.yml` in order to have your local app consume bundle data. You can modify this file for local testing.
+**Note:** _This file is for local testing only. If you wish to make changes to the actual bundles, please refer to https://github.com/RedHatInsights/entitlements-config_
 
 ## Running the Application
 
