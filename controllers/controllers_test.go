@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"errors"
+	"testing"
 
 	. "github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
@@ -212,3 +213,16 @@ var _ = Describe("Identity Controller", func() {
 
 	})
 })
+
+func BenchmarkRequest(b *testing.B) {
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       []string{"SVC123", "SVC3851", "MCT3691"},
+			CacheHit:   false,
+		}
+
+		testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "SVC3124,MCT3691", fakeResponse))
+	}
+}

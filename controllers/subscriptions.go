@@ -155,8 +155,12 @@ func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var skus []string
 
-		for b := range bundleInfo {
-			skus = append(skus, bundleInfo[b].Skus...)
+		for _, bundle := range bundleInfo {
+			for _, sku := range bundle.Skus {
+				for key := range sku {
+					skus = append(skus, key)
+				}
+			}
 		}
 
 		start := time.Now()
@@ -187,7 +191,15 @@ func Index() func(http.ResponseWriter, *http.Request) {
 			entitle := true
 
 			if len(bundleInfo[b].Skus) > 0 {
-				entitle = validAccNum && len(checkCommonSkus(bundleInfo[b].Skus, res.Data)) > 0
+				var bundleSkus []string
+
+				for _, sku := range bundleInfo[b].Skus {
+					for key := range sku {
+						bundleSkus = append(bundleSkus, key)
+					}
+				}
+
+				entitle = validAccNum && len(checkCommonSkus(bundleSkus, res.Data)) > 0
 			}
 
 			if bundleInfo[b].UseValidAccNum {

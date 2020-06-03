@@ -1,13 +1,13 @@
 - name: TestBundle1
   skus:
-    - SVC123
-    - SVC456
-    - MCT789
+    - SVC123: {is_trial: false}
+    - SVC456: {is_trial: false}
+    - MCT789: {is_trial: false}
 
 - name: TestBundle2
   skus:
-    - MCT1122
-    - SVC3344
+    - MCT1122: {is_trial: false}
+    - SVC3344: {is_trial: false}
 
 - name: TestBundle3
   use_valid_acc_num: false
