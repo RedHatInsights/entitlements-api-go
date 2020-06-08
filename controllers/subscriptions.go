@@ -117,34 +117,26 @@ var GetSubscriptions = func(orgID string, skus string) types.SubscriptionsRespon
 }
 
 // Checks the common strings between two slices of strings and returns a slice of strings
-// with the common skus
-func checkCommonSkus(skus []string, userSkus []string) []string {
-	skuHash := make(map[string]bool)
+// with the common skus, as well as the subset of trial SKUs
+func commonAndTrialSKUs(b int, userSkus []string) ([]string, []string) {
 	var commonSKUs []string
-
-	for sku := range skus {
-		skuHash[skus[sku]] = true
-	}
-
-	for usku := range userSkus {
-		if _, found := skuHash[userSkus[usku]]; found {
-			commonSKUs = append(commonSKUs, userSkus[usku])
-		}
-	}
-
-	return commonSKUs
-}
-
-func onlyHasTrialSkus(b int, commonSKUs []string) bool {
 	var trialSKUs []string
+
 	skus := bundleInfo[b].Skus
 
-	for _, sku := range commonSKUs {
-		if skus[sku].IsTrial {
-			trialSKUs = append(trialSKUs, sku)
+	for _, usku := range userSkus {
+		if _, found := skus[usku]; found {
+			commonSKUs = append(commonSKUs, usku)
+			if skus[usku].IsTrial {
+				trialSKUs = append(trialSKUs, usku)
+			}
 		}
 	}
 
+	return commonSKUs, trialSKUs
+}
+
+func onlyHasTrialSkus(commonSKUs []string, trialSKUs []string) bool {
 	return len(commonSKUs) == len(trialSKUs)
 }
 
@@ -203,14 +195,9 @@ func Index() func(http.ResponseWriter, *http.Request) {
 			trial := false
 
 			if len(bundleInfo[b].Skus) > 0 {
-				var bundleSkus []string
-				for sku, _ := range bundleInfo[b].Skus {
-					bundleSkus = append(bundleSkus, sku)
-				}
-
-				commonSKUs := checkCommonSkus(bundleSkus, res.Data)
+				commonSKUs, trialSKUs := commonAndTrialSKUs(b, res.Data)
 				entitle = (validAccNum && len(commonSKUs) > 0)
-				trial = onlyHasTrialSkus(b, commonSKUs)
+				trial = onlyHasTrialSkus(commonSKUs, trialSKUs)
 			}
 
 			if bundleInfo[b].UseValidAccNum {
