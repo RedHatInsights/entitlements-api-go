@@ -1,277 +1,540 @@
 - name: ansible
   skus:
-    - MCT3691: {is_trial: false}
-    - MCT3691RN: {is_trial: false}
-    - MCT3691F3: {is_trial: false}
-    - MCT3691F3RN: {is_trial: false}
-    - MCT3691S: {is_trial: false}
-    - MCT3692: {is_trial: false}
-    - MCT3692RN: {is_trial: false}
-    - MCT3692F3: {is_trial: false}
-    - MCT3692F3RN: {is_trial: false}
-    - MCT3692S: {is_trial: false}
-    - MCT3693: {is_trial: false}
-    - MCT3693RN: {is_trial: false}
-    - MCT3693F3: {is_trial: false}
-    - MCT3693F3RN: {is_trial: false}
-    - MCT3693S: {is_trial: false}
-    - MCT3694: {is_trial: false}
-    - MCT3694RN: {is_trial: false}
-    - MCT3694F3: {is_trial: false}
-    - MCT3694F3RN: {is_trial: false}
-    - MCT3694S: {is_trial: false}
-    - MCT3695: {is_trial: false}
-    - MCT3695RN: {is_trial: false}
-    - MCT3695F3: {is_trial: false}
-    - MCT3695F3RN: {is_trial: false}
-    - MCT3695S: {is_trial: false}
-    - MCT3696: {is_trial: false}
-    - MCT3696RN: {is_trial: false}
-    - MCT3696F3: {is_trial: false}
-    - MCT3696F3RN: {is_trial: false}
-    - MCT3696S: {is_trial: false}
-    - MCT3733: {is_trial: false}
-    - MCT3733RN: {is_trial: false}
-    - MCT3733F3: {is_trial: false}
-    - MCT3733F3RN: {is_trial: false}
-    - MCT3733S: {is_trial: false}
-    - SER0496: {is_trial: false}
-    - SER0496RN: {is_trial: false}
-    - SER0496F3: {is_trial: false}
-    - SER0496F3RN: {is_trial: false}
-    - SER0496S: {is_trial: false}
-    - SER0497: {is_trial: false}
-    - SER0497RN: {is_trial: false}
-    - SER0497F3: {is_trial: false}
-    - SER0497F3RN: {is_trial: false}
-    - SER0497S: {is_trial: false}
-    - SER0569: {is_trial: false}
-    - SER0569RN: {is_trial: false}
-    - SER0569F3: {is_trial: false}
-    - SER0569F3RN: {is_trial: false}
-    - SER0569S: {is_trial: false}
+    MCT3691:
+        is_trial: false
+    MCT3691RN:
+        is_trial: false
+    MCT3691F3:
+        is_trial: false
+    MCT3691F3RN:
+        is_trial: false
+    MCT3691S:
+        is_trial: false
+    MCT3692:
+        is_trial: false
+    MCT3692RN:
+        is_trial: false
+    MCT3692F3:
+        is_trial: false
+    MCT3692F3RN:
+        is_trial: false
+    MCT3692S:
+        is_trial: false
+    MCT3693:
+        is_trial: false
+    MCT3693RN:
+        is_trial: false
+    MCT3693F3:
+        is_trial: false
+    MCT3693F3RN:
+        is_trial: false
+    MCT3693S:
+        is_trial: false
+    MCT3694:
+        is_trial: false
+    MCT3694RN:
+        is_trial: false
+    MCT3694F3:
+        is_trial: false
+    MCT3694F3RN:
+        is_trial: false
+    MCT3694S:
+        is_trial: false
+    MCT3695:
+        is_trial: false
+    MCT3695RN:
+        is_trial: false
+    MCT3695F3:
+        is_trial: false
+    MCT3695F3RN:
+        is_trial: false
+    MCT3695S:
+        is_trial: false
+    MCT3696:
+        is_trial: false
+    MCT3696RN:
+        is_trial: false
+    MCT3696F3:
+        is_trial: false
+    MCT3696F3RN:
+        is_trial: false
+    MCT3696S:
+        is_trial: false
+    MCT3733:
+        is_trial: false
+    MCT3733RN:
+        is_trial: false
+    MCT3733F3:
+        is_trial: false
+    MCT3733F3RN:
+        is_trial: false
+    MCT3733S:
+        is_trial: false
+    SER0496:
+        is_trial: false
+    SER0496RN:
+        is_trial: false
+    SER0496F3:
+        is_trial: false
+    SER0496F3RN:
+        is_trial: false
+    SER0496S:
+        is_trial: false
+    SER0497:
+        is_trial: false
+    SER0497RN:
+        is_trial: false
+    SER0497F3:
+        is_trial: false
+    SER0497F3RN:
+        is_trial: false
+    SER0497S:
+        is_trial: false
+    SER0569:
+        is_trial: false
+    SER0569RN:
+        is_trial: false
+    SER0569F3:
+        is_trial: false
+    SER0569F3RN:
+        is_trial: false
+    SER0569S:
+        is_trial: false
 
 - name: cost_management
   skus:
-    - MW00454: {is_trial: false}
-    - MW00455: {is_trial: false}
-    - MW00456: {is_trial: false}
-    - MW00457: {is_trial: false}
-    - MW00458: {is_trial: false}
-    - MW00459: {is_trial: false}
-    - MW00448: {is_trial: false}
-    - MW00449: {is_trial: false}
-    - MW00450: {is_trial: false}
-    - MW00451: {is_trial: false}
-    - MW00452: {is_trial: false}
-    - MW00453: {is_trial: false}
-    - MW00373: {is_trial: false}
-    - MW00374: {is_trial: false}
-    - MW00375: {is_trial: false}
-    - MW00376: {is_trial: false}
-    - MW00377: {is_trial: false}
-    - MW00378: {is_trial: false}
-    - MW00361: {is_trial: false}
-    - MW00362: {is_trial: false}
-    - MW00363: {is_trial: false}
-    - MW00364: {is_trial: false}
-    - MW00365: {is_trial: false}
-    - MW00366: {is_trial: false}
-    - MCT2735: {is_trial: false}
-    - MCT2736: {is_trial: false}
-    - MCT3489: {is_trial: false}
-    - MCT3490: {is_trial: false}
-    - MCT3753: {is_trial: false}
-    - MCT3754: {is_trial: false}
-    - MCT3759: {is_trial: false}
-    - MCT3760: {is_trial: false}
-    - MW00329: {is_trial: false}
-    - MW00330: {is_trial: false}
-    - MW00331: {is_trial: false}
-    - MW00332: {is_trial: false}
-    - MW00421: {is_trial: false}
-    - MW00422: {is_trial: false}
-    - MCT2862: {is_trial: false}
-    - MCT2863: {is_trial: false}
+    MW00454:
+        is_trial: false
+    MW00455:
+        is_trial: false
+    MW00456:
+        is_trial: false
+    MW00457:
+        is_trial: false
+    MW00458:
+        is_trial: false
+    MW00459:
+        is_trial: false
+    MW00448:
+        is_trial: false
+    MW00449:
+        is_trial: false
+    MW00450:
+        is_trial: false
+    MW00451:
+        is_trial: false
+    MW00452:
+        is_trial: false
+    MW00453:
+        is_trial: false
+    MW00373:
+        is_trial: false
+    MW00374:
+        is_trial: false
+    MW00375:
+        is_trial: false
+    MW00376:
+        is_trial: false
+    MW00377:
+        is_trial: false
+    MW00378:
+        is_trial: false
+    MW00361:
+        is_trial: false
+    MW00362:
+        is_trial: false
+    MW00363:
+        is_trial: false
+    MW00364:
+        is_trial: false
+    MW00365:
+        is_trial: false
+    MW00366:
+        is_trial: false
+    MCT2735:
+        is_trial: false
+    MCT2736:
+        is_trial: false
+    MCT3489:
+        is_trial: false
+    MCT3490:
+        is_trial: false
+    MCT3753:
+        is_trial: false
+    MCT3754:
+        is_trial: false
+    MCT3759:
+        is_trial: false
+    MCT3760:
+        is_trial: false
+    MW00329:
+        is_trial: false
+    MW00330:
+        is_trial: false
+    MW00331:
+        is_trial: false
+    MW00332:
+        is_trial: false
+    MW00421:
+        is_trial: false
+    MW00422:
+        is_trial: false
+    MCT2862:
+        is_trial: false
+    MCT2863:
+        is_trial: false
 
 - name: insights
   use_valid_acc_num: true
 
 - name: migrations
   skus:
-    - SER0584: {is_trial: false}
-    - CL216: {is_trial: false}
-    - CL216OS: {is_trial: false}
-    - CL216VT: {is_trial: false}
-    - CL218: {is_trial: false}
-    - CL218IGE: {is_trial: false}
-    - CL218OS: {is_trial: false}
-    - CL218PT: {is_trial: false}
-    - CL218VT: {is_trial: false}
-    - CL220: {is_trial: false}
-    - CL220IGE: {is_trial: false}
-    - CL220IGE-R1: {is_trial: false}
-    - CL220IGE-R2: {is_trial: false}
-    - CL220IGE-R3: {is_trial: false}
-    - CL220OS: {is_trial: false}
-    - CL220VC: {is_trial: false}
-    - ESA0017: {is_trial: false}
-    - ESA0039: {is_trial: false}
-    - MCT2358: {is_trial: false}
-    - MCT2358F3: {is_trial: false}
-    - MCT2358F3RN: {is_trial: false}
-    - MCT2358RN: {is_trial: false}
-    - MCT2360: {is_trial: false}
-    - MCT2360F3: {is_trial: false}
-    - MCT2360F3RN: {is_trial: false}
-    - MCT2360RN: {is_trial: false}
-    - MCT2834: {is_trial: false}
-    - MCT2838: {is_trial: false}
-    - MCT2838F3: {is_trial: false}
-    - MCT2838F3RN: {is_trial: false}
-    - MCT2838RN: {is_trial: false}
-    - MCT2838S: {is_trial: false}
-    - MCT2839: {is_trial: false}
-    - MCT2839F3: {is_trial: false}
-    - MCT2839F3RN: {is_trial: false}
-    - MCT2839RN: {is_trial: false}
-    - MCT2840: {is_trial: false}
-    - MCT2840F3: {is_trial: false}
-    - MCT2840F3RN: {is_trial: false}
-    - MCT2840RN: {is_trial: false}
-    - MCT2841: {is_trial: false}
-    - MCT2841F3: {is_trial: false}
-    - MCT2841F3RN: {is_trial: false}
-    - MCT2841RN: {is_trial: false}
-    - MCT2841S: {is_trial: false}
-    - MCT2842: {is_trial: false}
-    - MCT2842F3: {is_trial: false}
-    - MCT2842F3RN: {is_trial: false}
-    - MCT2842RN: {is_trial: false}
-    - MCT2843: {is_trial: false}
-    - MCT2843F3: {is_trial: false}
-    - MCT2843F3RN: {is_trial: false}
-    - MCT2843RN: {is_trial: false}
-    - MCT2856: {is_trial: false}
-    - MCT2856F3: {is_trial: false}
-    - MCT2856F3RN: {is_trial: false}
-    - MCT2856RN: {is_trial: false}
-    - MCT2856S: {is_trial: false}
-    - MCT2955: {is_trial: false}
-    - MCT3116: {is_trial: false}
-    - MCT3158: {is_trial: false}
-    - MCT3159: {is_trial: false}
-    - MCT3867: {is_trial: false}
-    - MCT3868: {is_trial: false}
-    - PT208: {is_trial: false}
-    - RH00541: {is_trial: false}
-    - RH00541F3: {is_trial: false}
-    - RH00541F3RN: {is_trial: false}
-    - RH00541RN: {is_trial: false}
-    - RH00541S: {is_trial: false}
-    - RH00542: {is_trial: false}
-    - RH00542F3: {is_trial: false}
-    - RH00542F3RN: {is_trial: false}
-    - RH00542RN: {is_trial: false}
-    - RH00542S: {is_trial: false}
-    - RH00543: {is_trial: false}
-    - RH00543F3: {is_trial: false}
-    - RH00543F3RN: {is_trial: false}
-    - RH00543RN: {is_trial: false}
-    - RH00543S: {is_trial: false}
-    - RH00544: {is_trial: false}
-    - RH00544F3: {is_trial: false}
-    - RH00544F3RN: {is_trial: false}
-    - RH00544RN: {is_trial: false}
-    - RH00544S: {is_trial: false}
-    - RV00062: {is_trial: false}
-    - RV00062F3: {is_trial: false}
-    - RV00062F3RN: {is_trial: false}
-    - RV00062RN: {is_trial: false}
-    - RV00062S: {is_trial: false}
-    - RV00063: {is_trial: false}
-    - RV00063F3: {is_trial: false}
-    - RV00063F3RN: {is_trial: false}
-    - RV00063RN: {is_trial: false}
-    - RV00063S: {is_trial: false}
-    - RV00064: {is_trial: false}
-    - RV00064F3: {is_trial: false}
-    - RV00064F3RN: {is_trial: false}
-    - RV00064RN: {is_trial: false}
-    - RV00064S: {is_trial: false}
-    - SER0407: {is_trial: false}
-    - SER0408: {is_trial: false}
-    - SER0412: {is_trial: false}
-    - SER0430: {is_trial: false}
-    - SER0431: {is_trial: false}
-    - SER0432: {is_trial: false}
-    - SER0433: {is_trial: false}
-    - SER0442: {is_trial: false}
-    - SER0583: {is_trial: false}
-    - SER0584: {is_trial: false}
-    - SVC1356: {is_trial: false}
-    - SVC1358: {is_trial: false}
-    - SVC1396: {is_trial: false}
-    - SVC1885: {is_trial: false}
-    - SVC1936: {is_trial: false}
-    - SVC1937: {is_trial: false}
-    - SVC1938: {is_trial: false}
-    - SVC1939: {is_trial: false}
-    - SVC1940: {is_trial: false}
-    - SVC1941: {is_trial: false}
-    - SVC1942: {is_trial: false}
-    - SVC1943: {is_trial: false}
-    - SVC1944: {is_trial: false}
-    - SVC1945: {is_trial: false}
-    - SVC1958: {is_trial: false}
-    - SVC1974: {is_trial: false}
-    - SVC2058: {is_trial: false}
-    - SVC2059: {is_trial: false}
-    - SVC2450: {is_trial: false}
-    - SVC2492: {is_trial: false}
-    - SVC2493: {is_trial: false}
-    - SVC3867: {is_trial: false}
-    - SVC3868: {is_trial: false}
-    - SVCCL220VC: {is_trial: false}
-    - SVCESA0017: {is_trial: false}
-    - SVCESA0039: {is_trial: false}
-    - SVCRH00541: {is_trial: false}
-    - SVCRH00542: {is_trial: false}
-    - SVCRH00543: {is_trial: false}
-    - SVCRH00544: {is_trial: false}
-    - SVCRV00062: {is_trial: false}
-    - SVCRV00063: {is_trial: false}
-    - SVCRV00064: {is_trial: false}
-    - SVCSER0583: {is_trial: false}
-    - SVCSER0584: {is_trial: false}
-    - SYS1356: {is_trial: false}
-    - SYS1358: {is_trial: false}
-    - SYS1396: {is_trial: false}
-    - SYS1885: {is_trial: false}
-    - SYS1936: {is_trial: false}
-    - SYS1937: {is_trial: false}
-    - SYS1938: {is_trial: false}
-    - SYS1939: {is_trial: false}
-    - SYS1940: {is_trial: false}
-    - SYS1941: {is_trial: false}
-    - SYS1942: {is_trial: false}
-    - SYS1943: {is_trial: false}
-    - SYS1944: {is_trial: false}
-    - SYS1945: {is_trial: false}
-    - SYS1958: {is_trial: false}
-    - SYS1974: {is_trial: false}
-    - SYS2058: {is_trial: false}
-    - SYS2059: {is_trial: false}
-    - SYS2450: {is_trial: false}
-    - SYS2492: {is_trial: false}
-    - SYS2493: {is_trial: false}
-    - TRK216: {is_trial: false}
-    - TRK218: {is_trial: false}
-    - TRK218IG: {is_trial: false}
-    - TRK220: {is_trial: false}
-    - TRK220IG: {is_trial: false}
-    - TRK220IG-R4: {is_trial: false}
-    - TRK220IG-R5: {is_trial: false}
+    SER0584:
+        is_trial: false
+    CL216:
+        is_trial: false
+    CL216OS:
+        is_trial: false
+    CL216VT:
+        is_trial: false
+    CL218:
+        is_trial: false
+    CL218IGE:
+        is_trial: false
+    CL218OS:
+        is_trial: false
+    CL218PT:
+        is_trial: false
+    CL218VT:
+        is_trial: false
+    CL220:
+        is_trial: false
+    CL220IGE:
+        is_trial: false
+    CL220IGE-R1:
+        is_trial: false
+    CL220IGE-R2:
+        is_trial: false
+    CL220IGE-R3:
+        is_trial: false
+    CL220OS:
+        is_trial: false
+    CL220VC:
+        is_trial: false
+    ESA0017:
+        is_trial: false
+    ESA0039:
+        is_trial: false
+    MCT2358:
+        is_trial: false
+    MCT2358F3:
+        is_trial: false
+    MCT2358F3RN:
+        is_trial: false
+    MCT2358RN:
+        is_trial: false
+    MCT2360:
+        is_trial: false
+    MCT2360F3:
+        is_trial: false
+    MCT2360F3RN:
+        is_trial: false
+    MCT2360RN:
+        is_trial: false
+    MCT2834:
+        is_trial: false
+    MCT2838:
+        is_trial: false
+    MCT2838F3:
+        is_trial: false
+    MCT2838F3RN:
+        is_trial: false
+    MCT2838RN:
+        is_trial: false
+    MCT2838S:
+        is_trial: false
+    MCT2839:
+        is_trial: false
+    MCT2839F3:
+        is_trial: false
+    MCT2839F3RN:
+        is_trial: false
+    MCT2839RN:
+        is_trial: false
+    MCT2840:
+        is_trial: false
+    MCT2840F3:
+        is_trial: false
+    MCT2840F3RN:
+        is_trial: false
+    MCT2840RN:
+        is_trial: false
+    MCT2841:
+        is_trial: false
+    MCT2841F3:
+        is_trial: false
+    MCT2841F3RN:
+        is_trial: false
+    MCT2841RN:
+        is_trial: false
+    MCT2841S:
+        is_trial: false
+    MCT2842:
+        is_trial: false
+    MCT2842F3:
+        is_trial: false
+    MCT2842F3RN:
+        is_trial: false
+    MCT2842RN:
+        is_trial: false
+    MCT2843:
+        is_trial: false
+    MCT2843F3:
+        is_trial: false
+    MCT2843F3RN:
+        is_trial: false
+    MCT2843RN:
+        is_trial: false
+    MCT2856:
+        is_trial: false
+    MCT2856F3:
+        is_trial: false
+    MCT2856F3RN:
+        is_trial: false
+    MCT2856RN:
+        is_trial: false
+    MCT2856S:
+        is_trial: false
+    MCT2955:
+        is_trial: false
+    MCT3116:
+        is_trial: false
+    MCT3158:
+        is_trial: false
+    MCT3159:
+        is_trial: false
+    MCT3867:
+        is_trial: false
+    MCT3868:
+        is_trial: false
+    PT208:
+        is_trial: false
+    RH00541:
+        is_trial: false
+    RH00541F3:
+        is_trial: false
+    RH00541F3RN:
+        is_trial: false
+    RH00541RN:
+        is_trial: false
+    RH00541S:
+        is_trial: false
+    RH00542:
+        is_trial: false
+    RH00542F3:
+        is_trial: false
+    RH00542F3RN:
+        is_trial: false
+    RH00542RN:
+        is_trial: false
+    RH00542S:
+        is_trial: false
+    RH00543:
+        is_trial: false
+    RH00543F3:
+        is_trial: false
+    RH00543F3RN:
+        is_trial: false
+    RH00543RN:
+        is_trial: false
+    RH00543S:
+        is_trial: false
+    RH00544:
+        is_trial: false
+    RH00544F3:
+        is_trial: false
+    RH00544F3RN:
+        is_trial: false
+    RH00544RN:
+        is_trial: false
+    RH00544S:
+        is_trial: false
+    RV00062:
+        is_trial: false
+    RV00062F3:
+        is_trial: false
+    RV00062F3RN:
+        is_trial: false
+    RV00062RN:
+        is_trial: false
+    RV00062S:
+        is_trial: false
+    RV00063:
+        is_trial: false
+    RV00063F3:
+        is_trial: false
+    RV00063F3RN:
+        is_trial: false
+    RV00063RN:
+        is_trial: false
+    RV00063S:
+        is_trial: false
+    RV00064:
+        is_trial: false
+    RV00064F3:
+        is_trial: false
+    RV00064F3RN:
+        is_trial: false
+    RV00064RN:
+        is_trial: false
+    RV00064S:
+        is_trial: false
+    SER0407:
+        is_trial: false
+    SER0408:
+        is_trial: false
+    SER0412:
+        is_trial: false
+    SER0430:
+        is_trial: false
+    SER0431:
+        is_trial: false
+    SER0432:
+        is_trial: false
+    SER0433:
+        is_trial: false
+    SER0442:
+        is_trial: false
+    SER0583:
+        is_trial: false
+    SER0584:
+        is_trial: false
+    SVC1356:
+        is_trial: false
+    SVC1358:
+        is_trial: false
+    SVC1396:
+        is_trial: false
+    SVC1885:
+        is_trial: false
+    SVC1936:
+        is_trial: false
+    SVC1937:
+        is_trial: false
+    SVC1938:
+        is_trial: false
+    SVC1939:
+        is_trial: false
+    SVC1940:
+        is_trial: false
+    SVC1941:
+        is_trial: false
+    SVC1942:
+        is_trial: false
+    SVC1943:
+        is_trial: false
+    SVC1944:
+        is_trial: false
+    SVC1945:
+        is_trial: false
+    SVC1958:
+        is_trial: false
+    SVC1974:
+        is_trial: false
+    SVC2058:
+        is_trial: false
+    SVC2059:
+        is_trial: false
+    SVC2450:
+        is_trial: false
+    SVC2492:
+        is_trial: false
+    SVC2493:
+        is_trial: false
+    SVC3867:
+        is_trial: false
+    SVC3868:
+        is_trial: false
+    SVCCL220VC:
+        is_trial: false
+    SVCESA0017:
+        is_trial: false
+    SVCESA0039:
+        is_trial: false
+    SVCRH00541:
+        is_trial: false
+    SVCRH00542:
+        is_trial: false
+    SVCRH00543:
+        is_trial: false
+    SVCRH00544:
+        is_trial: false
+    SVCRV00062:
+        is_trial: false
+    SVCRV00063:
+        is_trial: false
+    SVCRV00064:
+        is_trial: false
+    SVCSER0583:
+        is_trial: false
+    SVCSER0584:
+        is_trial: false
+    SYS1356:
+        is_trial: false
+    SYS1358:
+        is_trial: false
+    SYS1396:
+        is_trial: false
+    SYS1885:
+        is_trial: false
+    SYS1936:
+        is_trial: false
+    SYS1937:
+        is_trial: false
+    SYS1938:
+        is_trial: false
+    SYS1939:
+        is_trial: false
+    SYS1940:
+        is_trial: false
+    SYS1941:
+        is_trial: false
+    SYS1942:
+        is_trial: false
+    SYS1943:
+        is_trial: false
+    SYS1944:
+        is_trial: false
+    SYS1945:
+        is_trial: false
+    SYS1958:
+        is_trial: false
+    SYS1974:
+        is_trial: false
+    SYS2058:
+        is_trial: false
+    SYS2059:
+        is_trial: false
+    SYS2450:
+        is_trial: false
+    SYS2492:
+        is_trial: false
+    SYS2493:
+        is_trial: false
+    TRK216:
+        is_trial: false
+    TRK218:
+        is_trial: false
+    TRK218IG:
+        is_trial: false
+    TRK220:
+        is_trial: false
+    TRK220IG:
+        is_trial: false
+    TRK220IG-R4:
+        is_trial: false
+    TRK220IG-R5:
+        is_trial: false
 
 - name: subscriptions
   use_valid_acc_num: true
@@ -284,5 +547,7 @@
 
 - name: smart_management
   skus:
-    - SVC3124: {is_trial: false}
-    - RH00066: {is_trial: false}
+    SVC3124:
+        is_trial: false
+    RH00066:
+        is_trial: false

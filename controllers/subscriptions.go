@@ -156,10 +156,8 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		var skus []string
 
 		for _, bundle := range bundleInfo {
-			for _, sku := range bundle.Skus {
-				for key := range sku {
-					skus = append(skus, key)
-				}
+			for sku, _ := range bundle.Skus {
+				skus = append(skus, sku)
 			}
 		}
 
@@ -192,11 +190,8 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 			if len(bundleInfo[b].Skus) > 0 {
 				var bundleSkus []string
-
-				for _, sku := range bundleInfo[b].Skus {
-					for key := range sku {
-						bundleSkus = append(bundleSkus, key)
-					}
+				for sku, _ := range bundleInfo[b].Skus {
+					bundleSkus = append(bundleSkus, sku)
 				}
 
 				entitle = validAccNum && len(checkCommonSkus(bundleSkus, res.Data)) > 0

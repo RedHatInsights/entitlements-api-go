@@ -31,7 +31,7 @@ type SubscriptionDetails struct {
 type Bundle struct {
 	Name           string `yaml:"name"`
 	UseValidAccNum bool   `yaml:"use_valid_acc_num"`
-	Skus           []Skus `yaml:"skus"`
+	Skus           Skus   `yaml:"skus"`
 }
 
 // SkuAttributes is a struct that is used to unmarshal the sku data in a bundle
