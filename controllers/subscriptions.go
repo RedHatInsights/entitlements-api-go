@@ -135,6 +135,19 @@ func checkCommonSkus(skus []string, userSkus []string) []string {
 	return commonSKUs
 }
 
+func onlyHasTrialSkus(b int, commonSKUs []string) bool {
+	var trialSKUs []string
+	skus := bundleInfo[b].Skus
+
+	for _, sku := range commonSKUs {
+		if skus[sku].IsTrial {
+			trialSKUs = append(trialSKUs, sku)
+		}
+	}
+
+	return len(commonSKUs) == len(trialSKUs)
+}
+
 func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w http.ResponseWriter) {
 	dependencyError := types.DependencyErrorDetails{
 		DependencyFailure: true,
@@ -187,6 +200,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
 		for b := range bundleInfo {
 			entitle := true
+			trial := false
 
 			if len(bundleInfo[b].Skus) > 0 {
 				var bundleSkus []string
@@ -194,13 +208,15 @@ func Index() func(http.ResponseWriter, *http.Request) {
 					bundleSkus = append(bundleSkus, sku)
 				}
 
-				entitle = validAccNum && len(checkCommonSkus(bundleSkus, res.Data)) > 0
+				commonSKUs := checkCommonSkus(bundleSkus, res.Data)
+				entitle = (validAccNum && len(commonSKUs) > 0)
+				trial = onlyHasTrialSkus(b, commonSKUs)
 			}
 
 			if bundleInfo[b].UseValidAccNum {
 				entitle = validAccNum && entitle
 			}
-			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle}
+			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
 		}
 
 		obj, err := json.Marshal(entitlementsResponse)

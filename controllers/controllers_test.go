@@ -212,6 +212,34 @@ var _ = Describe("Identity Controller", func() {
 		})
 
 	})
+
+	Context("When the Subs API says we have SKUs to a Bundle", func() {
+		It("should set IsTrial to `true` when the only SKU(s) entitled are trials", func() {
+			fakeResponse := SubscriptionsResponse{
+				StatusCode: 200,
+				Data:       []string{"SVC123", "SVC3851", "MCT1122"},
+				CacheHit:   false,
+			}
+
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "", fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsTrial).To(Equal(false))
+			Expect(body["TestBundle2"].IsTrial).To(Equal(true))
+		})
+
+		It("should set IsTrial to `false` when one ore more SKU(s) entitled are not trials", func() {
+			fakeResponse := SubscriptionsResponse{
+				StatusCode: 200,
+				Data:       []string{"SVC123", "SVC3851", "MCT1122", "SVC3344"},
+				CacheHit:   false,
+			}
+
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "", fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsTrial).To(Equal(false))
+			Expect(body["TestBundle2"].IsTrial).To(Equal(false))
+		})
+	})
 })
 
 func BenchmarkRequest(b *testing.B) {

@@ -1,8 +1,9 @@
 package types
 
-// EntitlementsSection is a struct representing { "is_entitled": bool } on the SubscriptionsResponse
+// EntitlementsSection is a struct representing { "is_entitled": bool, "is_trial": bool } on the SubscriptionsResponse
 type EntitlementsSection struct {
 	IsEntitled bool `json:"is_entitled"`
+	IsTrial    bool `json:"is_trial"`
 }
 
 // SubscriptionsResponse is a struct that is used to unmarshal the data that comes back from the
