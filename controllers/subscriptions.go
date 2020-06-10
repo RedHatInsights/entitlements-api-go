@@ -117,22 +117,27 @@ var GetSubscriptions = func(orgID string, skus string) types.SubscriptionsRespon
 }
 
 // Checks the common strings between two slices of strings and returns a slice of strings
-// with the common skus
-func checkCommonSkus(skus []string, userSkus []string) []string {
-	skuHash := make(map[string]bool)
+// with the common skus, as well as the subset of trial SKUs
+func commonAndTrialSKUs(b int, userSkus []string) ([]string, []string) {
 	var commonSKUs []string
+	var trialSKUs []string
 
-	for sku := range skus {
-		skuHash[skus[sku]] = true
-	}
+	skus := bundleInfo[b].Skus
 
-	for usku := range userSkus {
-		if _, found := skuHash[userSkus[usku]]; found {
-			commonSKUs = append(commonSKUs, userSkus[usku])
+	for _, usku := range userSkus {
+		if _, found := skus[usku]; found {
+			commonSKUs = append(commonSKUs, usku)
+			if skus[usku].IsTrial {
+				trialSKUs = append(trialSKUs, usku)
+			}
 		}
 	}
 
-	return commonSKUs
+	return commonSKUs, trialSKUs
+}
+
+func onlyHasTrialSkus(commonSKUs []string, trialSKUs []string) bool {
+	return len(commonSKUs) == len(trialSKUs)
 }
 
 func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w http.ResponseWriter) {
@@ -155,8 +160,10 @@ func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var skus []string
 
-		for b := range bundleInfo {
-			skus = append(skus, bundleInfo[b].Skus...)
+		for _, bundle := range bundleInfo {
+			for sku, _ := range bundle.Skus {
+				skus = append(skus, sku)
+			}
 		}
 
 		start := time.Now()
@@ -185,15 +192,18 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
 		for b := range bundleInfo {
 			entitle := true
+			trial := false
 
 			if len(bundleInfo[b].Skus) > 0 {
-				entitle = validAccNum && len(checkCommonSkus(bundleInfo[b].Skus, res.Data)) > 0
+				commonSKUs, trialSKUs := commonAndTrialSKUs(b, res.Data)
+				entitle = (validAccNum && len(commonSKUs) > 0)
+				trial = onlyHasTrialSkus(commonSKUs, trialSKUs)
 			}
 
 			if bundleInfo[b].UseValidAccNum {
 				entitle = validAccNum && entitle
 			}
-			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle}
+			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
 		}
 
 		obj, err := json.Marshal(entitlementsResponse)

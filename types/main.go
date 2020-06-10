@@ -1,8 +1,9 @@
 package types
 
-// EntitlementsSection is a struct representing { "is_entitled": bool } on the SubscriptionsResponse
+// EntitlementsSection is a struct representing { "is_entitled": bool, "is_trial": bool } on the SubscriptionsResponse
 type EntitlementsSection struct {
 	IsEntitled bool `json:"is_entitled"`
+	IsTrial    bool `json:"is_trial"`
 }
 
 // SubscriptionsResponse is a struct that is used to unmarshal the data that comes back from the
@@ -29,10 +30,18 @@ type SubscriptionDetails struct {
 
 // Bundle is a struct that is used to unmarshal the bundle info from bundles.yml
 type Bundle struct {
-	Name           string   `yaml:"name"`
-	UseValidAccNum bool     `yaml:"use_valid_acc_num"`
-	Skus           []string `yaml:"skus"`
+	Name           string `yaml:"name"`
+	UseValidAccNum bool   `yaml:"use_valid_acc_num"`
+	Skus           Skus   `yaml:"skus"`
 }
+
+// SkuAttributes is a struct that is used to unmarshal the sku data in a bundle
+type SkuAttributes struct {
+	IsTrial bool `yaml:"is_trial"`
+}
+
+// Skus is a struct that is used to unmarshal a map of SkuAttributes
+type Skus map[string]SkuAttributes
 
 // DependencyErrorDetails is a struct that is used to marshal failure details
 // from failed requests to the subscriptions service

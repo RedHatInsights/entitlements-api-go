@@ -74,3 +74,6 @@ For an example see `cat ./scripts/xrhid_helper.sh`
 * To run the unit tests, execute the following commands from the terminal:
     `cd controllers`
     `go test`
+* To include benchmarks:
+    `cd controllers`
+    `go test -bench=.`
