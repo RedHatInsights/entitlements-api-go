@@ -197,7 +197,10 @@ func Index() func(http.ResponseWriter, *http.Request) {
 			if len(bundleInfo[b].Skus) > 0 {
 				commonSKUs, trialSKUs := commonAndTrialSKUs(b, res.Data)
 				entitle = (validAccNum && len(commonSKUs) > 0)
-				trial = onlyHasTrialSkus(commonSKUs, trialSKUs)
+
+				if len(trialSKUs) > 0 {
+					trial = onlyHasTrialSkus(commonSKUs, trialSKUs)
+				}
 			}
 
 			if bundleInfo[b].UseValidAccNum {

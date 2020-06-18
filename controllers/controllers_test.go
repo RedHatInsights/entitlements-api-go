@@ -239,6 +239,21 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body["TestBundle1"].IsTrial).To(Equal(false))
 			Expect(body["TestBundle2"].IsTrial).To(Equal(false))
 		})
+
+		It("should set IsTrial to `false` when the user is not entitled because they have no SKUs", func() {
+			fakeResponse := SubscriptionsResponse{
+				StatusCode: 200,
+				Data:       []string{},
+				CacheHit:   false,
+			}
+
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetSubscriptions(DEFAULT_ORG_ID, "", fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsTrial).To(Equal(false))
+			Expect(body["TestBundle2"].IsTrial).To(Equal(false))
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+		})
 	})
 })
 
