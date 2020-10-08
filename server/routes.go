@@ -1,13 +1,13 @@
 package server
 
 import (
+	chilogger "github.com/766b/chi-logger"
 	"github.com/RedHatInsights/entitlements-api-go/apispec"
 	"github.com/RedHatInsights/entitlements-api-go/controllers"
 	log "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/platform-go-middlewares/identity"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/766b/chi-logger"
 )
 
 // DoRoutes sets up the routes used by the server.
@@ -25,6 +25,7 @@ func DoRoutes() chi.Router {
 		r.With(identity.EnforceIdentity).Route("/", controllers.LubDub)
 		r.Route("/openapi.json", apispec.OpenAPISpec)
 		r.With(identity.EnforceIdentity).Get("/services", controllers.Index())
+		r.Route("/status", controllers.Status)
 	})
 
 	return r
