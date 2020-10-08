@@ -27,5 +27,7 @@ func DoRoutes() chi.Router {
 		r.With(identity.EnforceIdentity).Get("/services", controllers.Index())
 	})
 
+	r.Route("/status", controllers.Status)
+
 	return r
 }
