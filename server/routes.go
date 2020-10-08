@@ -25,8 +25,9 @@ func DoRoutes() chi.Router {
 		r.With(identity.EnforceIdentity).Route("/", controllers.LubDub)
 		r.Route("/openapi.json", apispec.OpenAPISpec)
 		r.With(identity.EnforceIdentity).Get("/services", controllers.Index())
-		r.Route("/status", controllers.Status)
 	})
+
+	r.Route("/status", controllers.Status)
 
 	return r
 }
