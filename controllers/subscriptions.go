@@ -11,7 +11,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
-	"github.com/RedHatInsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/platform-go-middlewares/identity"
 
 	"github.com/karlseguin/ccache"
 	"github.com/sirupsen/logrus"

@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	. "github.com/RedHatInsights/entitlements-api-go/types"
-	"github.com/RedHatInsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/platform-go-middlewares/identity"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
