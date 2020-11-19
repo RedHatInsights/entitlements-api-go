@@ -167,9 +167,9 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		}
 
 		start := time.Now()
-		reqCtx := req.Context().Value(identity.Key).(identity.XRHID).Identity
-		res := GetSubscriptions(reqCtx.Internal.OrgID, strings.Join(skus, ","))
-		accNum := reqCtx.AccountNumber
+		idObj := identity.Get(req.Context()).Identity
+		res := GetSubscriptions(idObj.Internal.OrgID, strings.Join(skus, ","))
+		accNum := idObj.AccountNumber
 
 		validAccNum := !(accNum == "" || accNum == "-1")
 
