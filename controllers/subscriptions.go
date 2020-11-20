@@ -170,6 +170,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		idObj := identity.Get(req.Context()).Identity
 		res := GetSubscriptions(idObj.Internal.OrgID, strings.Join(skus, ","))
 		accNum := idObj.AccountNumber
+		isInternal := idObj.User.Internal
 
 		validAccNum := !(accNum == "" || accNum == "-1")
 
@@ -205,6 +206,10 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 			if bundleInfo[b].UseValidAccNum {
 				entitle = validAccNum && entitle
+			}
+
+			if bundleInfo[b].UseIsInternal {
+				entitle = validAccNum && isInternal
 			}
 			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
 		}

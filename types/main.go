@@ -32,6 +32,7 @@ type SubscriptionDetails struct {
 type Bundle struct {
 	Name           string `yaml:"name"`
 	UseValidAccNum bool   `yaml:"use_valid_acc_num"`
+	UseIsInternal  bool   `yaml:"use_is_internal"`
 	Skus           Skus   `yaml:"skus"`
 }
 
