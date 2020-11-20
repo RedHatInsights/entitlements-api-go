@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"regexp"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
@@ -171,6 +172,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		res := GetSubscriptions(idObj.Internal.OrgID, strings.Join(skus, ","))
 		accNum := idObj.AccountNumber
 		isInternal := idObj.User.Internal
+		validEmailMatch, _ := regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)
 
 		validAccNum := !(accNum == "" || accNum == "-1")
 
@@ -209,7 +211,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 			}
 
 			if bundleInfo[b].UseIsInternal {
-				entitle = validAccNum && isInternal
+				entitle = validAccNum && isInternal && validEmailMatch
 			}
 			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
 		}

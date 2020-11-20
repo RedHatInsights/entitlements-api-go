@@ -18,8 +18,9 @@ import (
 const DEFAULT_ORG_ID string = "4384938490324"
 const DEFAULT_ACCOUNT_NUMBER string = "540155"
 const DEFAULT_IS_INTERNAL bool = false
+const DEFAULT_EMAIL = "test+qa@redhat.com"
 
-func testRequest(method string, path string, accnum string, orgid string, isinternal bool, fakeCaller func(string, string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func testRequest(method string, path string, accnum string, orgid string, isinternal bool, email string, fakeCaller func(string, string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
@@ -29,6 +30,7 @@ func testRequest(method string, path string, accnum string, orgid string, isinte
 			AccountNumber: accnum,
 			User: identity.User{
 				Internal: isinternal,
+				Email: email,
 			},
 			Internal: identity.Internal{
 				OrgID: orgid,
@@ -55,7 +57,7 @@ func testRequest(method string, path string, accnum string, orgid string, isinte
 }
 
 func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
-	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, DEFAULT_IS_INTERNAL, fakeCaller)
+	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeCaller)
 }
 
 func fakeGetSubscriptions(expectedOrgID string, expectedSkus string, response SubscriptionsResponse) func(string, string) SubscriptionsResponse {
@@ -85,8 +87,8 @@ var _ = Describe("Identity Controller", func() {
 			Data:       []string{"foo", "bar"},
 			CacheHit:   false,
 		}
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", DEFAULT_IS_INTERNAL, fakeGetSubscriptions("540155", "", fakeResponse))
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", DEFAULT_IS_INTERNAL, fakeGetSubscriptions("deadbeef12", "", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeGetSubscriptions("540155", "", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeGetSubscriptions("deadbeef12", "", fakeResponse))
 	})
 
 	Context("When the Subs API sends back a non-200", func() {
@@ -179,7 +181,7 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with bundles using Valid Account Number false", func() {
 			// testing with account number "-1"
-			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
@@ -190,7 +192,7 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with bundles using Valid Account Number false", func() {
 			// testing with account number ""
-			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, true, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
@@ -209,7 +211,7 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with that bundle true", func() {
 			// testing with account number ""
-			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
@@ -228,25 +230,31 @@ var _ = Describe("Identity Controller", func() {
 		}
 
 		It("should entitle when valid account and principal is inernal", func() {
-			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle5"].IsEntitled).To(Equal(true))
 		})
 
+		It("should not entitle when valid account and principal is inernal but email is not @redhat.com", func() {
+			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, "jdoe@example.com", fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
+		})
+
 		It("should not entitle when valid account and principal is not inernal", func() {
-			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, false, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, false, DEFAULT_EMAIL, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
 		})
 
 		It("should not entitle when not a valid account and principal is inernal", func() {
-			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, true, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
 		})
 
 		It("should not entitle when not a valid account and principal is inernal", func() {
-			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetSubscriptions(DEFAULT_ORG_ID, "test", fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
 		})
