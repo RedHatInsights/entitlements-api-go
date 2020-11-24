@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"regexp"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
-	"github.com/RedHatInsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/platform-go-middlewares/identity"
 
 	"github.com/karlseguin/ccache"
 	"github.com/sirupsen/logrus"
@@ -167,9 +168,11 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		}
 
 		start := time.Now()
-		reqCtx := req.Context().Value(identity.Key).(identity.XRHID).Identity
-		res := GetSubscriptions(reqCtx.Internal.OrgID, strings.Join(skus, ","))
-		accNum := reqCtx.AccountNumber
+		idObj := identity.Get(req.Context()).Identity
+		res := GetSubscriptions(idObj.Internal.OrgID, strings.Join(skus, ","))
+		accNum := idObj.AccountNumber
+		isInternal := idObj.User.Internal
+		validEmailMatch, _ := regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)
 
 		validAccNum := !(accNum == "" || accNum == "-1")
 
@@ -205,6 +208,10 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 			if bundleInfo[b].UseValidAccNum {
 				entitle = validAccNum && entitle
+			}
+
+			if bundleInfo[b].UseIsInternal {
+				entitle = validAccNum && isInternal && validEmailMatch
 			}
 			entitlementsResponse[bundleInfo[b].Name] = types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
 		}

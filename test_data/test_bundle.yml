@@ -20,3 +20,6 @@
 
 - name: TestBundle4
   use_valid_acc_num: true
+
+- name: TestBundle5
+  use_is_internal: true
