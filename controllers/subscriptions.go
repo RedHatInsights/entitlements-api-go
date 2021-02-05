@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 	"regexp"
 
@@ -54,7 +53,7 @@ func SetBundleInfo(yamlFilePath string) error {
 }
 
 // GetFeatureStatus calls the IT subs service features endpoint and returns the entitlements for specified features/bundles
-var GetFeatureStatus = func(orgID string, skus string) types.SubscriptionsResponse {
+var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
 
 	if item != nil && !item.Expired() {
@@ -125,17 +124,9 @@ func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w htt
 // Index the handler for GETs to /api/entitlements/v1/services/
 func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		var skus []string
-
-		for _, bundle := range bundleInfo {
-			for sku, _ := range bundle.Skus {
-				skus = append(skus, sku)
-			}
-		}
-
 		start := time.Now()
 		idObj := identity.Get(req.Context()).Identity
-		res := GetFeatureStatus(idObj.Internal.OrgID, strings.Join(skus, ","))
+		res := GetFeatureStatus(idObj.Internal.OrgID)
 		accNum := idObj.AccountNumber
 		isInternal := idObj.User.Internal
 		validEmailMatch, _ := regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)

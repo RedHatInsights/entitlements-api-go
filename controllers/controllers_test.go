@@ -20,7 +20,7 @@ const DEFAULT_ACCOUNT_NUMBER string = "540155"
 const DEFAULT_IS_INTERNAL bool = false
 const DEFAULT_EMAIL = "test+qa@redhat.com"
 
-func testRequest(method string, path string, accnum string, orgid string, isinternal bool, email string, fakeCaller func(string, string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func testRequest(method string, path string, accnum string, orgid string, isinternal bool, email string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
@@ -56,12 +56,12 @@ func testRequest(method string, path string, accnum string, orgid string, isinte
 	return rr, ret, string(out)
 }
 
-func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string, string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeCaller)
 }
 
-func fakeGetFeatureStatus(expectedOrgID string, expectedSkus string, response SubscriptionsResponse) func(string, string) SubscriptionsResponse {
-	return func(orgID string, skus string) SubscriptionsResponse {
+func fakeGetFeatureStatus(expectedOrgID string, response SubscriptionsResponse) func(string) SubscriptionsResponse {
+	return func(orgID string) SubscriptionsResponse {
 		Expect(expectedOrgID).To(Equal(orgID))
 		return response
 	}
@@ -87,13 +87,13 @@ var _ = Describe("Identity Controller", func() {
 			Data:       FeatureStatus{},
 			CacheHit:   false,
 		}
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeGetFeatureStatus("540155", "", fakeResponse))
-		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeGetFeatureStatus("deadbeef12", "", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "540155", DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeGetFeatureStatus("540155", fakeResponse))
+		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeGetFeatureStatus("deadbeef12", fakeResponse))
 	})
 
 	Context("When the Subs API sends back a non-200", func() {
 		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string, string) SubscriptionsResponse {
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string) SubscriptionsResponse {
 				return SubscriptionsResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false}
 			})
 
@@ -111,7 +111,7 @@ var _ = Describe("Identity Controller", func() {
 
 	Context("When the Subs API sends back an error", func() {
 		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string, string) SubscriptionsResponse {
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string) SubscriptionsResponse {
 				return SubscriptionsResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false, Error: errors.New("Sub Failure")}
 			})
 
@@ -152,7 +152,7 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with bundles using Valid Account Number false", func() {
 			// testing with account number "-1"
-			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
@@ -163,7 +163,7 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with bundles using Valid Account Number false", func() {
 			// testing with account number ""
-			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
@@ -182,7 +182,7 @@ var _ = Describe("Identity Controller", func() {
 
 		It("should give back a valid EntitlementsResponse with that bundle true", func() {
 			// testing with account number ""
-			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
@@ -201,31 +201,31 @@ var _ = Describe("Identity Controller", func() {
 		}
 
 		It("should entitle when valid account and principal is internal", func() {
-			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle5"].IsEntitled).To(Equal(true))
 		})
 
 		It("should not entitle when valid account and principal is internal but email is not @redhat.com", func() {
-			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, "jdoe@example.com", fakeGetFeatureStatus(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, "jdoe@example.com", fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
 		})
 
 		It("should not entitle when valid account and principal is not internal", func() {
-			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, false, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, false, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
 		})
 
 		It("should not entitle when not a valid account and principal is internal", func() {
-			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
 		})
 
 		It("should not entitle when not a valid account and principal is internal", func() {
-			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, "test", fakeResponse))
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
 		})
@@ -244,7 +244,7 @@ var _ = Describe("Identity Controller", func() {
 				CacheHit:   false,
 			}
 
-			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetFeatureStatus(DEFAULT_ORG_ID, "", fakeResponse))
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
 			Expect(body["TestBundle1"].IsTrial).To(Equal(false))
 			Expect(body["TestBundle2"].IsTrial).To(Equal(true))
@@ -265,6 +265,6 @@ func BenchmarkRequest(b *testing.B) {
 			CacheHit:   false,
 		}
 
-		testRequestWithDefaultOrgId("GET", "/", fakeGetFeatureStatus(DEFAULT_ORG_ID, "SVC3124,MCT3691", fakeResponse))
+		testRequestWithDefaultOrgId("GET", "/", fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 	}
 }
