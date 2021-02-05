@@ -12,7 +12,7 @@ type SubscriptionsResponse struct {
 	StatusCode int
 	Body       string
 	Error      error
-	Data       []string
+	Data       FeatureStatus
 	CacheHit   bool
 }
 
@@ -20,6 +20,16 @@ type SubscriptionsResponse struct {
 // response of the Subscription Service
 type Entries struct {
 	Value string
+}
+
+type Feature struct {
+	Name string   `json:"name"`
+	IsEval bool   `json:"isEval"`
+	Entitled bool `json:"entitled"`
+}
+
+type FeatureStatus struct {
+	Features []Feature `json:"features"`
 }
 
 // SubscriptionDetails is a struct that is used to unmarshal the data that comes back in the Body
