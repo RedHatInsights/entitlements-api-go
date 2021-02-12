@@ -157,13 +157,9 @@ func Index() func(http.ResponseWriter, *http.Request) {
 			if len(b.Skus) > 0 {
 				entitle = false
 				for _, f := range res.Data.Features {
-					name := f.Name
-					isEval := f.IsEval
-					entitled := f.Entitled
-
-					if name == b.Name {
-						entitle = entitled
-						trial = isEval
+					if f.Name == b.Name {
+						entitle = f.Entitled
+						trial = f.IsEval
 					}
 				}
 			}
