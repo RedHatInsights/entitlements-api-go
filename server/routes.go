@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/766b/chi-logger"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // DoRoutes sets up the routes used by the server.
@@ -28,6 +29,7 @@ func DoRoutes() chi.Router {
 	})
 
 	r.Route("/status", controllers.Status)
+	r.Handle("/metrics", promhttp.Handler())
 
 	return r
 }
