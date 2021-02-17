@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -35,6 +36,8 @@ type EntitlementsConfigKeysType struct {
 	CwRegion        string
 	CwKey         	string
 	CwSecret        string
+	Features        string
+	FeaturesPath    string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -52,6 +55,12 @@ var Keys = EntitlementsConfigKeysType{
 	CwRegion:        "CW_REGION",
 	CwKey:           "CW_KEY",
 	CwSecret:        "CW_SECRET",
+	Features:        "FEATURES",
+}
+
+func getBaseFeaturesPath(options *viper.Viper) string {
+	featureList := strings.Split(options.GetString(Keys.Features), ",")
+	return "?features=" + strings.Join(featureList, "&features=")
 }
 
 func getRootCAs(localCertFile string) *x509.CertPool {
@@ -118,9 +127,13 @@ func initialize() {
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
 	options.SetDefault(Keys.CwLogStream, hostname)
 	options.SetDefault(Keys.CwRegion, "us-east-1")
+	options.SetDefault(Keys.Features, "ansible,smart_management")
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
+
+	// Must be set after AutomaticEnv() in order to pickup FEATURES env variable
+	options.SetDefault(Keys.FeaturesPath, getBaseFeaturesPath(options))
 
 	config = &EntitlementsConfig{
 		Certs:   getCerts(options),

@@ -23,3 +23,12 @@
 
 - name: TestBundle5
   use_is_internal: true
+
+- name: TestBundle6
+  skus:
+    SVC321:
+      is_trial: false
+    SVC654:
+      is_trial: false
+    MCT987:
+      is_trial: false
