@@ -16,13 +16,19 @@ import (
 	"github.com/karlseguin/ccache"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type getter func(string) []string
 
 var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
-
 var bundleInfo []types.Bundle
+var subsFailure = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "it_subscriptions_service_failure",
+	Help: "Total number of IT subscriptions service failures",
+})
+
 
 func getClient() *http.Client {
 	// Create a HTTPS client that uses the supplied pub/priv mutual TLS certs
@@ -143,6 +149,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		l.Log.WithFields(logrus.Fields{"subs_call_duration": time.Since(start), "cache_hit": res.CacheHit}).Info("subs call complete")
 
 		if res.StatusCode != 200 {
+			subsFailure.Inc()
 			errMsg := "Got back a non 200 status code from Subscriptions Service"
 			l.Log.WithFields(logrus.Fields{"code": res.StatusCode, "body": res.Body}).Error(errMsg)
 			failOnDependencyError(errMsg, res, w)
