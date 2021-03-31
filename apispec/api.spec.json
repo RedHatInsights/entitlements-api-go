@@ -69,6 +69,10 @@
                     "is_entitled": {
                         "type": "boolean",
                         "default": false
+                    },
+                    "is_trial": {
+                        "type": "boolean",
+                        "default": false
                     }
                 }
             },
@@ -78,11 +82,21 @@
                     "$ref": "#/components/schemas/ServiceDetails"
                 },
                 "example": {
+                    "ansible": {
+                        "is_entitled": true,
+                        "is_trial": true
+                    },
+                    "cost_management": {
+                        "is_entitled": true,
+                        "is_trial": false
+                    },
                     "insights": {
-                        "is_entitled": true
+                        "is_entitled": false,
+                        "is_trial": false
                     },
                     "smart_management": {
-                        "is_entitled": false
+                        "is_entitled": false,
+                        "is_trial": true
                     }
                 }
             }
