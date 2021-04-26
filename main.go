@@ -16,6 +16,9 @@ import (
 
 func main() {
 
+	// Init the logger first thing
+	logger.InitLogger()
+
 	var dsn string = os.Getenv("SENTRY_DSN")
 
 	if dsn != "" {
@@ -27,8 +30,6 @@ func main() {
 	  logger.Log.Info("SENTRY_DSN was not set, skipping Sentry initialization.")
 	}
 
-	// Init the logger first thing
-	logger.InitLogger()
 	// init config here
 	if err := controllers.SetBundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)); err != nil {
 		logger.Log.WithFields(logrus.Fields{"error": err}).Fatal("Error reading bundles.yml")
