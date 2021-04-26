@@ -27,7 +27,7 @@ func main() {
 			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry")
 		}
 	} else {
-	  logger.Log.Info("SENTRY_DSN was not set, skipping Sentry initialization.")
+		logger.Log.Info("SENTRY_DSN was not set, skipping Sentry initialization.")
 	}
 
 	// init config here
