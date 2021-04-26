@@ -19,17 +19,7 @@ func main() {
 	var dsn string = os.Getenv("SENTRY_DSN")
 
 	if dsn != "" {
-		err := sentry.Init(sentry.ClientOptions{
-			// Either set your DSN here or set the SENTRY_DSN environment variable.
-			//Dsn: "https://examplePublicKey@o0.ingest.sentry.io/0",
-			// Either set environment and release here or set the SENTRY_ENVIRONMENT
-			// and SENTRY_RELEASE environment variables.
-			//Environment: "",
-			//Release:     "my-project-name@1.0.0",
-			// Enable printing of SDK debug messages.
-			// Useful when getting started or trying to figure something out.
-			Debug: false,
-		})
+		err := sentry.Init(sentry.ClientOptions{})
 		if err != nil {
 			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry")
 		}
