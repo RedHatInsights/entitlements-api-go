@@ -31,7 +31,7 @@ func main() {
 			Debug: false,
 		})
 		if err != nil {
-			logger.Log.WithFields(logrus.Fields{"error": err}).Fatal("Error loading Sentry")
+			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry")
 		}
 	}
 
