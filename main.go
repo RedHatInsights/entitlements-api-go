@@ -33,6 +33,8 @@ func main() {
 		if err != nil {
 			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry")
 		}
+	} else {
+	  logger.Log.Info("SENTRY_DSN was not set, skipping Sentry initialization.")
 	}
 
 	// Init the logger first thing
