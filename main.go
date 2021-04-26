@@ -25,8 +25,7 @@ func main() {
 		err := sentry.Init(sentry.ClientOptions{})
 		if err != nil {
 			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry SDK")
-		}
-		else {
+		} else {
 			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Sentry SDK initialization was successful!")
 		}
 	} else {
