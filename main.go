@@ -24,7 +24,10 @@ func main() {
 	if dsn != "" {
 		err := sentry.Init(sentry.ClientOptions{})
 		if err != nil {
-			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry")
+			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry SDK")
+		}
+		else {
+			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Sentry SDK initialization was successful!")
 		}
 	} else {
 		logger.Log.Info("SENTRY_DSN was not set, skipping Sentry initialization.")
