@@ -34,6 +34,7 @@ func main() {
 
 	// init config here
 	if err := controllers.SetBundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)); err != nil {
+		sentry.CaptureException(err)
 		logger.Log.WithFields(logrus.Fields{"error": err}).Fatal("Error reading bundles.yml")
 	}
 

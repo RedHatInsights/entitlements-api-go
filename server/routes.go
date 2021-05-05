@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/766b/chi-logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	sentryhttp "github.com/getsentry/sentry-go/http"
 )
 
 // DoRoutes sets up the routes used by the server.
@@ -17,10 +18,15 @@ import (
 func DoRoutes() chi.Router {
 	r := chi.NewRouter()
 
+	sentryMiddleware := sentryhttp.New(sentryhttp.Options{
+		Repanic: true,
+	})
+
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(chilogger.NewLogrusMiddleware("router", log.Log))
+	r.Use(sentryMiddleware.Handle)
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.With(identity.EnforceIdentity).Route("/", controllers.LubDub)
