@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 	"regexp"
+	"errors"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
@@ -18,6 +19,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/getsentry/sentry-go"
 )
 
 type getter func(string) []string
@@ -47,11 +49,13 @@ func SetBundleInfo(yamlFilePath string) error {
 	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
 
 	if err != nil {
+		sentry.CaptureException(err)
 		return err
 	}
 
 	err = yaml.Unmarshal([]byte(bundlesYaml), &bundleInfo)
 	if err != nil {
+		sentry.CaptureException(err)
 		return err
 	}
 
@@ -79,6 +83,7 @@ var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 	resp, err := getClient().Get(req)
 
 	if err != nil {
+		sentry.CaptureException(err)
 		return types.SubscriptionsResponse{
 			Error: err,
 		}
@@ -142,6 +147,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		if res.Error != nil {
 			errMsg := "Unexpected error while talking to Subs Service"
 			l.Log.WithFields(logrus.Fields{"error": res.Error}).Error(errMsg)
+			sentry.CaptureException(res.Error)
 			failOnDependencyError(errMsg, res, w)
 			return
 		}
@@ -152,6 +158,13 @@ func Index() func(http.ResponseWriter, *http.Request) {
 			subsFailure.Inc()
 			errMsg := "Got back a non 200 status code from Subscriptions Service"
 			l.Log.WithFields(logrus.Fields{"code": res.StatusCode, "body": res.Body}).Error(errMsg)
+
+			sentry.WithScope(func(scope *sentry.Scope) {
+				scope.SetExtra("response_body", res.Body);
+				scope.SetExtra("response_status", res.StatusCode);
+				sentry.CaptureException(errors.New(errMsg))
+			})
+
 			failOnDependencyError(errMsg, res, w)
 			return
 		}
@@ -185,6 +198,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 		if err != nil {
 			l.Log.WithFields(logrus.Fields{"error": err}).Error("Unexpected error while unmarshalling JSON data from Subs Service")
+			sentry.CaptureException(err)
 			http.Error(w, http.StatusText(500), 500)
 			return
 		}
