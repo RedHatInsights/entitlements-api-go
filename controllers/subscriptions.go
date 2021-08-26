@@ -30,6 +30,11 @@ var subsFailure = promauto.NewCounter(prometheus.CounterOpts{
 	Name: "it_subscriptions_service_failure",
 	Help: "Total number of IT subscriptions service failures",
 })
+var subsTimeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
+	Name:    "it_subscriptions_service_time_taken",
+	Help:    "Subscriptions latency distributions.",
+	Buckets: prometheus.LinearBuckets(0.25, 0.25, 20),
+})
 
 
 func getClient() *http.Client {
@@ -152,7 +157,9 @@ func Index() func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		l.Log.WithFields(logrus.Fields{"subs_call_duration": time.Since(start), "cache_hit": res.CacheHit}).Info("subs call complete")
+		subsTimeTaken := time.Since(start).Seconds()
+		l.Log.WithFields(logrus.Fields{"subs_call_duration": subsTimeTaken, "cache_hit": res.CacheHit}).Info("subs call complete")
+		subsTimeHistogram.Observe(subsTimeTaken)
 
 		if res.StatusCode != 200 {
 			subsFailure.Inc()
