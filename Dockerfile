@@ -20,8 +20,11 @@ FROM registry.redhat.io/ubi8/ubi-minimal
 
 WORKDIR /
 
-# Copy GO executable file from the builder image
+# Copy GO executable file and need directories from the builder image
 COPY --from=builder /go/src/app/entitlements-api-go ./entitlements-api-go
+COPY resources ./resources
+COPY test_data ./test_data
+COPY bundles ./bundles
 
 USER 1001
 
