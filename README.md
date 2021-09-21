@@ -64,6 +64,13 @@ Now that everything is set up, you can run the application using:
 bash ./scripts/watch.sh ./local/development.env.sh
 ```
 
+To run locally with Docker:
+
+```bash
+docker build -t entitlements-api-go .
+docker run entitlements-api-go -p 3000:3000
+```
+
 ## Testing Entitlements API with curl
 
 The Entitlements API requires that you pass in a valid x-redhat-identity header or it rejects requests.
