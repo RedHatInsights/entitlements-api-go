@@ -13,7 +13,7 @@ source $CICD_ROOT/build.sh
 
 # NOP action until PR Check logic is added in the future
 mkdir -p $WORKSPACE/artifacts
-cat << EOF > $WORKSPACE/artifacts/dummy.xml
+cat << EOF > $WORKSPACE/artifacts/junit-dummy.xml
 <testsuite tests="1">
     <testcase classname="dummy" name="dummytest"/>
 </testsuite>
