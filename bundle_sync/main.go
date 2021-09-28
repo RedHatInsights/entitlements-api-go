@@ -14,39 +14,14 @@ import (
 	"time"
 
 	cfg "github.com/RedHatInsights/entitlements-api-go/config"
+	t "github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
 
 var (
-	endpoints = []string{"ansible", "smart_management", "openshift_container_platform"}
+	endpoints = strings.Split(cfg.Keys.Features, ",")
 )
-
-// SubModel is the struct for the json request/response from subscriptions API
-type SubModel struct {
-	Name  string `json:"name"`
-	Rules Rules `json:"rules"`
-}
-
-type Rules struct {
-	MatchProducts []MatchProducts `json:"matchProducts,omitempty"`
-	ExcludeProducts []ExcludeProducts `json:"excludeProducts,omitempty"`
-}
-
-type MatchProducts struct {
-	SkuCodes []string `json:"skuCodes,omitempty"`
-}
-
-type ExcludeProducts struct {
-	SkuCodes []string `json:"skuCodes,omitempty"`
-}
-
-type YAMLSkus []struct {
-	Name string `yaml:"name"`
-	Skus map[string]map[string]bool `yaml:"skus,omitempty"`
-	AccNum bool `yaml:"use_valid_acc_num,omitempty"`
-}
-
 
 // assertEq compares two slices of strings and returns true if they are equalzs
 func assertEq(test []string, ans []string) bool {
@@ -73,56 +48,46 @@ func getClient(cfg *cfg.EntitlementsConfig) *http.Client {
 	return client
 }
 
-func getCurrent(client *http.Client, url string) (SubModel, error) {
+func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 	resp, err := client.Get(url)
 	if err != nil {
 		log.Fatal(err)
-		return SubModel{}, err
+		return t.SubModel{}, err
 	}
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
-		return SubModel{}, err
+		return t.SubModel{}, err
 	}
 
-	var currentSubs SubModel
+	var currentSubs t.SubModel
 	json.Unmarshal(data, &currentSubs)
 	return currentSubs, nil
 }
 
-func getUpdates(cfg *viper.Viper) (YAMLSkus, error){
-	var env string = strings.Split(cfg.GetString("SUBS_HOST"), ".")[1]
-
-	if env == "api" {
-		env = "prod"
-	}
-	if env == "dev" {
-		env = "ci"
-	}
-	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/RedHatInsights/entitlements-config/master/configs/%s/bundles.yml", env))
+func getUpdates(cfg *viper.Viper) ([]t.Bundle, error){
+	bundlesYaml, err := ioutil.ReadFile(cfg.GetString("BUNDLES_YAML"))
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
+		return []t.Bundle{}, err
 	}
-	defer resp.Body.Close()
 
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal()
-		return nil, err
-	}
 	
-	var m YAMLSkus
-	yaml.Unmarshal(data, &m)
+	var m []t.Bundle
+	err = yaml.Unmarshal(bundlesYaml, &m)
+	if err != nil {
+		log.Fatal(err)
+		return []t.Bundle{}, err
+	}
 
 	return m, nil
 
 }
 
 func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
-	url := fmt.Sprintf("%s%s", cfg.GetString("SUBS_HOST"), cfg.GetString("SUB_API_BASE_PATH"))
+	url := fmt.Sprintf("%s%s%s", cfg.GetString("SUBS_HOST"), cfg.GetString("SUB_API_BASE_PATH"), "features/")
 	req, err := client.Post(url, "application/json", strings.NewReader(string(data)))
 	if err != nil {
 		log.Fatal(err)
@@ -142,9 +107,10 @@ func main() {
 	for _, endpoint := range endpoints {
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
-		url := fmt.Sprintf("%s%s",
+		url := fmt.Sprintf("%s%s%s",
 						   options.GetString("SUBS_HOST"),
-						   options.GetString("SUB_API_BASE_PATH"))
+						   options.GetString("SUB_API_BASE_PATH"),
+						   "features/")
 		current, err := getCurrent(client, url + endpoint)
 		if err != nil {
 			os.Exit(1)
@@ -172,11 +138,11 @@ func main() {
 		if assertEq(skus[endpoint], current_skus[endpoint]) { 
 			fmt.Printf("No updates for %s\n", endpoint)
 		} else {
-			var m []MatchProducts
-			m = append(m, MatchProducts{SkuCodes: skus[endpoint]})
-			v := SubModel{
+			var m []t.MatchProducts
+			m = append(m, t.MatchProducts{SkuCodes: skus[endpoint]})
+			v := t.SubModel{
 				Name: endpoint,
-				Rules: Rules{
+				Rules: t.Rules{
 					MatchProducts: m,
 				},
 			}

@@ -69,3 +69,25 @@ type DependencyErrorDetails struct {
 type DependencyErrorResponse struct {
 	Error DependencyErrorDetails `json:"error"`
 }
+
+// SubModel is the struct for GET and POST data for subscriptions
+type SubModel struct {
+	Name  string `json:"name"`
+	Rules Rules `json:"rules"`
+}
+
+// Rules contains match and exlude product arrays
+type Rules struct {
+	MatchProducts []MatchProducts `json:"matchProducts,omitempty"`
+	ExcludeProducts []ExcludeProducts `json:"excludeProducts,omitempty"`
+}
+
+// MatchProducts contains the SkuCodes array
+type MatchProducts struct {
+	SkuCodes []string `json:"skuCodes,omitempty"`
+}
+
+// ExcludeProducts contains the SkuCodes array
+type ExcludeProducts struct {
+	SkuCodes []string `json:"skuCodes,omitempty"`
+}
