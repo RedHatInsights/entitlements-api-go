@@ -68,7 +68,7 @@ func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 }
 
 func getUpdates(cfg *viper.Viper) ([]t.Bundle, error){
-	bundlesYaml, err := ioutil.ReadFile(cfg.GetString("BUNDLES_YAML"))
+	bundlesYaml, err := ioutil.ReadFile(cfg.GetString("BUNDLE_INFO_YAML"))
 	if err != nil {
 		log.Fatal(err)
 		return []t.Bundle{}, err
