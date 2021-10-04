@@ -18,10 +18,174 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 210,
-      "iteration": 1633371005123,
+      "id": 211,
+      "iteration": 1633372805214,
       "links": [],
       "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "crcs02ue1-prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "hiddenSeries": false,
+          "id": 21,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(it_subscriptions_service_failure{namespace=\"$namespace\", service=\"entitlements-api-go\", pod=~\".*entitlements.*\"}[5m]))",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "IT subscriptions service failure",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "cards": {
+            "cardPadding": null,
+            "cardRound": null
+          },
+          "color": {
+            "cardColor": "#c15c17",
+            "colorScale": "linear",
+            "colorScheme": "interpolateOranges",
+            "exponent": 0.9,
+            "min": null,
+            "mode": "opacity"
+          },
+          "dataFormat": "tsbuckets",
+          "datasource": "crcs02ue1-prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "heatmap": {},
+          "hideZeroBuckets": false,
+          "highlightCards": true,
+          "id": 22,
+          "legend": {
+            "show": true
+          },
+          "links": [],
+          "reverseYBuckets": false,
+          "targets": [
+            {
+              "expr": "sum(increase(it_subscriptions_service_time_taken_bucket{service=\"entitlements-api-go\"}[5m])) by (le)",
+              "format": "heatmap",
+              "interval": "15s",
+              "legendFormat": "{{le}} s",
+              "refId": "A"
+            }
+          ],
+          "title": "IT subscriptions latency",
+          "tooltip": {
+            "show": true,
+            "showHistogram": false
+          },
+          "type": "heatmap",
+          "xAxis": {
+            "show": true
+          },
+          "xBucketNumber": null,
+          "xBucketSize": null,
+          "yAxis": {
+            "decimals": null,
+            "format": "dtdurations",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true,
+            "splitFactor": null
+          },
+          "yBucketBound": "auto",
+          "yBucketNumber": null,
+          "yBucketSize": null
+        },
         {
           "cards": {
             "cardPadding": null,
@@ -47,7 +211,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 0
+            "y": 8
           },
           "heatmap": {},
           "hideZeroBuckets": false,
@@ -110,7 +274,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 0
+            "y": 9
           },
           "hiddenSeries": false,
           "id": 5,
@@ -207,7 +371,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 9
+            "y": 17
           },
           "hiddenSeries": false,
           "id": 13,
@@ -307,7 +471,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 9
+            "y": 18
           },
           "hiddenSeries": false,
           "id": 17,
@@ -405,7 +569,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 26
           },
           "hiddenSeries": false,
           "id": 15,
@@ -504,7 +668,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 27
           },
           "hiddenSeries": false,
           "id": 19,
@@ -602,7 +766,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 27
+            "y": 35
           },
           "hiddenSeries": false,
           "id": 11,
@@ -698,7 +862,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 27
+            "y": 36
           },
           "hiddenSeries": false,
           "id": 9,
@@ -806,8 +970,8 @@ data:
             "allValue": null,
             "current": {
               "selected": true,
-              "text": "entitlements-prod",
-              "value": "entitlements-prod"
+              "text": "entitlements-stage",
+              "value": "entitlements-stage"
             },
             "hide": 0,
             "includeAll": false,
@@ -816,12 +980,12 @@ data:
             "name": "namespace",
             "options": [
               {
-                "selected": true,
+                "selected": false,
                 "text": "entitlements-prod",
                 "value": "entitlements-prod"
               },
               {
-                "selected": false,
+                "selected": true,
                 "text": "entitlements-stage",
                 "value": "entitlements-stage"
               }
@@ -863,7 +1027,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Operations - Entitlements w/CPU",
+      "title": "Operations - Entitlements",
       "uid": "TjP_nMWMkd",
       "version": 1
     }
