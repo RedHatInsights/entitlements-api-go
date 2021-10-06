@@ -51,26 +51,26 @@ func getClient(cfg *cfg.EntitlementsConfig) *http.Client {
 func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 	resp, err := client.Get(url)
 	if err != nil {
-		log.Fatal(err)
 		return t.SubModel{}, err
 	}
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
 		return t.SubModel{}, err
 	}
 
 	var currentSubs t.SubModel
-	json.Unmarshal(data, &currentSubs)
+	err = json.Unmarshal(data, &currentSubs)
+	if err != nil {
+		return t.SubModel{}, err
+	}	
 	return currentSubs, nil
 }
 
 func getUpdates(cfg *viper.Viper) ([]t.Bundle, error){
 	bundlesYaml, err := ioutil.ReadFile(cfg.GetString("BUNDLE_INFO_YAML"))
 	if err != nil {
-		log.Fatal(err)
 		return []t.Bundle{}, err
 	}
 
@@ -78,7 +78,6 @@ func getUpdates(cfg *viper.Viper) ([]t.Bundle, error){
 	var m []t.Bundle
 	err = yaml.Unmarshal(bundlesYaml, &m)
 	if err != nil {
-		log.Fatal(err)
 		return []t.Bundle{}, err
 	}
 
@@ -90,7 +89,6 @@ func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
 	url := fmt.Sprintf("%s%s%s", cfg.GetString("SUBS_HOST"), cfg.GetString("SUB_API_BASE_PATH"), "features/")
 	req, err := client.Post(url, "application/json", strings.NewReader(string(data)))
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	defer req.Body.Close()
@@ -113,11 +111,13 @@ func main() {
 						   "features/")
 		current, err := getCurrent(client, url + endpoint)
 		if err != nil {
+			log.Fatalf("Unable to get current subscriptions: %s", err)
 			os.Exit(1)
 		}
 
 		sku_updates, err := getUpdates(options)
 		if err != nil {
+			log.Fatalf("Unable to get updated YAML: %s", err)
 			os.Exit(1)
 		}
 		for _, v := range sku_updates {
@@ -148,11 +148,12 @@ func main() {
 			}
 			b, err := json.Marshal(v)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalf("Failed to Marshal updated JSON: %s", err)
+				os.Exit(1)
 			}
 			err = postUpdates(options, client, b)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalf("Unable to post updates to subscriptions API: %s", err)
 				os.Exit(1)
 			} else {
 				fmt.Printf("Updated %s\n", endpoint)
