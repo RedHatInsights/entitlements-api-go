@@ -19,10 +19,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var (
-	endpoints = strings.Split(cfg.Keys.Features, ",")
-)
-
 // assertEq compares two slices of strings and returns true if they are equalzs
 func assertEq(test []string, ans []string) bool {
     return reflect.DeepEqual(test, ans)
@@ -102,6 +98,7 @@ func main() {
 	c := cfg.GetConfig()
 	client := getClient(c)
 	options := c.Options
+	endpoints := strings.Split(c.Options.GetString(cfg.Keys.Features), ",")
 	for _, endpoint := range endpoints {
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
