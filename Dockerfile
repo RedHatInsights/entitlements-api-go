@@ -23,7 +23,7 @@ WORKDIR /
 
 # Copy GO executable file and need directories from the builder image
 COPY --from=builder /go/src/app/entitlements-api-go ./entitlements-api-go
-COPY --from=build /go/src/app/bundle-sync ./bundle-sync
+COPY --from=builder /go/src/app/bundle-sync ./bundle-sync
 COPY resources ./resources
 COPY apispec ./apispec
 COPY bundles ./bundles
