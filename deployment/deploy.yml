@@ -48,6 +48,10 @@ objects:
                     - entitlements-api-go
                 topologyKey: kubernetes.io/hostname
               weight: 99
+        initContainers:
+          - name: bundle-sync
+            image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
+            command: ["/bundle-sync"]
         containers:
         - env:
           - name: ENT_CERTS_FROM_ENV
