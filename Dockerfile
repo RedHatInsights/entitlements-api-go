@@ -14,6 +14,7 @@ COPY . .
 USER 0
 
 RUN go build -o entitlements-api-go main.go
+RUN go build -o ./bundle-sync bundle_sync/main.go
 
 # Using ubi8-minimal due to its smaller footprint
 FROM registry.redhat.io/ubi8/ubi-minimal
@@ -22,6 +23,7 @@ WORKDIR /
 
 # Copy GO executable file and need directories from the builder image
 COPY --from=builder /go/src/app/entitlements-api-go ./entitlements-api-go
+COPY --from=build /go/src/app/bundle-sync ./bundle-sync
 COPY resources ./resources
 COPY apispec ./apispec
 COPY bundles ./bundles
