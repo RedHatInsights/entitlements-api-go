@@ -3,39 +3,42 @@ package controllers
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
-	"time"
 	"regexp"
-	"errors"
+	"strconv"
+	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/karlseguin/ccache"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/getsentry/sentry-go"
 )
 
 type getter func(string) []string
 
 var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
 var bundleInfo []types.Bundle
-var subsFailure = promauto.NewCounter(prometheus.CounterOpts{
-	Name: "it_subscriptions_service_failure",
-	Help: "Total number of IT subscriptions service failures",
-})
+var subsFailure = promauto.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "it_subscriptions_service_failure",
+		Help: "Total number of IT subscriptions service failures",
+	},
+	[]string{"code"},
+)
 var subsTimeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
 	Name:    "it_subscriptions_service_time_taken",
 	Help:    "Subscriptions latency distributions.",
 	Buckets: prometheus.LinearBuckets(0.25, 0.25, 20),
 })
-
 
 func getClient() *http.Client {
 	// Create a HTTPS client that uses the supplied pub/priv mutual TLS certs
@@ -83,7 +86,6 @@ var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 	req := config.GetConfig().Options.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/featureStatus" +
 		q + "&accountId=" + orgID
-
 
 	resp, err := getClient().Get(req)
 
@@ -134,6 +136,7 @@ func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w htt
 	errorResponse := types.DependencyErrorResponse{Error: dependencyError}
 	errorResponsejson, _ := json.Marshal(errorResponse)
 
+	subsFailure.WithLabelValues(strconv.Itoa(res.StatusCode)).Inc()
 	http.Error(w, string(errorResponsejson), 500)
 }
 
@@ -162,13 +165,12 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		subsTimeHistogram.Observe(subsTimeTaken)
 
 		if res.StatusCode != 200 {
-			subsFailure.Inc()
 			errMsg := "Got back a non 200 status code from Subscriptions Service"
 			l.Log.WithFields(logrus.Fields{"code": res.StatusCode, "body": res.Body}).Error(errMsg)
 
 			sentry.WithScope(func(scope *sentry.Scope) {
-				scope.SetExtra("response_body", res.Body);
-				scope.SetExtra("response_status", res.StatusCode);
+				scope.SetExtra("response_body", res.Body)
+				scope.SetExtra("response_status", res.StatusCode)
 				sentry.CaptureException(errors.New(errMsg))
 			})
 

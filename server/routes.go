@@ -1,15 +1,15 @@
 package server
 
 import (
+	chilogger "github.com/766b/chi-logger"
 	"github.com/RedHatInsights/entitlements-api-go/apispec"
 	"github.com/RedHatInsights/entitlements-api-go/controllers"
 	log "github.com/RedHatInsights/entitlements-api-go/logger"
-	"github.com/redhatinsights/platform-go-middlewares/identity"
+	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/766b/chi-logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	sentryhttp "github.com/getsentry/sentry-go/http"
+	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
 
 // DoRoutes sets up the routes used by the server.
@@ -22,6 +22,7 @@ func DoRoutes() chi.Router {
 		Repanic: true,
 	})
 
+	r.Use(prometheusMiddleware)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
