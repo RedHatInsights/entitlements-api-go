@@ -62,6 +62,9 @@ objects:
             envFrom:
               - secretRef:
                   name: go-api-certs
+            volumeMounts:
+            - mountPath: /bundles
+              name: default-entitlements-config
         containers:
         - env:
           - name: ENT_CERTS_FROM_ENV
