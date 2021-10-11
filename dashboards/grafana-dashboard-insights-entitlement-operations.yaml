@@ -18,16 +18,30 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 211,
-      "iteration": 1633372805214,
+      "id": 206,
+      "iteration": 1633985866500,
       "links": [],
       "panels": [
         {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 28,
+          "panels": [],
+          "title": "API status /v1/services",
+          "type": "row"
+        },
+        {
           "aliasColors": {},
-          "bars": false,
+          "bars": true,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "crcs02ue1-prometheus",
+          "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -40,10 +54,10 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 0
+            "y": 1
           },
           "hiddenSeries": false,
-          "id": 21,
+          "id": 34,
           "legend": {
             "avg": false,
             "current": false,
@@ -53,8 +67,9 @@ data:
             "total": false,
             "values": false
           },
-          "lines": true,
+          "lines": false,
           "linewidth": 1,
+          "links": [],
           "nullPointMode": "null",
           "options": {
             "alertThreshold": true
@@ -70,9 +85,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(it_subscriptions_service_failure{namespace=\"$namespace\", service=\"entitlements-api-go\", pod=~\".*entitlements.*\"}[5m]))",
-              "interval": "",
-              "legendFormat": "",
+              "expr": "sum(increase(entitlements_api_response_status{namespace=\"$namespace\", service=\"entitlements-api-go\", path=\"/api/entitlements/v1/services\"}[1m])) by (code)",
+              "format": "time_series",
+              "instant": false,
+              "interval": "1m",
+              "legendFormat": "{{status}}",
               "refId": "A"
             }
           ],
@@ -80,7 +97,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "IT subscriptions service failure",
+          "title": "API request counts per minute",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -123,78 +140,9 @@ data:
             "cardRound": null
           },
           "color": {
-            "cardColor": "#c15c17",
+            "cardColor": "#FF780A",
             "colorScale": "linear",
-            "colorScheme": "interpolateOranges",
-            "exponent": 0.9,
-            "min": null,
-            "mode": "opacity"
-          },
-          "dataFormat": "tsbuckets",
-          "datasource": "crcs02ue1-prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 12,
-            "y": 0
-          },
-          "heatmap": {},
-          "hideZeroBuckets": false,
-          "highlightCards": true,
-          "id": 22,
-          "legend": {
-            "show": true
-          },
-          "links": [],
-          "reverseYBuckets": false,
-          "targets": [
-            {
-              "expr": "sum(increase(it_subscriptions_service_time_taken_bucket{service=\"entitlements-api-go\"}[5m])) by (le)",
-              "format": "heatmap",
-              "interval": "15s",
-              "legendFormat": "{{le}} s",
-              "refId": "A"
-            }
-          ],
-          "title": "IT subscriptions latency",
-          "tooltip": {
-            "show": true,
-            "showHistogram": false
-          },
-          "type": "heatmap",
-          "xAxis": {
-            "show": true
-          },
-          "xBucketNumber": null,
-          "xBucketSize": null,
-          "yAxis": {
-            "decimals": null,
-            "format": "dtdurations",
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true,
-            "splitFactor": null
-          },
-          "yBucketBound": "auto",
-          "yBucketNumber": null,
-          "yBucketSize": null
-        },
-        {
-          "cards": {
-            "cardPadding": null,
-            "cardRound": null
-          },
-          "color": {
-            "cardColor": "#c15c17",
-            "colorScale": "linear",
-            "colorScheme": "interpolateOranges",
+            "colorScheme": "interpolateCubehelixDefault",
             "exponent": 0.9,
             "min": null,
             "mode": "opacity"
@@ -208,15 +156,15 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 9,
+            "h": 8,
             "w": 12,
-            "x": 0,
-            "y": 8
+            "x": 12,
+            "y": 1
           },
           "heatmap": {},
           "hideZeroBuckets": false,
           "highlightCards": true,
-          "id": 7,
+          "id": 33,
           "legend": {
             "show": true
           },
@@ -224,14 +172,14 @@ data:
           "reverseYBuckets": false,
           "targets": [
             {
-              "expr": "sum(increase(api_3scale_gateway_api_time_bucket{exported_service=\"entitlements\"}[5m])) by (le)",
+              "expr": "sum(increase(entitlements_api_duration_seconds_bucket{namespace=\"$namespace\", service=\"entitlements-api-go\", path=\"/api/entitlements/v1/services\"}[$__interval])) by (le)",
               "format": "heatmap",
-              "interval": "15s",
-              "legendFormat": "{{le}} ms",
+              "interval": "1m",
+              "legendFormat": "{{le}} s",
               "refId": "A"
             }
           ],
-          "title": "Latency",
+          "title": "API latency",
           "tooltip": {
             "show": true,
             "showHistogram": false
@@ -271,10 +219,176 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 9,
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 35,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "(sum(rate(entitlements_api_response_status{namespace=\"$namespace\", service=\"entitlements-api-go\", path=\"/api/entitlements/v1/services\"}[2m])) - sum(rate(api_3scale_gateway_api_time_count{exported_service=\"entitlements\"}[2m])))*60",
+              "interval": "1m",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Internal requests per minute (2 minutes average)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "cards": {
+            "cardPadding": null,
+            "cardRound": null
+          },
+          "color": {
+            "cardColor": "#FF780A",
+            "colorScale": "linear",
+            "colorScheme": "interpolateOranges",
+            "exponent": 0.9,
+            "min": null,
+            "mode": "opacity"
+          },
+          "dataFormat": "tsbuckets",
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
             "w": 12,
             "x": 12,
             "y": 9
+          },
+          "heatmap": {},
+          "hideZeroBuckets": false,
+          "highlightCards": true,
+          "id": 36,
+          "legend": {
+            "show": true
+          },
+          "links": [],
+          "reverseYBuckets": false,
+          "targets": [
+            {
+              "expr": "sum(increase(api_3scale_gateway_api_time_bucket{exported_service=\"entitlements\"}[1m])) by (le)",
+              "format": "heatmap",
+              "interval": "1m",
+              "legendFormat": "{{le}} s",
+              "refId": "A"
+            }
+          ],
+          "title": "API latency in 3scale",
+          "tooltip": {
+            "show": true,
+            "showHistogram": false
+          },
+          "type": "heatmap",
+          "xAxis": {
+            "show": true
+          },
+          "xBucketNumber": null,
+          "xBucketSize": null,
+          "yAxis": {
+            "decimals": null,
+            "format": "dtdurations",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true,
+            "splitFactor": null
+          },
+          "yBucketBound": "auto",
+          "yBucketNumber": null,
+          "yBucketSize": null
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 17
           },
           "hiddenSeries": false,
           "id": 5,
@@ -305,8 +419,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(api_3scale_gateway_api_time_count{exported_service=\"entitlements\"}[5m]))",
-              "interval": "15s",
+              "expr": "sum(increase(api_3scale_gateway_api_time_count{exported_service=\"entitlements\"}[1m]))",
+              "interval": "1m",
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -314,7 +429,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Request Rate",
+          "title": "Request Rate per minute in 3scale",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -368,9 +483,9 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 9,
+            "h": 8,
             "w": 12,
-            "x": 0,
+            "x": 12,
             "y": 17
           },
           "hiddenSeries": false,
@@ -414,7 +529,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Error Rate",
+          "title": "Error Rate in 3scale",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -452,102 +567,18 @@ data:
           }
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "description": "Plots the number of container restarts in 5 minute chunks",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
+          "collapsed": false,
+          "datasource": null,
           "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 12,
-            "y": 18
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 25
           },
-          "hiddenSeries": false,
-          "id": 17,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.2.1",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"$namespace\",pod=~\".*entitlements.*\"}[5m]))",
-              "interval": "15s",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Container Restarts",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "decimals": 0,
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": "0",
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "id": 26,
+          "panels": [],
+          "title": "Dependencies",
+          "type": "row"
         },
         {
           "aliasColors": {},
@@ -555,43 +586,57 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "CPU consumption plotted against configured CPU limit of service",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
-              "links": []
+              "custom": {
+                "align": null,
+                "filterable": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
             },
             "overrides": []
           },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 9,
+            "h": 8,
             "w": 12,
             "x": 0,
             "y": 26
           },
           "hiddenSeries": false,
-          "id": 15,
+          "id": 21,
           "legend": {
             "avg": false,
             "current": false,
             "max": false,
             "min": false,
-            "show": false,
+            "show": true,
             "total": false,
             "values": false
           },
           "lines": true,
           "linewidth": 1,
-          "links": [],
           "nullPointMode": "null",
           "options": {
             "alertThreshold": true
           },
           "percentage": false,
           "pluginVersion": "7.2.1",
-          "pointradius": 5,
+          "pointradius": 2,
           "points": false,
           "renderer": "flot",
           "seriesOverrides": [],
@@ -600,9 +645,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\".*entitlements.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"$namespace\",pod=~\".*entitlements.*\", resource=\"cpu\"})",
-              "interval": "15s",
-              "legendFormat": "",
+              "expr": "sum(rate(it_subscriptions_service_failure{namespace=\"$namespace\", service=\"entitlements-api-go\", pod=~\".*entitlements.*\"}[1m]))",
+              "interval": "",
+              "legendFormat": "{{code}}",
               "refId": "A"
             }
           ],
@@ -610,7 +655,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Percentage of CPU limit consumed",
+          "title": "IT subscriptions service failure",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -626,12 +671,11 @@ data:
           },
           "yaxes": [
             {
-              "decimals": null,
-              "format": "percentunit",
+              "format": "short",
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": "0",
+              "min": null,
               "show": true
             },
             {
@@ -640,7 +684,7 @@ data:
               "logBase": 1,
               "max": null,
               "min": null,
-              "show": false
+              "show": true
             }
           ],
           "yaxis": {
@@ -649,296 +693,598 @@ data:
           }
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
+          "cards": {
+            "cardPadding": null,
+            "cardRound": null
+          },
+          "color": {
+            "cardColor": "#FF780A",
+            "colorScale": "linear",
+            "colorScheme": "interpolateOranges",
+            "exponent": 0.9,
+            "min": null,
+            "mode": "opacity"
+          },
+          "dataFormat": "tsbuckets",
           "datasource": "$datasource",
-          "description": "",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
-              "links": []
+              "custom": {}
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
-            "h": 9,
+            "h": 8,
             "w": 12,
             "x": 12,
-            "y": 27
+            "y": 26
           },
-          "hiddenSeries": false,
-          "id": 19,
+          "heatmap": {},
+          "hideZeroBuckets": false,
+          "highlightCards": true,
+          "id": 22,
           "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": false,
-            "total": false,
-            "values": false
+            "show": true
           },
-          "lines": true,
-          "linewidth": 1,
           "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.2.1",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "reverseYBuckets": false,
           "targets": [
             {
-              "expr": "sum(container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go\"}) / sum(kube_pod_container_resource_limits{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go\",resource=\"memory\", unit=\"byte\"})",
-              "interval": "15s",
-              "legendFormat": "",
+              "expr": "sum(increase(it_subscriptions_service_time_taken_bucket{service=\"entitlements-api-go\"}[1m])) by (le)",
+              "format": "heatmap",
+              "interval": "1m",
+              "legendFormat": "{{le}} s",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Percentage of memory limit consumed",
+          "title": "IT subscriptions latency",
           "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
             "show": true,
-            "values": []
+            "showHistogram": false
           },
-          "yaxes": [
-            {
-              "decimals": 1,
-              "format": "percentunit",
-              "label": null,
-              "logBase": 1,
-              "max": "1",
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "type": "heatmap",
+          "xAxis": {
+            "show": true
+          },
+          "xBucketNumber": null,
+          "xBucketSize": null,
+          "yAxis": {
+            "decimals": null,
+            "format": "dtdurations",
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true,
+            "splitFactor": null
+          },
+          "yBucketBound": "auto",
+          "yBucketNumber": null,
+          "yBucketSize": null
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
+          "collapsed": true,
+          "datasource": null,
           "gridPos": {
-            "h": 9,
-            "w": 12,
+            "h": 1,
+            "w": 24,
             "x": 0,
-            "y": 35
+            "y": 34
           },
-          "hiddenSeries": false,
-          "id": 11,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.2.1",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": true,
-          "steppedLine": false,
-          "targets": [
+          "id": 24,
+          "panels": [
             {
-              "expr": "rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\".*entitlements.*\"}[5m])",
-              "legendFormat": "{{pod}}:{{container_name}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "CPU",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "s",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "description": "CPU consumption plotted against configured CPU limit of service",
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {},
+                  "links": []
+                },
+                "overrides": []
+              },
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 5,
+                "w": 12,
+                "x": 0,
+                "y": 35
+              },
+              "hiddenSeries": false,
+              "id": 15,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": false,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "links": [],
+              "nullPointMode": "null",
+              "options": {
+                "alertThreshold": true
+              },
+              "percentage": false,
+              "pluginVersion": "7.2.1",
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\".*entitlements.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"$namespace\",pod=~\".*entitlements.*\", resource=\"cpu\"})",
+                  "interval": "15s",
+                  "legendFormat": "",
+                  "refId": "A"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Percentage of CPU limit consumed",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "decimals": null,
+                  "format": "percentunit",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": "0",
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
             },
             {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "description": "",
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {},
+                  "links": []
+                },
+                "overrides": []
+              },
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 5,
+                "w": 12,
+                "x": 12,
+                "y": 35
+              },
+              "hiddenSeries": false,
+              "id": 19,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": false,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "links": [],
+              "nullPointMode": "null",
+              "options": {
+                "alertThreshold": true
+              },
+              "percentage": false,
+              "pluginVersion": "7.2.1",
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "sum(container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go\"}) / sum(kube_pod_container_resource_limits{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go\",resource=\"memory\", unit=\"byte\"})",
+                  "interval": "15s",
+                  "legendFormat": "",
+                  "refId": "A"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Percentage of memory limit consumed",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "decimals": 1,
+                  "format": "percentunit",
+                  "label": null,
+                  "logBase": 1,
+                  "max": "1",
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
             },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 12,
-            "y": 36
-          },
-          "hiddenSeries": false,
-          "id": 9,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "7.2.1",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": true,
-          "steppedLine": false,
-          "targets": [
             {
-              "expr": "container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*entitlements.*\"}",
-              "interval": "15s",
-              "legendFormat": "{{pod}}:{{container_name}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Memory",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "bytes",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {},
+                  "links": []
+                },
+                "overrides": []
+              },
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 5,
+                "w": 12,
+                "x": 0,
+                "y": 40
+              },
+              "hiddenSeries": false,
+              "id": 29,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "links": [],
+              "nullPointMode": "null",
+              "options": {
+                "alertThreshold": true
+              },
+              "percentage": false,
+              "pluginVersion": "7.2.1",
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": true,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go\"}[5m])",
+                  "interval": "15s",
+                  "legendFormat": "{{pod}}:{{container_name}}",
+                  "refId": "A"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "CPU",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "s",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
             },
             {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+              "aliasColors": {},
+              "bars": false,
+              "cacheTimeout": null,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {
+                    "align": null,
+                    "filterable": false
+                  },
+                  "links": [],
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 5,
+                "w": 12,
+                "x": 12,
+                "y": 40
+              },
+              "hiddenSeries": false,
+              "id": 9,
+              "interval": null,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "links": [],
+              "nullPointMode": "null",
+              "options": {
+                "alertThreshold": true
+              },
+              "percentage": false,
+              "pluginVersion": "7.2.1",
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": true,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*entitlements.*\", container=\"entitlements-api-go\"}",
+                  "interval": "15s",
+                  "legendFormat": "{{pod}}:{{container_name}}",
+                  "refId": "A"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Memory",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "bytes",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            },
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "description": "Plots the number of container restarts in 5 minute chunks",
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {},
+                  "links": []
+                },
+                "overrides": []
+              },
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 5,
+                "w": 24,
+                "x": 0,
+                "y": 45
+              },
+              "hiddenSeries": false,
+              "id": 17,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "links": [],
+              "nullPointMode": "null",
+              "options": {
+                "alertThreshold": true
+              },
+              "percentage": false,
+              "pluginVersion": "7.2.1",
+              "pointradius": 5,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"$namespace\",pod=~\".*entitlements.*\"}[5m]))",
+                  "interval": "15s",
+                  "legendFormat": "",
+                  "refId": "A"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Container Restarts",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "decimals": 0,
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": "0",
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
             }
           ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "title": "Container Health",
+          "type": "row"
         }
       ],
       "refresh": false,
@@ -1029,7 +1375,7 @@ data:
       "timezone": "",
       "title": "Operations - Entitlements",
       "uid": "TjP_nMWMkd",
-      "version": 1
+      "version": 2
     }
 kind: ConfigMap
 metadata:
