@@ -11,19 +11,31 @@ data:
             "hide": true,
             "iconColor": "rgba(0, 211, 255, 1)",
             "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
             "type": "dashboard"
           }
         ]
       },
       "editable": true,
+      "fiscalYearStartMonth": 0,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 206,
-      "iteration": 1633985866504,
+      "id": 91,
+      "iteration": 1640277379952,
       "links": [],
+      "liveNow": false,
       "panels": [
         {
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
           "gridPos": {
             "h": 1,
             "w": 24,
@@ -38,7 +50,6 @@ data:
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
@@ -64,6 +75,7 @@ data:
           },
           "id": 40,
           "options": {
+            "orientation": "auto",
             "reduceOptions": {
               "calcs": [
                 "mean"
@@ -72,9 +84,10 @@ data:
               "values": false
             },
             "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "showThresholdMarkers": true,
+            "text": {}
           },
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "targets": [
             {
               "expr": "sum(rate(entitlements_api_response_status{namespace=\"$namespace\", code=~\"2..\"}[$__rate_interval]))/sum(rate(entitlements_api_response_status{namespace=\"$namespace\"}[$__rate_interval]))*100",
@@ -92,7 +105,6 @@ data:
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
@@ -118,6 +130,7 @@ data:
           },
           "id": 38,
           "options": {
+            "orientation": "auto",
             "reduceOptions": {
               "calcs": [
                 "mean"
@@ -126,9 +139,10 @@ data:
               "values": false
             },
             "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "showThresholdMarkers": true,
+            "text": {}
           },
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "targets": [
             {
               "expr": "sum(rate(entitlements_api_response_status{namespace=\"$namespace\", code=~\"4..\"}[$__rate_interval]))/sum(rate(entitlements_api_response_status{namespace=\"$namespace\"}[$__rate_interval]))*100",
@@ -146,7 +160,6 @@ data:
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "mappings": [],
               "noValue": "0",
               "thresholds": {
@@ -173,6 +186,7 @@ data:
           },
           "id": 39,
           "options": {
+            "orientation": "auto",
             "reduceOptions": {
               "calcs": [
                 "mean"
@@ -181,9 +195,10 @@ data:
               "values": false
             },
             "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "showThresholdMarkers": true,
+            "text": {}
           },
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "targets": [
             {
               "expr": "sum(rate(entitlements_api_response_status{namespace=\"$namespace\", code=~\"5..\"}[$__rate_interval]))/sum(rate(entitlements_api_response_status{namespace=\"$namespace\", code=~\"5..\"}[$__rate_interval]))*100",
@@ -200,6 +215,10 @@ data:
         {
           "collapsed": false,
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
           "gridPos": {
             "h": 1,
             "w": 24,
@@ -217,12 +236,6 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -252,7 +265,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -326,12 +339,6 @@ data:
           },
           "dataFormat": "tsbuckets",
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
           "gridPos": {
             "h": 8,
             "w": 12,
@@ -391,7 +398,6 @@ data:
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -423,7 +429,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -495,12 +501,6 @@ data:
           },
           "dataFormat": "tsbuckets",
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
           "gridPos": {
             "h": 8,
             "w": 12,
@@ -560,7 +560,6 @@ data:
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -592,7 +591,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -658,7 +657,6 @@ data:
           "description": "Proportion of 5xx status codes returned from this service.",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -692,7 +690,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -752,6 +750,10 @@ data:
         {
           "collapsed": false,
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
           "gridPos": {
             "h": 1,
             "w": 24,
@@ -769,29 +771,6 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": null,
-                "filterable": false
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -818,7 +797,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -890,12 +869,6 @@ data:
           },
           "dataFormat": "tsbuckets",
           "datasource": "$datasource",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
           "gridPos": {
             "h": 8,
             "w": 12,
@@ -948,6 +921,10 @@ data:
         {
           "collapsed": false,
           "datasource": null,
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
           "gridPos": {
             "h": 1,
             "w": 24,
@@ -968,7 +945,6 @@ data:
           "description": "CPU consumption plotted against configured CPU limit of service",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -1000,7 +976,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -1067,7 +1043,6 @@ data:
           "description": "",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -1099,7 +1074,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -1165,7 +1140,6 @@ data:
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -1197,7 +1171,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -1263,25 +1237,7 @@ data:
           "datasource": "$datasource",
           "fieldConfig": {
             "defaults": {
-              "custom": {
-                "align": null,
-                "filterable": false
-              },
-              "links": [],
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
+              "links": []
             },
             "overrides": []
           },
@@ -1313,7 +1269,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -1379,7 +1335,6 @@ data:
           "description": "Plots the number of container restarts in 5 minute chunks",
           "fieldConfig": {
             "defaults": {
-              "custom": {},
               "links": []
             },
             "overrides": []
@@ -1411,7 +1366,7 @@ data:
             "alertThreshold": true
           },
           "percentage": false,
-          "pluginVersion": "7.2.1",
+          "pluginVersion": "8.2.7",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -1471,7 +1426,7 @@ data:
         }
       ],
       "refresh": false,
-      "schemaVersion": 26,
+      "schemaVersion": 32,
       "style": "dark",
       "tags": [],
       "templating": {
@@ -1479,9 +1434,11 @@ data:
           {
             "current": {
               "selected": true,
-              "text": "crcs02ue1-prometheus",
-              "value": "crcs02ue1-prometheus"
+              "text": "crcp01ue1-prometheus",
+              "value": "crcp01ue1-prometheus"
             },
+            "description": null,
+            "error": null,
             "hide": 0,
             "includeAll": false,
             "label": "Datasource",
@@ -1491,7 +1448,7 @@ data:
             "query": "prometheus",
             "queryValue": "",
             "refresh": 1,
-            "regex": "",
+            "regex": "/.*crc[s|p].*/",
             "skipUrlSync": false,
             "type": "datasource"
           },
@@ -1499,30 +1456,28 @@ data:
             "allValue": null,
             "current": {
               "selected": true,
-              "text": "entitlements-stage",
-              "value": "entitlements-stage"
+              "text": "entitlements-prod",
+              "value": "entitlements-prod"
             },
+            "datasource": "${datasource}",
+            "definition": "kube_pod_container_status_restarts_total{}",
+            "description": null,
+            "error": null,
             "hide": 0,
             "includeAll": false,
             "label": "Namespace",
             "multi": false,
             "name": "namespace",
-            "options": [
-              {
-                "selected": false,
-                "text": "entitlements-prod",
-                "value": "entitlements-prod"
-              },
-              {
-                "selected": true,
-                "text": "entitlements-stage",
-                "value": "entitlements-stage"
-              }
-            ],
-            "query": "entitlements-prod,entitlements-stage",
-            "queryValue": "",
+            "options": [],
+            "query": {
+              "query": "kube_pod_container_status_restarts_total{}",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "/.*namespace=\"(entitlement[^\"]*).*/",
             "skipUrlSync": false,
-            "type": "custom"
+            "sort": 0,
+            "type": "query"
           }
         ]
       },
