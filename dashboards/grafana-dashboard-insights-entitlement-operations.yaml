@@ -201,7 +201,7 @@ data:
           "pluginVersion": "8.2.7",
           "targets": [
             {
-              "expr": "sum(rate(entitlements_api_response_status{namespace=\"$namespace\", code=~\"5..\"}[$__rate_interval]))/sum(rate(entitlements_api_response_status{namespace=\"$namespace\", code=~\"5..\"}[$__rate_interval]))*100",
+              "expr": "sum(rate(entitlements_api_response_status{namespace=\"$namespace\", code=~\"5..\"}[$__rate_interval]))/sum(rate(entitlements_api_response_status{namespace=\"$namespace\"}[$__rate_interval]))*100",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
