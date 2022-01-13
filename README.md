@@ -44,9 +44,10 @@ Add a file that contains your local configuration options: `$EDITOR ./local/qa.c
 The contents should look like this:
 
 ```sh
-export ENT_KEY=/{path_to_key}.key
-export ENT_CERT=/{path_to_cert}.crt
-export ENT_SUBS_HOST=https://subscription.qa.api.redhat.com
+export ENT_KEY=./{path_to_key}.key
+export ENT_CERT=./{path_to_cert}.crt
+export ENT_CA_PATH=./{path_to_ca_cert}.crt
+export ENT_SUBS_HOST=https://subscription.dev.api.redhat.com
 ```
 
 Replace {path_to_key} and {path_to_cert} with the locations of the .key and .crt files from the previous section.
@@ -75,6 +76,16 @@ docker run entitlements-api-go -p 3000:3000
 
 The Entitlements API requires that you pass in a valid x-redhat-identity header or it rejects requests.
 For an example see `cat ./scripts/xrhid_helper.sh`
+
+## Testing the bundle-sync
+
+To test the bundle sync behavior, you'll need to configure your environment similar to the insructions above, build the script, and run it against the dev environment:
+
+```sh
+. ./local/development.env.sh
+go build -o ./bundle-sync bundle_sync/main.go
+./bundle-sync
+```
 
 ## Running the Unit Tests
 
