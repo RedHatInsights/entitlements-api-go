@@ -46,6 +46,14 @@ func getClient(cfg *cfg.EntitlementsConfig) *http.Client {
 
 func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 	resp, err := client.Get(url)
+
+	if resp.StatusCode == 404 {
+		// since `postUpdates` is an upsert, this will allow us to add new features
+		// into our config, and `getUpdates` will source the feature SKU list and
+		// create the new feature when it's not found.
+		return t.SubModel{}, nil
+	}
+
 	if err != nil {
 		return t.SubModel{}, err
 	}
@@ -60,7 +68,7 @@ func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 	err = json.Unmarshal(data, &currentSubs)
 	if err != nil {
 		return t.SubModel{}, err
-	}	
+	}
 	return currentSubs, nil
 }
 
@@ -70,7 +78,7 @@ func getUpdates(cfg *viper.Viper) ([]t.Bundle, error){
 		return []t.Bundle{}, err
 	}
 
-	
+
 	var m []t.Bundle
 	err = yaml.Unmarshal(bundlesYaml, &m)
 	if err != nil {
@@ -131,8 +139,8 @@ func main() {
 
 		sort.Strings(skus[endpoint])
 		sort.Strings(current_skus[endpoint])
-		
-		if assertEq(skus[endpoint], current_skus[endpoint]) { 
+
+		if assertEq(skus[endpoint], current_skus[endpoint]) {
 			fmt.Printf("No updates for %s\n", endpoint)
 		} else {
 			var m []t.MatchProducts

@@ -2,3 +2,4 @@ coverage.txt
 local
 .DS_Store
 /bundles/bundles.yml
+/bundle-sync
