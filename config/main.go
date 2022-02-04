@@ -129,7 +129,7 @@ func initialize() {
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
 	options.SetDefault(Keys.CwLogStream, hostname)
 	options.SetDefault(Keys.CwRegion, "us-east-1")
-	options.SetDefault(Keys.Features, "ansible,smart_management,rhods")
+	options.SetDefault(Keys.Features, "ansible,smart_management,rhods,rhoam")
 	options.SetDefault(Keys.SubAPIBasePath, "/svcrest/subscription/v5/")
 
 	options.SetEnvPrefix("ENT")
