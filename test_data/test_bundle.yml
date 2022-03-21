@@ -1,19 +1,14 @@
 - name: TestBundle1
   skus:
-    SVC123:
-      is_trial: false
-    SVC456:
-      is_trial: false
-    MCT789:
-      is_trial: false
+    - SVC123
+    - SVC456
+    - MCT789
 
 
 - name: TestBundle2
   skus:
-    MCT1122:
-      is_trial: true
-    SVC3344:
-      is_trial: false
+    - MCT1122
+    - SVC3344
 
 - name: TestBundle3
   use_valid_acc_num: false
@@ -26,9 +21,6 @@
 
 - name: TestBundle6
   skus:
-    SVC321:
-      is_trial: false
-    SVC654:
-      is_trial: false
-    MCT987:
-      is_trial: false
+    - SVC321
+    - SVC654
+    - MCT987
