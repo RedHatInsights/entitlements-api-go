@@ -40,19 +40,11 @@ type SubscriptionDetails struct {
 
 // Bundle is a struct that is used to unmarshal the bundle info from bundles.yml
 type Bundle struct {
-	Name           string `yaml:"name"`
-	UseValidAccNum bool   `yaml:"use_valid_acc_num"`
-	UseIsInternal  bool   `yaml:"use_is_internal"`
-	Skus           Skus   `yaml:"skus"`
+	Name           string   `yaml:"name"`
+	UseValidAccNum bool     `yaml:"use_valid_acc_num"`
+	UseIsInternal  bool     `yaml:"use_is_internal"`
+	Skus           []string `yaml:"skus"`
 }
-
-// SkuAttributes is a struct that is used to unmarshal the sku data in a bundle
-type SkuAttributes struct {
-	IsTrial bool `yaml:"is_trial"`
-}
-
-// Skus is a struct that is used to unmarshal a map of SkuAttributes
-type Skus map[string]SkuAttributes
 
 // DependencyErrorDetails is a struct that is used to marshal failure details
 // from failed requests to the subscriptions service
