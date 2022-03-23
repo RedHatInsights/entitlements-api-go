@@ -127,7 +127,7 @@ func main() {
 		}
 		for _, v := range sku_updates {
 			if v.Name == endpoint {
-				for sku := range v.Skus {
+				for _, sku := range v.Skus {
 					skus[endpoint] = append(skus[endpoint], sku)
 				}
 			}
