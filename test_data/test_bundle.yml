@@ -24,3 +24,6 @@
     - SVC321
     - SVC654
     - MCT987
+
+- name: TestBundle7
+  use_valid_org_id: true

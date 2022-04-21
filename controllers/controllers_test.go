@@ -193,6 +193,36 @@ var _ = Describe("Identity Controller", func() {
 
 	})
 
+	Context("When a bundle is defined with use_valid_org_id", func() {
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       FeatureStatus{},
+			CacheHit:   false,
+		}
+
+		Context("When the org_id is invalid", func() {
+			It("should not entitle bundles when a -1 org_id is supplied", func() {
+				rr, body, _ := testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "-1", true, DEFAULT_EMAIL, fakeGetFeatureStatus("-1", fakeResponse))
+				expectPass(rr.Result())
+				Expect(body["TestBundle7"].IsEntitled).To(Equal(false))
+			})
+
+			It("should not entitle bundles when a blank org_id is supplied", func() {
+				rr, body, _ := testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "", true, DEFAULT_EMAIL, fakeGetFeatureStatus("", fakeResponse))
+				expectPass(rr.Result())
+				Expect(body["TestBundle7"].IsEntitled).To(Equal(false))
+			})
+		})
+
+		Context("When the org_id is valid", func() {
+			It("should entitle bundles when a valid org_id is supplied", func() {
+				rr, body, _ := testRequest("GET", "/", "123456", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+				expectPass(rr.Result())
+				Expect(body["TestBundle7"].IsEntitled).To(Equal(true))
+			})
+		})
+	})
+
 	Context("When a bundle uses only use_is_internal", func() {
 		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,

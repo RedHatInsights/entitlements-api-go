@@ -145,12 +145,14 @@ func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		start := time.Now()
 		idObj := identity.Get(req.Context()).Identity
-		res := GetFeatureStatus(idObj.Internal.OrgID)
+		orgId := idObj.Internal.OrgID
+		res := GetFeatureStatus(orgId)
 		accNum := idObj.AccountNumber
 		isInternal := idObj.User.Internal
 		validEmailMatch, _ := regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)
 
 		validAccNum := !(accNum == "" || accNum == "-1")
+		validOrgId := !(orgId == "" || orgId == "-1")
 
 		if res.Error != nil {
 			errMsg := "Unexpected error while talking to Subs Service"
@@ -195,6 +197,10 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 			if b.UseValidAccNum {
 				entitle = validAccNum && entitle
+			}
+
+			if b.UseValidOrgId {
+				entitle = validOrgId && entitle
 			}
 
 			if b.UseIsInternal {
