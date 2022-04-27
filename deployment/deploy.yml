@@ -59,6 +59,8 @@ objects:
                 value: /bundles/bundles.yml
               - name: ENT_CERTS_FROM_ENV
                 value: 'true'
+              - name: ENT_RUN_BUNDLE_SYNC
+                value: ${RUN_BUNDLE_SYNC}
             envFrom:
               - secretRef:
                   name: go-api-certs
@@ -179,3 +181,7 @@ parameters:
 - description: Image tag
   name: IMAGE_TAG
   required: true
+- description: Flag to determine whether or not to sync bundles on init
+  name: RUN_BUNDLE_SYNC
+  required: false
+  value: false

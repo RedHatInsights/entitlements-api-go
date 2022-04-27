@@ -106,6 +106,13 @@ func main() {
 	c := cfg.GetConfig()
 	client := getClient(c)
 	options := c.Options
+	runSync := options.GetBool(cfg.Keys.RunBundleSync)
+
+	if !runSync {
+		fmt.Println("Bundle sync disabled")
+		return
+	}
+
 	endpoints := strings.Split(c.Options.GetString(cfg.Keys.Features), ",")
 	for _, endpoint := range endpoints {
 		skus := make(map[string][]string)

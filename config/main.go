@@ -39,6 +39,7 @@ type EntitlementsConfigKeysType struct {
 	Features        string
 	FeaturesPath    string
 	SubAPIBasePath	string
+	RunBundleSync 	string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -58,6 +59,7 @@ var Keys = EntitlementsConfigKeysType{
 	CwSecret:        "CW_SECRET",
 	Features:        "FEATURES",
 	SubAPIBasePath:  "SUB_API_BASE_PATH",
+	RunBundleSync:   "RUN_BUNDLE_SYNC",
 }
 
 func getBaseFeaturesPath(options *viper.Viper) string {
@@ -131,6 +133,7 @@ func initialize() {
 	options.SetDefault(Keys.CwRegion, "us-east-1")
 	options.SetDefault(Keys.Features, "ansible,smart_management,rhods,rhoam,rhosak")
 	options.SetDefault(Keys.SubAPIBasePath, "/svcrest/subscription/v5/")
+	options.SetDefault(Keys.RunBundleSync, false)
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
