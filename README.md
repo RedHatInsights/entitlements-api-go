@@ -69,7 +69,7 @@ To run locally with Docker:
 
 ```bash
 docker build -t entitlements-api-go .
-docker run entitlements-api-go -p 3000:3000
+docker run -p 3000:3000 entitlements-api-go
 ```
 
 ## Testing Entitlements API with curl

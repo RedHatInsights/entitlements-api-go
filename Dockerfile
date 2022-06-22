@@ -27,6 +27,7 @@ COPY --from=builder /go/src/app/bundle-sync ./bundle-sync
 COPY resources ./resources
 COPY apispec ./apispec
 COPY bundles ./bundles
+COPY test_data ./test_data
 
 USER 1001
 
