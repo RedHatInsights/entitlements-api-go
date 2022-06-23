@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -39,18 +38,6 @@ var subsTimeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
 	Help:    "Subscriptions latency distributions.",
 	Buckets: prometheus.LinearBuckets(0.25, 0.25, 20),
 })
-
-func getClient() *http.Client {
-	// Create a HTTPS client that uses the supplied pub/priv mutual TLS certs
-	return &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs:      config.GetConfig().RootCAs,
-				Certificates: []tls.Certificate{*config.GetConfig().Certs},
-			},
-		},
-	}
-}
 
 // SetBundleInfo sets the bundle information fetched from the YAML
 func SetBundleInfo(yamlFilePath string) error {
