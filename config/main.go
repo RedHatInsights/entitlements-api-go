@@ -28,18 +28,19 @@ type EntitlementsConfigKeysType struct {
 	Port            string
 	CertsFromEnv    string
 	SubsHost        string
+	ComplianceHost  string
 	CaPath          string
 	OpenAPISpecPath string
 	BundleInfoYaml  string
 	CwLogGroup      string
 	CwLogStream     string
 	CwRegion        string
-	CwKey         	string
+	CwKey           string
 	CwSecret        string
 	Features        string
 	FeaturesPath    string
-	SubAPIBasePath	string
-	RunBundleSync 	string
+	SubAPIBasePath  string
+	RunBundleSync   string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -49,6 +50,7 @@ var Keys = EntitlementsConfigKeysType{
 	Port:            "PORT",
 	CertsFromEnv:    "CERTS_FROM_ENV",
 	SubsHost:        "SUBS_HOST",
+	ComplianceHost:  "COMPLIANCE_HOST",
 	CaPath:          "CA_PATH",
 	OpenAPISpecPath: "OPENAPI_SPEC_PATH",
 	BundleInfoYaml:  "BUNDLE_INFO_YAML",
@@ -123,6 +125,7 @@ func initialize() {
 	options.SetDefault(Keys.CertsFromEnv, false)
 	options.SetDefault(Keys.Port, "3000")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
+	options.SetDefault(Keys.ComplianceHost, "https://export-compliance.api.redhat.com")
 	options.SetDefault(Keys.CaPath, "../resources/ca.crt")
 	options.SetDefault(Keys.Cert, "../test_data/test.cert") // default values of Cert and Key are for testing purposes only
 	options.SetDefault(Keys.Key, "../test_data/test.key")
