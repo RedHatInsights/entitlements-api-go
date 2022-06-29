@@ -13,3 +13,8 @@ type ComplianceScreeningRequest struct {
 	User    User    `json:"user"`
 	Account Account `json:"account"`
 }
+
+type ComplianceScreeningResponse struct {
+	Result      string `json:"result"`
+	Description string `json:"description"`
+}

@@ -76,7 +76,7 @@ func failOnComplianceError(w http.ResponseWriter, errMsg string, err error, url 
 			Service:           complianceServiceName,
 			Status:            http.StatusInternalServerError,
 			Endpoint:          url,
-			Message:           err.Error(),
+			Message:           errMsg + ": " + err.Error(),
 		},
 	}
 
