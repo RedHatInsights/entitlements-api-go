@@ -172,6 +172,9 @@ parameters:
 - description: Subscriptions Service API endpoint
   name: SUBS_HOST
   value: https://subscription.qa.api.redhat.com
+- description: Export Compliance Service API endpoint
+  name: COMPLIANCE_HOST
+  value: https://export-compliance.dev.api.redhat.com
 - description: Name of the entitlements-config config map
   name: CONFIG_MAP_NAME
   value: entitlements-config
