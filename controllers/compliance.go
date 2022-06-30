@@ -10,7 +10,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -66,7 +65,7 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		complianceTimeHistogram.Observe(complianceTimeTaken)
 
 		defer resp.Body.Close()
-		respBody, err := io.ReadAll(resp.Body)
+		respBody, err := ioutil.ReadAll(resp.Body)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(respBody))
