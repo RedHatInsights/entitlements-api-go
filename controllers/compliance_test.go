@@ -1,24 +1,20 @@
 package controllers
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
-	"errors"
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/types"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/redhatinsights/platform-go-middlewares/identity"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 )
 
-type errReader int
-
-func (errReader) Read(p []byte) (n int, err error) {
-	return 0, errors.New("test error")
-}
+var defaultEmail = "test@redhat.com"
 
 func readResponse(respBody io.ReadCloser) []byte {
 	out, err := ioutil.ReadAll(respBody)
@@ -28,11 +24,30 @@ func readResponse(respBody io.ReadCloser) []byte {
 	return out
 }
 
+func getContextWithIdentity(userEmail string) context.Context {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, identity.Key, identity.XRHID{
+		Identity: identity.Identity{
+			AccountNumber: "540155",
+			User: identity.User{
+				Internal: false,
+				Email:    userEmail,
+			},
+			Internal: identity.Internal{
+				OrgID: "4384938490324",
+			},
+		},
+	})
+
+	return ctx
+}
+
 var _ = Describe("", func() {
-	Context("When the request cannot be read", func() {
+	Context("When user email is empty", func() {
 		It("should return an error and status 400", func() {
 			// given
-			req := httptest.NewRequest(http.MethodPost, "/foo", errReader(0))
+			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
+			req = req.WithContext(getContextWithIdentity(""))
 			rr := httptest.NewRecorder()
 
 			// when
@@ -47,7 +62,31 @@ var _ = Describe("", func() {
 			Expect(err).To(BeNil(), "Error unmarshalling server response")
 
 			Expect(errorResp.Error).ToNot(BeNil())
-			Expect(errorResp.Error.Message).To(ContainSubstring("test error"))
+			Expect(errorResp.Error.Message).To(ContainSubstring("x-rh-identity header has a missing or whitespace user email"))
+			Expect(errorResp.Error.Status).To(Equal(http.StatusBadRequest))
+		})
+	})
+
+	Context("When user email is whitespace", func() {
+		It("should return an error and status 400", func() {
+			// given
+			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
+			req = req.WithContext(getContextWithIdentity("           "))
+			rr := httptest.NewRecorder()
+
+			// when
+			Compliance()(rr, req)
+
+			// then
+			Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
+			resp := readResponse(rr.Result().Body)
+
+			var errorResp types.RequestErrorResponse
+			err := json.Unmarshal(resp, &errorResp)
+			Expect(err).To(BeNil(), "Error unmarshalling server response")
+
+			Expect(errorResp.Error).ToNot(BeNil())
+			Expect(errorResp.Error.Message).To(ContainSubstring("x-rh-identity header has a missing or whitespace user email"))
 			Expect(errorResp.Error.Status).To(Equal(http.StatusBadRequest))
 		})
 	})
@@ -56,15 +95,8 @@ var _ = Describe("", func() {
 		It("should return an error and status 500", func() {
 			// given
 			config.GetConfig().Options.Set(config.Keys.ComplianceHost, "bad url that will cause an error in http.NewRequest\n")
-			reqBody, _ := json.Marshal(types.ComplianceScreeningRequest{
-				User: types.User{
-					Id: "1234",
-				},
-				Account: types.Account{
-					Primary: false,
-				},
-			})
-			req := httptest.NewRequest(http.MethodPost, "/foo", bytes.NewBuffer(reqBody))
+			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
+			req = req.WithContext(getContextWithIdentity(defaultEmail))
 			rr := httptest.NewRecorder()
 
 			// when
@@ -89,15 +121,8 @@ var _ = Describe("", func() {
 	Context("When the request to compliance service fails", func() {
 		It("should return an error and status 500", func() {
 			// given
-			reqBody, _ := json.Marshal(types.ComplianceScreeningRequest{
-				User: types.User{
-					Id: "1234",
-				},
-				Account: types.Account{
-					Primary: false,
-				},
-			})
-			req := httptest.NewRequest(http.MethodPost, "/foo", bytes.NewBuffer(reqBody))
+			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
+			req = req.WithContext(getContextWithIdentity(defaultEmail))
 			rr := httptest.NewRecorder()
 
 			server := httptest.NewUnstartedServer(http.NotFoundHandler())
@@ -125,15 +150,8 @@ var _ = Describe("", func() {
 	Context("When the request to compliance service is successful", func() {
 		It("should return a body and successful status code", func() {
 			// given
-			reqBody, _ := json.Marshal(types.ComplianceScreeningRequest{
-				User: types.User{
-					Id: "1234",
-				},
-				Account: types.Account{
-					Primary: false,
-				},
-			})
-			req := httptest.NewRequest(http.MethodPost, "/foo", bytes.NewBuffer(reqBody))
+			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
+			req = req.WithContext(getContextWithIdentity(defaultEmail))
 			rr := httptest.NewRecorder()
 
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {

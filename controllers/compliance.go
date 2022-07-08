@@ -3,16 +3,19 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/getsentry/sentry-go"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/redhatinsights/platform-go-middlewares/identity"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -35,16 +38,32 @@ var complianceTimeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
 func Compliance() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		start := time.Now()
-		reqBody, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			failOnBadRequest(w, "Failed to read request body", err)
+
+		userIdentity := identity.Get(req.Context()).Identity
+		if len(strings.TrimSpace(userIdentity.User.Email)) == 0 {
+			err := errors.New("compliance: x-rh-identity header has a missing or whitespace user email")
+			failOnBadRequest(w, "Invalid x-rh-identity header", err)
 			return
 		}
-		defer req.Body.Close()
-		var httpClient = getClient()
 
+		reqBody := types.ComplianceScreeningRequest{
+			User: types.User{
+				Login: userIdentity.User.Email,
+			},
+			Account: types.Account{
+				Primary: false,
+			},
+		}
+
+		reqBodyJson, err := json.Marshal(reqBody)
+		if err != nil {
+			failOnServiceError(w, "Unable to marshal request to compliance service", err)
+			return
+		}
+
+		var httpClient = getClient()
 		url := config.GetConfig().Options.GetString(config.Keys.ComplianceHost) + screeningPathV1
-		complianceReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(reqBody))
+		complianceReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(reqBodyJson))
 
 		if err != nil {
 			failOnComplianceError(w, "Unexpected error while creating request to Export Compliance Service", err, url)
@@ -105,4 +124,10 @@ func failOnComplianceError(w http.ResponseWriter, errMsg string, err error, url 
 
 	responseJson, _ := json.Marshal(response)
 	http.Error(w, string(responseJson), http.StatusInternalServerError)
+}
+
+func failOnServiceError(w http.ResponseWriter, errMsg string, err error) {
+	l.Log.WithFields(logrus.Fields{"error": err}).Error(errMsg)
+	sentry.CaptureException(err)
+	http.Error(w, http.StatusText(http.StatusInternalServerError)+": "+errMsg+": "+err.Error(), http.StatusInternalServerError)
 }
