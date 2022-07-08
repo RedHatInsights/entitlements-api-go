@@ -40,20 +40,13 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		start := time.Now()
 
 		userIdentity := identity.Get(req.Context()).Identity
-		if len(strings.TrimSpace(userIdentity.User.Email)) == 0 {
-			err := errors.New("compliance: x-rh-identity header has a missing or whitespace user email")
+		if len(strings.TrimSpace(userIdentity.User.Username)) == 0 {
+			err := errors.New("compliance: x-rh-identity header has a missing or whitespace username")
 			failOnBadRequest(w, "Invalid x-rh-identity header", err)
 			return
 		}
 
-		reqBody := types.ComplianceScreeningRequest{
-			User: types.User{
-				Login: userIdentity.User.Email,
-			},
-			Account: types.Account{
-				Primary: false,
-			},
-		}
+		reqBody := constructComplianceRequestBody(userIdentity)
 
 		reqBodyJson, err := json.Marshal(reqBody)
 		if err != nil {
@@ -89,6 +82,19 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(respBody))
 	}
+}
+
+func constructComplianceRequestBody(userIdentity identity.Identity) types.ComplianceScreeningRequest {
+	reqBody := types.ComplianceScreeningRequest{
+		User: types.User{
+			Login: userIdentity.User.Username,
+		},
+		Account: types.Account{
+			Primary: true,
+		},
+	}
+
+	return reqBody
 }
 
 func failOnBadRequest(w http.ResponseWriter, errMsg string, err error) {

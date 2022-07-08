@@ -24,17 +24,13 @@ func readResponse(respBody io.ReadCloser) []byte {
 	return out
 }
 
-func getContextWithIdentity(userEmail string) context.Context {
+func getContextWithIdentity(username string) context.Context {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, identity.Key, identity.XRHID{
 		Identity: identity.Identity{
 			AccountNumber: "540155",
 			User: identity.User{
-				Internal: false,
-				Email:    userEmail,
-			},
-			Internal: identity.Internal{
-				OrgID: "4384938490324",
+				Username: username,
 			},
 		},
 	})
@@ -43,7 +39,7 @@ func getContextWithIdentity(userEmail string) context.Context {
 }
 
 var _ = Describe("", func() {
-	Context("When user email is empty", func() {
+	Context("When username is empty", func() {
 		It("should return an error and status 400", func() {
 			// given
 			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
@@ -62,12 +58,12 @@ var _ = Describe("", func() {
 			Expect(err).To(BeNil(), "Error unmarshalling server response")
 
 			Expect(errorResp.Error).ToNot(BeNil())
-			Expect(errorResp.Error.Message).To(ContainSubstring("x-rh-identity header has a missing or whitespace user email"))
+			Expect(errorResp.Error.Message).To(ContainSubstring("x-rh-identity header has a missing or whitespace username"))
 			Expect(errorResp.Error.Status).To(Equal(http.StatusBadRequest))
 		})
 	})
 
-	Context("When user email is whitespace", func() {
+	Context("When username is whitespace", func() {
 		It("should return an error and status 400", func() {
 			// given
 			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
@@ -86,7 +82,7 @@ var _ = Describe("", func() {
 			Expect(err).To(BeNil(), "Error unmarshalling server response")
 
 			Expect(errorResp.Error).ToNot(BeNil())
-			Expect(errorResp.Error.Message).To(ContainSubstring("x-rh-identity header has a missing or whitespace user email"))
+			Expect(errorResp.Error.Message).To(ContainSubstring("x-rh-identity header has a missing or whitespace username"))
 			Expect(errorResp.Error.Status).To(Equal(http.StatusBadRequest))
 		})
 	})
