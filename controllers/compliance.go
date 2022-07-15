@@ -80,6 +80,7 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		respBody, err := ioutil.ReadAll(resp.Body)
 
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(resp.StatusCode)
 		w.Write([]byte(respBody))
 	}
 }

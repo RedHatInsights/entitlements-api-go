@@ -151,7 +151,7 @@ var _ = Describe("", func() {
 			rr := httptest.NewRecorder()
 
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				if req.URL.Path == screeningPathV1 {
+				if req.URL.Path == config.GetConfig().Options.GetString(config.Keys.CompAPIBasePath) {
 					resp, _ := json.Marshal(types.ComplianceScreeningResponse{
 						Result:      "OK",
 						Description: "",
@@ -175,6 +175,50 @@ var _ = Describe("", func() {
 
 			Expect(response.Result).To(Equal("OK"))
 			Expect(response.Description).To(Equal(""))
+		})
+	})
+
+	Context("When the request to compliance service is fails on error from compliance", func() {
+		It("should return a body and appropriate status code", func() {
+			// given
+			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
+			req = req.WithContext(getContextWithIdentity(defaultEmail))
+			rr := httptest.NewRecorder()
+
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				if req.URL.Path == config.GetConfig().Options.GetString(config.Keys.CompAPIBasePath) {
+					resp, _ := json.Marshal(types.ComplianceScreeningErrorResponse{
+						Errors: []types.ComplianceScreeningError{
+							{
+								Error:        "no_such_user",
+								IdentityType: "login",
+								Identity:     defaultEmail,
+							},
+						},
+					})
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write(resp)
+				}
+			}))
+			config.GetConfig().Options.Set(config.Keys.ComplianceHost, server.URL)
+
+			// when
+			Compliance()(rr, req)
+
+			// then
+			Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
+			resp := readResponse(rr.Result().Body)
+
+			var response types.ComplianceScreeningErrorResponse
+			err := json.Unmarshal(resp, &response)
+			Expect(err).To(BeNil(), "Error unmarshalling server response")
+
+			Expect(response.Errors).To(HaveLen(1))
+			Expect(response.Errors).To(ContainElement(types.ComplianceScreeningError{
+				Error:        "no_such_user",
+				IdentityType: "login",
+				Identity:     defaultEmail,
+			}))
 		})
 	})
 })

@@ -18,3 +18,13 @@ type ComplianceScreeningResponse struct {
 	Result      string `json:"result"`
 	Description string `json:"description"`
 }
+
+type ComplianceScreeningError struct {
+	Error        string `json:"error"`
+	IdentityType string `json:"identityType"`
+	Identity     string `json:"identity"`
+}
+
+type ComplianceScreeningErrorResponse struct {
+	Errors []ComplianceScreeningError `json:"errors"`
+}
