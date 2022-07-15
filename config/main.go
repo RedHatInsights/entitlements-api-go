@@ -40,6 +40,7 @@ type EntitlementsConfigKeysType struct {
 	Features        string
 	FeaturesPath    string
 	SubAPIBasePath  string
+	CompAPIBasePath string
 	RunBundleSync   string
 }
 
@@ -61,6 +62,7 @@ var Keys = EntitlementsConfigKeysType{
 	CwSecret:        "CW_SECRET",
 	Features:        "FEATURES",
 	SubAPIBasePath:  "SUB_API_BASE_PATH",
+	CompAPIBasePath: "COMP_API_BASE_PATH",
 	RunBundleSync:   "RUN_BUNDLE_SYNC",
 }
 
@@ -136,6 +138,7 @@ func initialize() {
 	options.SetDefault(Keys.CwRegion, "us-east-1")
 	options.SetDefault(Keys.Features, "ansible,smart_management,rhods,rhoam,rhosak")
 	options.SetDefault(Keys.SubAPIBasePath, "/svcrest/subscription/v5/")
+	options.SetDefault(Keys.CompAPIBasePath, "/v1/screening")
 	options.SetDefault(Keys.RunBundleSync, false)
 
 	options.SetEnvPrefix("ENT")

@@ -19,7 +19,6 @@ import (
 	"time"
 )
 
-var screeningPathV1 = "/v1/screening"
 var complianceServiceName = "Export Compliance Service"
 
 var complianceFailure = promauto.NewCounterVec(
@@ -55,7 +54,8 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		}
 
 		var httpClient = getClient()
-		url := config.GetConfig().Options.GetString(config.Keys.ComplianceHost) + screeningPathV1
+		configOptions := config.GetConfig().Options
+		url := configOptions.GetString(config.Keys.ComplianceHost) + configOptions.GetString(config.Keys.CompAPIBasePath)
 		complianceReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(reqBodyJson))
 
 		if err != nil {
