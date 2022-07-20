@@ -75,6 +75,8 @@ objects:
             value: /resources/ca.crt
           - name: ENT_SUBS_HOST
             value: ${SUBS_HOST}
+          - name: ENT_COMPLIANCE_HOST
+            value: ${COMPLIANCE_HOST}
           - name: ENT_OPENAPI_SPEC_PATH
             value: /apispec/api.spec.json
           - name: ENT_BUNDLE_INFO_YAML
