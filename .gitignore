@@ -3,3 +3,4 @@ local
 .DS_Store
 /bundles/bundles.yml
 /bundle-sync
+entitlements-api-go
