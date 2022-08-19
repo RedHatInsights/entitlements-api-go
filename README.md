@@ -29,9 +29,10 @@ bash ./scripts/dev_deps.sh
 
 ### Getting an Enterprise Cert
 
-To run the Entitlements API locally, you will need an Enterprise Services cert with access to the dev subscription endpoint /search/criteria.
+To run the Entitlements API locally, you will need an Enterprise Services cert with access to the dev subscription endpoint /search/criteria and the export compliance service in whatever environment you are testing in.
 
 * You can request a personal cert by following ALL steps in this [mojo doc](https://mojo.redhat.com/docs/DOC-1144091).
+* You can request access to export compliance service by following the appropriate steps in this [doc](https://source.redhat.com/groups/public/it-legal-program/legal_restricted_party_screening_solution_wiki/how_to_use_export_compliance_service#jive_content_id_AuthenticationAccess_as_yourself_for_testingdevelopmentCreating_a_certificate).
 * You can export your crt and key like so:
     `openssl pkcs12 -in your-p12-cert.p12 -out your-key.key -nocerts -nodes`
     `openssl pkcs12 -in your-p12-cert.p12 -out your-cert-sans-key.crt -clcerts -nokeys`
@@ -48,6 +49,7 @@ export ENT_KEY=./{path_to_key}.key
 export ENT_CERT=./{path_to_cert}.crt
 export ENT_CA_PATH=./{path_to_ca_cert}.crt
 export ENT_SUBS_HOST=https://subscription.dev.api.redhat.com
+export ENT_COMPLIANCE_HOST=https://export-compliance.dev.api.redhat.com
 ```
 
 Replace {path_to_key} and {path_to_cert} with the locations of the .key and .crt files from the previous section.
