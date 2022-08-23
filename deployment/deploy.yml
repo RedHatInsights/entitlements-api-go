@@ -75,6 +75,8 @@ objects:
             value: /resources/ca.crt
           - name: ENT_SUBS_HOST
             value: ${SUBS_HOST}
+          - name: ENT_COMPLIANCE_HOST
+            value: ${COMPLIANCE_HOST}
           - name: ENT_OPENAPI_SPEC_PATH
             value: /apispec/api.spec.json
           - name: ENT_BUNDLE_INFO_YAML
@@ -172,6 +174,9 @@ parameters:
 - description: Subscriptions Service API endpoint
   name: SUBS_HOST
   value: https://subscription.qa.api.redhat.com
+- description: Export Compliance Service API endpoint
+  name: COMPLIANCE_HOST
+  value: https://export-compliance.dev.api.redhat.com
 - description: Name of the entitlements-config config map
   name: CONFIG_MAP_NAME
   value: entitlements-config

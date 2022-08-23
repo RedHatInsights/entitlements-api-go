@@ -23,9 +23,9 @@ type Entries struct {
 }
 
 type Feature struct {
-	Name string   `json:"name"`
-	IsEval bool   `json:"isEval"`
-	Entitled bool `json:"entitled"`
+	Name     string `json:"name"`
+	IsEval   bool   `json:"isEval"`
+	Entitled bool   `json:"entitled"`
 }
 
 type FeatureStatus struct {
@@ -48,7 +48,7 @@ type Bundle struct {
 }
 
 // DependencyErrorDetails is a struct that is used to marshal failure details
-// from failed requests to the subscriptions service
+// from failed requests to external services
 type DependencyErrorDetails struct {
 	DependencyFailure bool   `json:"dependency_failure"`
 	Service           string `json:"service"`
@@ -58,20 +58,31 @@ type DependencyErrorDetails struct {
 }
 
 // DependencyErrorResponse is a struct that is used to marshal an error response
-// based on details from a failed request to the subscriptions service
+// based on details from a failed request to external services
 type DependencyErrorResponse struct {
 	Error DependencyErrorDetails `json:"error"`
+}
+
+// RequestErrorDetails is used to describe what was invalid about a bad request to entitlements
+type RequestErrorDetails struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+}
+
+// RequestErrorResponse is used to marshal an error response based on details from a bad request to entitlements
+type RequestErrorResponse struct {
+	Error RequestErrorDetails `json:"error"`
 }
 
 // SubModel is the struct for GET and POST data for subscriptions
 type SubModel struct {
 	Name  string `json:"name"`
-	Rules Rules `json:"rules"`
+	Rules Rules  `json:"rules"`
 }
 
 // Rules contains match and exlude product arrays
 type Rules struct {
-	MatchProducts []MatchProducts `json:"matchProducts,omitempty"`
+	MatchProducts   []MatchProducts   `json:"matchProducts,omitempty"`
 	ExcludeProducts []ExcludeProducts `json:"excludeProducts,omitempty"`
 }
 

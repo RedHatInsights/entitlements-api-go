@@ -59,6 +59,76 @@
                     }
                 }
             }
+        },
+        "/compliance": {
+            "get": {
+                "tags": [
+                    "services"
+                ],
+                "summary": "verify exports compliance for a given user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ComplianceScreeningResponse"
+                                },
+                                "examples": {
+                                    "compliant_user": {
+                                        "value": {
+                                            "result": "OK",
+                                            "description": ""
+                                        },
+                                        "description": "User is compliant."
+                                    },
+                                    "non_compliant_error_export_control": {
+                                        "value": {
+                                            "result": "ERROR_EXPORT_CONTROL",
+                                            "description": "Your account appears to be on Export Hold. Please review the information at the following link for more detail: https://access.redhat.com/articles/1340183"
+                                        },
+                                        "description": "User is not compliant."
+                                    },
+                                    "non_compliant_error_ofac": {
+                                        "value": {
+                                            "result": "ERROR_OFAC",
+                                            "description": "Your order cannot be processed because your email address indicates that you are located in a country subject to sanctions implemented by the US Department of Treasury, Office of Foreign Assets Control (\"OFAC\"). Red Hat products are not authorized for export to your country at this time and we are prohibited from processing your order.\nFurther detail can be found here:\nhttp://www.treasury.gov/resource-center/sanctions/programs"
+                                        },
+                                        "description": "User is not compliant."
+                                    },
+                                    "non_compliant_error_T5": {
+                                        "value": {
+                                            "result": "ERROR_T5",
+                                            "description": "Your order cannot be processed because your address indicates that you are located in a country subject to sanctions implemented by the US Department of Treasury, Office of Foreign Assets Control (\"OFAC\"). Red Hat products are not authorized for export to your country at this time and we are prohibited from processing your order.\nFurther detail can be found here:\nhttp://www.treasury.gov/resource-center/sanctions/programs"
+                                        },
+                                        "description": "User is not compliant."
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ComplianceScreeningErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DependencyErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -97,6 +167,80 @@
                     "smart_management": {
                         "is_entitled": false,
                         "is_trial": true
+                    }
+                }
+            },
+            "ComplianceScreeningResponse": {
+                "type": "object",
+                "properties": {
+                    "result": {
+                        "type": "string",
+                        "enum": ["OK", "ERROR_T5", "ERROR_OFAC", "ERROR_EXPORT_CONTROL"]
+                    },
+                    "description": {
+                        "type": "string",
+                        "default": null
+                    }
+                },
+                "example":
+                    {
+                        "result": "OK",
+                        "description": ""
+                    }
+            },
+            "ComplianceScreeningErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "errors": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "error": {"type": "string"},
+                                "identityType": {"type": "string"},
+                                "identity": {"type": "string"}
+                            }
+                        }
+                    }
+                },
+                "example": {
+                    "errors": [
+                        {
+                            "error": "no_such_user",
+                            "identityType": "login",
+                            "identity": "test232342@redhat.com"
+                        }
+                    ]
+                }
+            },
+            "DependencyErrorDetails": {
+                "type": "object",
+                "properties": {
+                    "dependency_failure": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "service": { "type": "string" },
+                    "status": { "type": "integer" },
+                    "endpoint": { "type": "string" },
+                    "message": { "type": "string" }
+                }
+            },
+            "DependencyErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/DependencyErrorDetails"
+                        }
+                    }
+                },
+                "example": {
+                    "error": {
+                        "dependency_failure": true,
+                        "service": "compliance",
+                        "status": 500,
+                        "endpoint": "https://export-compliance.dev.api.redhat.com/v1/screening",
+                        "message": "Unexpected error received from Compliance Service"
                     }
                 }
             }
