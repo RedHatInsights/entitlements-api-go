@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
@@ -130,6 +131,8 @@ func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w htt
 // Index the handler for GETs to /api/entitlements/v1/services/
 func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
+		var include_filter []string
+		var exclude_filter []string
 		start := time.Now()
 		idObj := identity.Get(req.Context()).Identity
 		orgId := idObj.Internal.OrgID
@@ -140,6 +143,16 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 		validAccNum := !(accNum == "" || accNum == "-1")
 		validOrgId := !(orgId == "" || orgId == "-1")
+
+		include_list := req.URL.Query().Get("include_bundles")
+		if include_list != "" {
+			include_filter = strings.Split(include_list, ",")
+		} else {
+			exclude_list := req.URL.Query().Get("exclude_bundles")
+			if exclude_list != "" {
+				exclude_filter = strings.Split(exclude_list, ",")
+			}
+		}
 
 		if res.Error != nil {
 			errMsg := "Unexpected error while talking to Subs Service"
@@ -169,6 +182,12 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
 		for _, b := range bundleInfo {
+			if len(include_filter) > 0 && !contains(include_filter, b.Name) {
+				continue
+			} else if len(exclude_filter) > 0 && contains(exclude_filter, b.Name) {
+				continue
+			}
+
 			entitle := true
 			trial := false
 
@@ -208,4 +227,13 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(obj))
 	}
+}
+
+func contains(s []string, t string) bool {
+	for _, val := range s {
+		if val == t {
+			return true
+		}
+	}
+	return false
 }
