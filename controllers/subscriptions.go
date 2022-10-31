@@ -131,8 +131,6 @@ func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w htt
 // Index the handler for GETs to /api/entitlements/v1/services/
 func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		var include_filter []string
-		var exclude_filter []string
 		start := time.Now()
 		idObj := identity.Get(req.Context()).Identity
 		orgId := idObj.Internal.OrgID
@@ -144,15 +142,8 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		validAccNum := !(accNum == "" || accNum == "-1")
 		validOrgId := !(orgId == "" || orgId == "-1")
 
-		include_list := req.URL.Query().Get("include_bundles")
-		if include_list != "" {
-			include_filter = strings.Split(include_list, ",")
-		} else {
-			exclude_list := req.URL.Query().Get("exclude_bundles")
-			if exclude_list != "" {
-				exclude_filter = strings.Split(exclude_list, ",")
-			}
-		}
+		include_filter := filtersFromParams(req, "include_bundles")
+		exclude_filter := filtersFromParams(req, "exclude_bundles")
 
 		if res.Error != nil {
 			errMsg := "Unexpected error while talking to Subs Service"
@@ -236,4 +227,13 @@ func contains(s []string, t string) bool {
 		}
 	}
 	return false
+}
+
+func filtersFromParams(req *http.Request, filterName string) []string {
+	var filter []string
+	list := req.URL.Query().Get(filterName)
+	if list != "" {
+		filter = strings.Split(list, ",")
+	}
+	return filter
 }

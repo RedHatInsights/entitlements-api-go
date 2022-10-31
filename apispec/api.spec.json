@@ -48,7 +48,7 @@
                         "in": "query",
                         "name": "include_bundles",
                         "required": false,
-                        "description": "Filter response to only include listed bundles.",
+                        "description": "Filter response to only include listed bundles. Takes priority over exclude_bundles.",
                         "schema":{
                             "type": "array",
                             "items": {
@@ -62,7 +62,7 @@
                         "in": "query",
                         "name": "exclude_bundles",
                         "required": false,
-                        "description": "Filter response to not include listed bundles.",
+                        "description": "Filter response to not include listed bundles. Ignored if include_bundles is also specified.",
                         "schema":{
                             "type": "array",
                             "items": {
