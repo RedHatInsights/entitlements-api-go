@@ -173,10 +173,14 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
 		for _, b := range bundleInfo {
-			if len(include_filter) > 0 && !contains(include_filter, b.Name) {
-				continue
-			} else if len(exclude_filter) > 0 && contains(exclude_filter, b.Name) {
-				continue
+			if len(include_filter) > 0 {
+				if !contains(include_filter, b.Name) {
+					continue
+				}
+			} else if len(exclude_filter) > 0 {
+				if contains(exclude_filter, b.Name) {
+					continue
+				}
 			}
 
 			entitle := true
