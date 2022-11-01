@@ -102,7 +102,7 @@ var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 	var FeatureStatus types.FeatureStatus
 	json.Unmarshal(body, &FeatureStatus)
 
-	cache.Set(orgID, FeatureStatus, time.Minute*10)
+	cache.Set(orgID, FeatureStatus, time.Minute*30)
 
 	return types.SubscriptionsResponse{
 		StatusCode: resp.StatusCode,
