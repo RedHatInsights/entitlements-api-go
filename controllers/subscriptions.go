@@ -171,6 +171,11 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		for _, b := range bundleInfo {
 			entitle := true
 			trial := false
+			entitleAll := config.GetConfig().Options.GetBool(config.Keys.EntitleAll)
+			if entitleAll == true {
+				entitlementsResponse[b.Name] = types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
+				continue
+			}
 
 			if len(b.Skus) > 0 {
 				entitle = false

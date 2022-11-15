@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"errors"
 	"testing"
+	"os"
 
 	. "github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
@@ -282,6 +283,36 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(true))
 			Expect(body["TestBundle6"].IsEntitled).To(Equal(false))
+		})
+	})
+
+	Context("When ENT_ENTITLE_ALL environment variable is set", func() {
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       FeatureStatus{},
+			CacheHit:   false,
+		}
+
+		It("should entitle all when set to 'true'", func() {
+			os.Setenv("ENT_ENTITLE_ALL", "true")
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle4"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle5"].IsEntitled).To(Equal(true))
+		})
+
+		It("should entitle based on bundle when set to 'false'", func() {
+			os.Setenv("ENT_ENTITLE_ALL", "false")
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle4"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
 		})
 	})
 })
