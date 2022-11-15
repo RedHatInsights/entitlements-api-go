@@ -127,6 +127,10 @@ func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w htt
 	http.Error(w, string(errorResponsejson), 500)
 }
 
+func setBundlePayload(entitle bool, trial bool) types.EntitlementsSection {
+	return types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
+}
+
 // Index the handler for GETs to /api/entitlements/v1/services/
 func Index() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -173,7 +177,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 			trial := false
 			entitleAll := config.GetConfig().Options.GetBool(config.Keys.EntitleAll)
 			if entitleAll == true {
-				entitlementsResponse[b.Name] = types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
+				entitlementsResponse[b.Name] = setBundlePayload(entitle, trial)
 				continue
 			}
 
@@ -198,7 +202,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 			if b.UseIsInternal {
 				entitle = validAccNum && isInternal && validEmailMatch
 			}
-			entitlementsResponse[b.Name] = types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
+			entitlementsResponse[b.Name] = setBundlePayload(entitle, trial)
 		}
 
 		obj, err := json.Marshal(entitlementsResponse)
