@@ -81,6 +81,8 @@ objects:
             value: /apispec/api.spec.json
           - name: ENT_BUNDLE_INFO_YAML
             value: /bundles/bundles.yml
+          - name: BUNDLES_SKUS_ALLOW_LIST
+            value: ${BUNDLES_SKUS_ALLOW_LIST}
           - name: ENT_CW_LOG_GROUP
             valueFrom:
               secretKeyRef:
@@ -190,3 +192,6 @@ parameters:
   name: RUN_BUNDLE_SYNC
   required: false
   value: 'false'
+- description: Application allow list for new bundles with skus to update the feature in the IT features API
+  name: BUNDLES_SKUS_ALLOW_LIST
+  value: ansible, smart_management_rods, rhoam, rhosak, openshift, rhel
