@@ -60,12 +60,21 @@ func SetBundleInfo(yamlFilePath string) error {
 // GetFeatureStatus calls the IT subs service features endpoint and returns the entitlements for specified features/bundles
 var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
+	entitleAll := config.GetConfig().Options.GetString(config.Keys.EntitleAll)
 
 	if item != nil && !item.Expired() {
 		return types.SubscriptionsResponse{
 			StatusCode: 200,
 			Data:       item.Value().(types.FeatureStatus),
 			CacheHit:   true,
+		}
+	}
+
+	if entitleAll == "true" {
+		return types.SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       types.FeatureStatus{},
+			CacheHit:   false,
 		}
 	}
 
@@ -171,6 +180,12 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		for _, b := range bundleInfo {
 			entitle := true
 			trial := false
+			entitleAll := config.GetConfig().Options.GetString(config.Keys.EntitleAll)
+
+			if entitleAll == "true" {
+				entitlementsResponse[b.Name] = types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
+				continue
+			}
 
 			if len(b.Skus) > 0 {
 				entitle = false
