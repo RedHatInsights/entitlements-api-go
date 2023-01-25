@@ -60,12 +60,21 @@ func SetBundleInfo(yamlFilePath string) error {
 // GetFeatureStatus calls the IT subs service features endpoint and returns the entitlements for specified features/bundles
 var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
+	entitleAll := config.GetConfig().Options.GetString(config.Keys.EntitleAll)
 
 	if item != nil && !item.Expired() {
 		return types.SubscriptionsResponse{
 			StatusCode: 200,
 			Data:       item.Value().(types.FeatureStatus),
 			CacheHit:   true,
+		}
+	}
+
+	if entitleAll == "true" {
+		return types.SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       types.FeatureStatus{},
+			CacheHit:   false,
 		}
 	}
 
@@ -102,7 +111,7 @@ var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 	var FeatureStatus types.FeatureStatus
 	json.Unmarshal(body, &FeatureStatus)
 
-	cache.Set(orgID, FeatureStatus, time.Minute*10)
+	cache.Set(orgID, FeatureStatus, time.Minute*30)
 
 	return types.SubscriptionsResponse{
 		StatusCode: resp.StatusCode,
@@ -125,6 +134,10 @@ func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w htt
 
 	subsFailure.WithLabelValues(strconv.Itoa(res.StatusCode)).Inc()
 	http.Error(w, string(errorResponsejson), 500)
+}
+
+func setBundlePayload(entitle bool, trial bool) types.EntitlementsSection {
+	return types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
 }
 
 // Index the handler for GETs to /api/entitlements/v1/services/
@@ -171,6 +184,12 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		for _, b := range bundleInfo {
 			entitle := true
 			trial := false
+			entitleAll := config.GetConfig().Options.GetString(config.Keys.EntitleAll)
+
+			if entitleAll == "true" {
+				entitlementsResponse[b.Name] = setBundlePayload(entitle, trial)
+				continue
+			}
 
 			if len(b.Skus) > 0 {
 				entitle = false
@@ -193,7 +212,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 			if b.UseIsInternal {
 				entitle = validAccNum && isInternal && validEmailMatch
 			}
-			entitlementsResponse[b.Name] = types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
+			entitlementsResponse[b.Name] = setBundlePayload(entitle, trial)
 		}
 
 		obj, err := json.Marshal(entitlementsResponse)

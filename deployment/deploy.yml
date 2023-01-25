@@ -69,6 +69,8 @@ objects:
               name: default-entitlements-config
         containers:
         - env:
+          - name: ENT_ENTITLE_ALL
+            value: ${ENTITLE_ALL}
           - name: ENT_CERTS_FROM_ENV
             value: 'true'
           - name: ENT_CA_PATH
@@ -195,3 +197,7 @@ parameters:
 - description: Application allow list for new bundles with skus to update the feature in the IT features API
   name: BUNDLES_SKUS_ALLOW_LIST
   value: ansible,smart_management_rods,rhoam,rhosak,openshift,rhel
+- description: Flag to determine whether or not to entitle all by default and mock calls to IT
+  name: ENTITLE_ALL
+  required: false
+  value: 'false'

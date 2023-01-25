@@ -42,6 +42,7 @@ type EntitlementsConfigKeysType struct {
 	SubAPIBasePath  string
 	CompAPIBasePath string
 	RunBundleSync   string
+	EntitleAll      string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -64,6 +65,7 @@ var Keys = EntitlementsConfigKeysType{
 	SubAPIBasePath:  "SUB_API_BASE_PATH",
 	CompAPIBasePath: "COMP_API_BASE_PATH",
 	RunBundleSync:   "RUN_BUNDLE_SYNC",
+	EntitleAll:      "ENTITLE_ALL",
 }
 
 func getBaseFeaturesPath(options *viper.Viper) string {
@@ -140,6 +142,7 @@ func initialize() {
 	options.SetDefault(Keys.SubAPIBasePath, "/svcrest/subscription/v5/")
 	options.SetDefault(Keys.CompAPIBasePath, "/v1/screening")
 	options.SetDefault(Keys.RunBundleSync, false)
+	options.SetDefault(Keys.EntitleAll, false)
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
