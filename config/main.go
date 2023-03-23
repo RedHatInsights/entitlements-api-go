@@ -43,6 +43,10 @@ type EntitlementsConfigKeysType struct {
 	CompAPIBasePath string
 	RunBundleSync   string
 	EntitleAll      string
+	AMSHost         string
+	ClientID        string
+	ClientSecret    string
+	TokenURL        string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -66,6 +70,10 @@ var Keys = EntitlementsConfigKeysType{
 	CompAPIBasePath: "COMP_API_BASE_PATH",
 	RunBundleSync:   "RUN_BUNDLE_SYNC",
 	EntitleAll:      "ENTITLE_ALL",
+	AMSHost:         "AMS_HOST",
+	ClientID:        "OIDC_CLIENT_ID",
+	ClientSecret:    "OIDC_CLIENT_SECRET",
+	TokenURL:        "OAUTH_TOKEN_URL",
 }
 
 func getBaseFeaturesPath(options *viper.Viper) string {
@@ -130,9 +138,9 @@ func initialize() {
 	options.SetDefault(Keys.Port, "3000")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.ComplianceHost, "https://export-compliance.api.redhat.com")
-	options.SetDefault(Keys.CaPath, "../resources/ca.crt")
-	options.SetDefault(Keys.Cert, "../test_data/test.cert") // default values of Cert and Key are for testing purposes only
-	options.SetDefault(Keys.Key, "../test_data/test.key")
+	options.SetDefault(Keys.CaPath, "./resources/ca.crt")
+	options.SetDefault(Keys.Cert, "./test_data/test.cert") // default values of Cert and Key are for testing purposes only
+	options.SetDefault(Keys.Key, "./test_data/test.key")
 	options.SetDefault(Keys.OpenAPISpecPath, "./apispec/api.spec.json")
 	options.SetDefault(Keys.BundleInfoYaml, "./bundles/bundles.yml")
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
@@ -143,6 +151,7 @@ func initialize() {
 	options.SetDefault(Keys.CompAPIBasePath, "/v1/screening")
 	options.SetDefault(Keys.RunBundleSync, false)
 	options.SetDefault(Keys.EntitleAll, false)
+	options.SetDefault(Keys.AMSHost, "https://api.openshift.com")
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()

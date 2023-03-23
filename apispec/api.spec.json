@@ -34,6 +34,10 @@
         {
             "name": "permissions",
             "description": "Operations about user"
+        },
+        {
+            "name": "seats",
+            "description": "Operations to list/assign/unassign seats"
         }
     ],
     "paths": {
@@ -56,6 +60,107 @@
                     },
                     "404": {
                         "description": "Response not found"
+                    }
+                }
+            }
+        },
+        "/seats": {
+            "get": {
+                "summary": "returns list of users occupying seats",
+                "tags": [
+                    "seats"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/QueryLimit"
+                    },
+                    {
+                        "$ref": "#/components/parameters/QueryOffset"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListSeatsResponsePagination"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "assign a user to a seat",
+                "tags": [
+                    "seats"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "description": "assign a user to a seat",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SeatRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Seat"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequest"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/seats/{id}": {
+            "delete": {
+                "summary": "remove a user from a seat",
+                "tags": [
+                    "seats"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "subscription id for the user to unassign",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequest"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -132,6 +237,31 @@
         }
     },
     "components": {
+        "parameters": {
+            "QueryOffset": {
+                "in": "query",
+                "name": "offset",
+                "required": false,
+                "description": "Parameter for selecting the offset of data.",
+                "schema": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0
+                }
+            },
+            "QueryLimit": {
+                "in": "query",
+                "name": "limit",
+                "required": false,
+                "description": "Parameter for selecting the amount of data returned.",
+                "schema": {
+                    "type": "integer",
+                    "default": 10,
+                    "minimum": 1,
+                    "maximum": 1000
+                }
+            }
+        },
         "schemas": {
             "ServiceDetails": {
                 "type": "object",
@@ -175,18 +305,30 @@
                 "properties": {
                     "result": {
                         "type": "string",
-                        "enum": ["OK", "ERROR_T5", "ERROR_OFAC", "ERROR_EXPORT_CONTROL"]
+                        "enum": [
+                            "OK",
+                            "ERROR_T5",
+                            "ERROR_OFAC",
+                            "ERROR_EXPORT_CONTROL"
+                        ]
                     },
                     "description": {
                         "type": "string",
                         "default": null
                     }
                 },
-                "example":
-                    {
-                        "result": "OK",
-                        "description": ""
+                "example": {
+                    "result": "OK",
+                    "description": ""
+                }
+            },
+            "BadRequest": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string"
                     }
+                }
             },
             "ComplianceScreeningErrorResponse": {
                 "type": "object",
@@ -195,9 +337,15 @@
                         "type": "array",
                         "items": {
                             "properties": {
-                                "error": {"type": "string"},
-                                "identityType": {"type": "string"},
-                                "identity": {"type": "string"}
+                                "error": {
+                                    "type": "string"
+                                },
+                                "identityType": {
+                                    "type": "string"
+                                },
+                                "identity": {
+                                    "type": "string"
+                                }
                             }
                         }
                     }
@@ -219,10 +367,18 @@
                         "type": "boolean",
                         "default": false
                     },
-                    "service": { "type": "string" },
-                    "status": { "type": "integer" },
-                    "endpoint": { "type": "string" },
-                    "message": { "type": "string" }
+                    "service": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "integer"
+                    },
+                    "endpoint": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
                 }
             },
             "DependencyErrorResponse": {
@@ -241,6 +397,89 @@
                         "status": 500,
                         "endpoint": "https://export-compliance.dev.api.redhat.com/v1/screening",
                         "message": "Unexpected error received from Compliance Service"
+                    }
+                }
+            },
+            "Seat": {
+                "type": "object",
+                "properties": {
+                    "subscription_id": {
+                        "type": "string"
+                    },
+                    "account_username": {
+                        "type": "string"
+                    }
+                }
+            },
+            "SeatRequest": {
+                "type": "object",
+                "properties": {
+                    "account_username": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ListSeatsResponsePagination": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ListPagination"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "data"
+                        ],
+                        "properties": {
+                            "data": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Seat"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "PaginationMeta": {
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 30
+                    }
+                }
+            },
+            "PaginationLinks": {
+                "properties": {
+                    "first": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "/api/entitlements/v1/(resources)/?offset=0&limit=10"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "/api/entitlements/v1/(resources)/?offset=20&limit=10"
+                    },
+                    "next": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "/api/entitlements/v1/(resources)/?offset=40&limit=10"
+                    },
+                    "last": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "/api/entitlements/v1/(resources)/?offset=90&limit=10"
+                    }
+                }
+            },
+            "ListPagination": {
+                "properties": {
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    },
+                    "links": {
+                        "$ref": "#/components/schemas/PaginationLinks"
                     }
                 }
             }

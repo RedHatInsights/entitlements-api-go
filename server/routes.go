@@ -34,6 +34,7 @@ func DoRoutes() chi.Router {
 		r.Route("/openapi.json", apispec.OpenAPISpec)
 		r.With(identity.EnforceIdentity).Get("/services", controllers.Index())
 		r.With(identity.EnforceIdentity).Get("/compliance", controllers.Compliance())
+		r.With(identity.EnforceIdentity).Route("/seats", controllers.SeatManager)
 	})
 
 	r.Route("/status", controllers.Status)
