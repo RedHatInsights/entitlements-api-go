@@ -1,18 +1,45 @@
 package controllers
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
 	// "github.com/RedHatInsights/entitlements-api-go/config"
-	"github.com/RedHatInsights/entitlements-api-go/controllers/internal/ocm"
+	"github.com/RedHatInsights/entitlements-api-go/config"
+	l "github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/go-chi/chi"
+	sdk "github.com/openshift-online/ocm-sdk-go"
+	"github.com/openshift-online/ocm-sdk-go/logging"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
+	"github.com/sirupsen/logrus"
 )
 
 func SeatManager(r chi.Router) {
-	client, err := ocm.NewOcmClient()
+
+	logger, err := logging.NewGoLoggerBuilder().Debug(false).Build()
+	if err != nil {
+		panic(err)
+	}
+
+	cfg := config.GetConfig()
+
+	clientId := cfg.Options.GetString(config.Keys.ClientID)
+	secret := cfg.Options.GetString(config.Keys.ClientSecret)
+	tokenUrl := cfg.Options.GetString(config.Keys.TokenURL)
+	amsUrl := cfg.Options.GetString(config.Keys.AMSHost)
+
+	client, err := sdk.NewConnectionBuilder().
+		Logger(logger).
+		Client(clientId, secret).
+		TokenURL(tokenUrl).
+		URL(amsUrl).
+		BuildContext(context.Background())
+
 	if err != nil {
 		panic(err)
 	}
@@ -22,7 +49,7 @@ func SeatManager(r chi.Router) {
 }
 
 // Returns the statistics of seats and who is currently sitting in seats
-func ListSeats(client ocm.OCM) func(http.ResponseWriter, *http.Request) {
+func ListSeats(client *sdk.Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		// get offset and length
 		idObj := identity.Get(req.Context()).Identity
@@ -48,15 +75,38 @@ func ListSeats(client ocm.OCM) func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-func Assign(client ocm.OCM) func(http.ResponseWriter, *http.Request) {
+func Assign(client *sdk.Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		// idObj := identity.Get(req.Context()).Identity
+		body, err := io.ReadAll(req.Body)
+		if err != nil {
+			errText := fmt.Sprintf("unexpected error while reading request body: %s", err)
+			l.Log.WithFields(logrus.Fields{
+				"error":     err,
+				"operation": "ams.Assign",
+			}).Error(errText)
+			http.Error(w, errText, http.StatusInternalServerError)
+			return
+		}
+		defer req.Body.Close()
+		var seat types.Seat
+		if err = json.Unmarshal(body, &seat); err != nil {
+			errText := fmt.Sprintf("unexpected error while unmarshalling request body: %s", err)
+			l.Log.WithFields(logrus.Fields{
+				"error":     err,
+				"operation": "ams.Assign",
+			}).Error(errText)
+			http.Error(w, errText, http.StatusBadRequest)
+			return
+		}
+
+		fmt.Printf("%+v\n", seat)
 		// TODO: call quota_cost to get quota version
 		// TODO: call quota_authorization
 	}
 }
 
-func Unassign(client ocm.OCM) func(http.ResponseWriter, *http.Request) {
+func Unassign(client *sdk.Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		// idObj := identity.Get(req.Context()).Identity
 		// TODO: check incoming ident orgId against orgId of subscription
