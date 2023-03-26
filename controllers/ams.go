@@ -4,23 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"strconv"
 
-	// "github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/config"
-	l "github.com/RedHatInsights/entitlements-api-go/logger"
-	"github.com/RedHatInsights/entitlements-api-go/types"
-	"github.com/go-chi/chi"
+	"github.com/RedHatInsights/entitlements-api-go/openapi"
 	sdk "github.com/openshift-online/ocm-sdk-go"
 	"github.com/openshift-online/ocm-sdk-go/logging"
-	"github.com/redhatinsights/platform-go-middlewares/identity"
-	"github.com/sirupsen/logrus"
 )
 
-func SeatManager(r chi.Router) {
+type SeatManagerApi struct {
+	sdk *sdk.Connection
+}
 
+var _ openapi.ServerInterface = &SeatManagerApi{}
+
+func NewSeatManagerApi() *SeatManagerApi {
 	logger, err := logging.NewGoLoggerBuilder().Debug(false).Build()
 	if err != nil {
 		panic(err)
@@ -43,73 +41,31 @@ func SeatManager(r chi.Router) {
 	if err != nil {
 		panic(err)
 	}
-	r.Get("/", ListSeats(client))
-	r.Post("/seat", Assign(client))
-	r.Delete("/seat/{id}", Unassign(client))
+
+	api := &SeatManagerApi{
+		sdk: client,
+	}
+	return api
 }
 
-// Returns the statistics of seats and who is currently sitting in seats
-func ListSeats(client *sdk.Connection) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		// get offset and length
-		idObj := identity.Get(req.Context()).Identity
-		queryParameters := req.URL.Query()
-
-		limitString := queryParameters.Get("limit")
-		limit, err := strconv.Atoi(limitString)
-		if err != nil {
-			limit = 50
-		}
-
-		offsetString := queryParameters.Get("limit")
-		offset, err := strconv.Atoi(offsetString)
-		if err != nil {
-			offset = 0
-		}
-
-		fmt.Printf("limit: %+v\n", limit)
-		fmt.Printf("offset: %+v\n", offset)
-		fmt.Printf("%+v\n", idObj)
-
-		// TODO: call subscription search
-	}
+func (api *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, id string) {
+	// idObj := identity.Get(req.Context()).Identity
+	// TODO: check incoming ident orgId against orgId of subscription
+	// TODO: call DELETE subscription {id}
 }
 
-func Assign(client *sdk.Connection) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		// idObj := identity.Get(req.Context()).Identity
-		body, err := io.ReadAll(req.Body)
-		if err != nil {
-			errText := fmt.Sprintf("unexpected error while reading request body: %s", err)
-			l.Log.WithFields(logrus.Fields{
-				"error":     err,
-				"operation": "ams.Assign",
-			}).Error(errText)
-			http.Error(w, errText, http.StatusInternalServerError)
-			return
-		}
-		defer req.Body.Close()
-		var seat types.Seat
-		if err = json.Unmarshal(body, &seat); err != nil {
-			errText := fmt.Sprintf("unexpected error while unmarshalling request body: %s", err)
-			l.Log.WithFields(logrus.Fields{
-				"error":     err,
-				"operation": "ams.Assign",
-			}).Error(errText)
-			http.Error(w, errText, http.StatusBadRequest)
-			return
-		}
-
-		fmt.Printf("%+v\n", seat)
-		// TODO: call quota_cost to get quota version
-		// TODO: call quota_authorization
-	}
+func (api *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params openapi.GetSeatsParams) {
+	// TODO: call subscription search
 }
 
-func Unassign(client *sdk.Connection) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, req *http.Request) {
-		// idObj := identity.Get(req.Context()).Identity
-		// TODO: check incoming ident orgId against orgId of subscription
-		// TODO: call DELETE subscription {id}
+func (api *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
+	seat := new(openapi.SeatRequest)
+	defer r.Body.Close()
+	if err := json.NewDecoder(r.Body).Decode(seat); err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
 	}
+	fmt.Printf("%+v\n", seat)
+	// TODO: call quota_cost to get quota version
+	// TODO: call quota_authorization
 }

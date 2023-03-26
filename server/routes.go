@@ -5,6 +5,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/apispec"
 	"github.com/RedHatInsights/entitlements-api-go/controllers"
 	log "github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/RedHatInsights/entitlements-api-go/openapi"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -34,7 +35,7 @@ func DoRoutes() chi.Router {
 		r.Route("/openapi.json", apispec.OpenAPISpec)
 		r.With(identity.EnforceIdentity).Get("/services", controllers.Index())
 		r.With(identity.EnforceIdentity).Get("/compliance", controllers.Compliance())
-		r.With(identity.EnforceIdentity).Route("/seats", controllers.SeatManager)
+		r.With(identity.EnforceIdentity).Mount("/seats", openapi.Handler(controllers.NewSeatManagerApi()))
 	})
 
 	r.Route("/status", controllers.Status)
