@@ -2,13 +2,13 @@ package server
 
 import (
 	chilogger "github.com/766b/chi-logger"
+	"github.com/RedHatInsights/entitlements-api-go/api"
 	"github.com/RedHatInsights/entitlements-api-go/apispec"
 	"github.com/RedHatInsights/entitlements-api-go/controllers"
 	log "github.com/RedHatInsights/entitlements-api-go/logger"
-	"github.com/RedHatInsights/entitlements-api-go/openapi"
 	sentryhttp "github.com/getsentry/sentry-go/http"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
@@ -16,6 +16,7 @@ import (
 // DoRoutes sets up the routes used by the server.
 // First, it sets up the chi router using our middleware.
 // Then it does the actual routing config.
+
 func DoRoutes() chi.Router {
 	r := chi.NewRouter()
 
@@ -30,12 +31,18 @@ func DoRoutes() chi.Router {
 	r.Use(chilogger.NewLogrusMiddleware("router", log.Log))
 	r.Use(sentryMiddleware.Handle)
 
+	// This is odd, but the generated code will register handlers
+	// and return a http.Handler.  This is normally used with .Mount,
+	// but since only part of the server is using code gen this is
+	// a way to hack it in
+	seatManagerApi := controllers.NewMockSeatManagerApi()
+	api.HandlerFromMuxWithBaseURL(seatManagerApi, r, "/api/entitlements/v1")
+
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.With(identity.EnforceIdentity).Route("/", controllers.LubDub)
 		r.Route("/openapi.json", apispec.OpenAPISpec)
 		r.With(identity.EnforceIdentity).Get("/services", controllers.Index())
 		r.With(identity.EnforceIdentity).Get("/compliance", controllers.Compliance())
-		r.With(identity.EnforceIdentity).Mount("/seats", openapi.Handler(controllers.NewSeatManagerApi()))
 	})
 
 	r.Route("/status", controllers.Status)

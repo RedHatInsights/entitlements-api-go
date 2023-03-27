@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 type info struct {

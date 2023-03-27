@@ -6,14 +6,15 @@ require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
 	github.com/aws/aws-sdk-go v1.38.51
 	github.com/deepmap/oapi-codegen v1.12.4
-	github.com/getkin/kin-openapi v0.115.0
+	github.com/getkin/kin-openapi v0.107.0
 	github.com/getsentry/sentry-go v0.10.0
 	github.com/go-chi/chi v4.0.2+incompatible
-	github.com/go-chi/chi/v5 v5.0.8
+	github.com/go-chi/chi/v5 v5.0.7
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/karlseguin/ccache v2.0.3+incompatible
 	github.com/karlseguin/expect v1.0.1 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.23 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.19.0
 	github.com/openshift-online/ocm-sdk-go v0.1.327

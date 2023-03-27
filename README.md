@@ -25,6 +25,12 @@ Then, install the project's Go dependencies by running:
 bash ./scripts/dev_deps.sh
 ```
 
+Generate the openapi types and stubs:
+
+```sh
+go generate ./...
+```
+
 ## Certificates and Configuration
 
 ### Getting an Enterprise Cert

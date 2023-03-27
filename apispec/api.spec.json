@@ -88,6 +88,14 @@
                                 }
                             }
                         }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
                     }
                 }
             },
@@ -377,6 +385,14 @@
                         "type": "string"
                     },
                     "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Generic500Error": {
+                "type": "object",
+                "properties": {
+                    "error": {
                         "type": "string"
                     }
                 }
