@@ -10,6 +10,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
 	"github.com/RedHatInsights/entitlements-api-go/logger"
+	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
 
@@ -59,13 +60,14 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 }
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
-	logger.Log.Info("GetSeats?")
 	subs, err := s.client.GetSubscriptions()
 	if err != nil {
 		return
 	}
-	logger.Log.Info("%s", subs)
-	// TODO: call subscription search
+
+	if err = v1.MarshalSubscriptionList(subs.Slice(), w); err != nil {
+		return
+	}
 }
 
 func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {

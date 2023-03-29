@@ -93,7 +93,9 @@
                         "description": "Internal server error",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "$ref": "#/components/schemas/Generic500Error"
+                                }
                             }
                         }
                     }

@@ -45,11 +45,12 @@ func (c *TestClient) DeleteSubscription(subscriptionId string) error {
 func (c *TestClient) QuotaAuthorization(accountUsername string) {}
 
 func (c *TestClient) GetSubscriptions() (*v1.SubscriptionList, error) {
-	lst, err := v1.NewSubscriptionList().Items(
-		v1.NewSubscription().Creator(
-			v1.NewAccount().Username("testuser"),
-		),
-	).Build()
+	lst, err := v1.NewSubscriptionList().
+		Items(
+			v1.NewSubscription().
+				Creator(v1.NewAccount().Username("testuser")).
+				Plan(v1.NewPlan().Type("AnsibleWisdom").Name("AnsibleWisdom")),
+		).Build()
 	if err != nil {
 		return nil, err
 	}

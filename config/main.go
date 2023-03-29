@@ -47,6 +47,7 @@ type EntitlementsConfigKeysType struct {
 	ClientID        string
 	ClientSecret    string
 	TokenURL        string
+	Debug           string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -74,6 +75,7 @@ var Keys = EntitlementsConfigKeysType{
 	ClientID:        "OIDC_CLIENT_ID",
 	ClientSecret:    "OIDC_CLIENT_SECRET",
 	TokenURL:        "OAUTH_TOKEN_URL",
+	Debug:           "DEBUG",
 }
 
 func getBaseFeaturesPath(options *viper.Viper) string {
@@ -152,6 +154,7 @@ func initialize() {
 	options.SetDefault(Keys.RunBundleSync, false)
 	options.SetDefault(Keys.EntitleAll, false)
 	options.SetDefault(Keys.AMSHost, "https://api.openshift.com")
+	options.SetDefault(Keys.Debug, false)
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()

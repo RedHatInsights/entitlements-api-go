@@ -4,6 +4,7 @@ import (
 	chilogger "github.com/766b/chi-logger"
 	"github.com/RedHatInsights/entitlements-api-go/api"
 	"github.com/RedHatInsights/entitlements-api-go/apispec"
+	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/controllers"
 	log "github.com/RedHatInsights/entitlements-api-go/logger"
 	sentryhttp "github.com/getsentry/sentry-go/http"
@@ -36,6 +37,9 @@ func DoRoutes() chi.Router {
 	// but since only part of the server is using code gen this is
 	// a way to hack it in
 	seatManagerApi := controllers.NewMockSeatManagerApi()
+	if !config.GetConfig().Options.GetBool(config.Keys.Debug) {
+		seatManagerApi = controllers.NewSeatManagerApi()
+	}
 	api.HandlerFromMuxWithBaseURL(seatManagerApi, r, "/api/entitlements/v1")
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
