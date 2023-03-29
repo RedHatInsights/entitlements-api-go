@@ -13,8 +13,7 @@ COPY . .
 
 USER 0
 
-RUN go build -o entitlements-api-go main.go
-RUN go build -o ./bundle-sync bundle_sync/main.go
+RUN make
 
 # Using ubi8-minimal due to its smaller footprint
 FROM registry.redhat.io/ubi8/ubi-minimal

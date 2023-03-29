@@ -8,7 +8,6 @@ require (
 	github.com/deepmap/oapi-codegen v1.12.4
 	github.com/getkin/kin-openapi v0.107.0
 	github.com/getsentry/sentry-go v0.10.0
-	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/karlseguin/ccache v2.0.3+incompatible

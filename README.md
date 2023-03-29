@@ -25,10 +25,10 @@ Then, install the project's Go dependencies by running:
 bash ./scripts/dev_deps.sh
 ```
 
-Generate the openapi types and stubs:
+Build the project and generate the openapi types and stubs:
 
 ```sh
-go generate ./...
+make
 ```
 
 ## Certificates and Configuration
@@ -76,7 +76,7 @@ bash ./scripts/watch.sh ./local/development.env.sh
 To run locally with Docker:
 
 ```bash
-docker build -t entitlements-api-go .
+make image
 docker run -p 3000:3000 entitlements-api-go
 ```
 
