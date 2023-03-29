@@ -103,11 +103,11 @@ objects:
               secretKeyRef:
                 key: aws_access_key_id
                 name: cloudwatch
-          - name: SENTRY_DSN
+          - name: GLITCHTIP_DSN
             valueFrom:
               secretKeyRef:
-                key: sentry-dsn
-                name: entitlements-secret
+                name: ${GLITCHTIP_SECRET}
+                key: dsn
                 optional: true
           envFrom:
           - secretRef:
