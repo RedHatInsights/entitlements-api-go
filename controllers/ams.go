@@ -5,12 +5,12 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
 	"github.com/RedHatInsights/entitlements-api-go/logger"
-	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
 
@@ -39,38 +39,113 @@ func NewMockSeatManagerApi() *SeatManagerApi {
 	}
 }
 
+func do500(w http.ResponseWriter, err error) {
+	response := api.Generic500Error{
+		Error: toPtr(err.Error()),
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(500)
+	json.NewEncoder(w).Encode(response)
+}
+
 func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, id string) {
 	idObj := identity.Get(r.Context()).Identity
+
+	if !idObj.User.OrgAdmin {
+		msg := fmt.Sprintf("Not allowed to delete subscription %s", id)
+		response := api.Forbidden{
+			Error: &msg,
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(403)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
 	subscription, err := s.client.GetSubscription(id)
 	if err != nil {
-		return // handle it?
+		do500(w, err)
+		return
 	}
 	orgId, ok := subscription.GetOrganizationID()
 	if !ok {
-		return // handle it!
+		do500(w, fmt.Errorf("subscription %s does not have an organization", id))
+		return
 	}
 
 	if orgId != idObj.Internal.OrgID {
-		return // Can't delete subs outside of org
+		msg := fmt.Sprintf("Not allowed to delete subscription %s", id)
+		response := api.Forbidden{
+			Error: &msg,
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(403)
+		json.NewEncoder(w).Encode(response)
 	}
 
 	if err = s.client.DeleteSubscription(id); err != nil {
-		return // handle it!
+		do500(w, err)
+		return
 	}
+}
+
+func toPtr[T any](s T) *T {
+	return &s
 }
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
-	subs, err := s.client.GetSubscriptions()
+
+	// AMS uses fixed pages rather than offsets So we are forcing the
+	// offset to be tied to the nearest previous page.
+	size := int(*params.Limit)
+	offset := int(*params.Offset)
+	page := 1 + (offset / size)
+
+	subs, err := s.client.GetSubscriptions(size, page)
 	if err != nil {
+		do500(w, err)
 		return
 	}
 
-	if err = v1.MarshalSubscriptionList(subs.Slice(), w); err != nil {
+	var seats []api.Seat
+	for _, sub := range subs.Slice() {
+		seats = append(seats, api.Seat{
+			AccountUsername: toPtr(sub.Creator().Username()),
+			SubscriptionId:  toPtr(sub.ID()),
+		})
+	}
+
+	resp := api.ListSeatsResponsePagination{
+		Meta: &api.PaginationMeta{
+			Count: toPtr(int64(len(seats))),
+		},
+		Links: &api.PaginationLinks{},
+		Data:  seats,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	if err = json.NewEncoder(w).Encode(resp); err != nil {
+		do500(w, err)
 		return
 	}
+
 }
 
 func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
+	idObj := identity.Get(r.Context()).Identity
+
+	if !idObj.User.OrgAdmin {
+		msg := "Not allowed to assign seats"
+		response := api.Forbidden{
+			Error: &msg,
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(403)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
 	seat := new(api.SeatRequest)
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(seat); err != nil {

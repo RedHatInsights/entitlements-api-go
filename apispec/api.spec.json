@@ -171,6 +171,16 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Forbidden"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -333,6 +343,14 @@
                 }
             },
             "BadRequest": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Forbidden": {
                 "type": "object",
                 "properties": {
                     "error": {

@@ -12,7 +12,7 @@ import (
 type AMSInterface interface {
 	GetQuotaCost(organizationId string) (*v1.QuotaCost, error)
 	GetSubscription(subscriptionId string) (*v1.Subscription, error)
-	GetSubscriptions() (*v1.SubscriptionList, error)
+	GetSubscriptions(size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
 	QuotaAuthorization(accountUsername string)
 }
@@ -44,7 +44,7 @@ func (c *TestClient) DeleteSubscription(subscriptionId string) error {
 // TODO: waiting on updates to the ocm sdk
 func (c *TestClient) QuotaAuthorization(accountUsername string) {}
 
-func (c *TestClient) GetSubscriptions() (*v1.SubscriptionList, error) {
+func (c *TestClient) GetSubscriptions(size, page int) (*v1.SubscriptionList, error) {
 	lst, err := v1.NewSubscriptionList().
 		Items(
 			v1.NewSubscription().
@@ -111,9 +111,13 @@ func (c *Client) GetSubscription(subscriptionId string) (*v1.Subscription, error
 	return subscription, nil
 }
 
-func (c *Client) GetSubscriptions() (*v1.SubscriptionList, error) {
-	resp, err := c.client.AccountsMgmt().V1().Subscriptions().List().Search(
-		"quota_id LIKE 'seat|ansible.wisdom'%").Send()
+func (c *Client) GetSubscriptions(size, page int) (*v1.SubscriptionList, error) {
+	req := c.client.AccountsMgmt().V1().Subscriptions().List().
+		Search("quota_id LIKE 'seat|ansible.wisdom'%").
+		Size(size).
+		Page(page)
+
+	resp, err := req.Send()
 	if err != nil {
 		return nil, err
 	}
