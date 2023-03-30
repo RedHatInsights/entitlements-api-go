@@ -196,3 +196,7 @@ parameters:
   name: ENTITLE_ALL
   required: false
   value: 'false'
+- description: The name of the Glitchtip secret
+  name: GLITCHTIP_SECRET
+  required: false
+  value: 'entitlements-secret'
