@@ -30,7 +30,7 @@ func (c *TestClient) GetQuotaCost(organizationId string) (*v1.QuotaCost, error) 
 }
 
 func (c *TestClient) GetSubscription(subscriptionId string) (*v1.Subscription, error) {
-	subscription, err := v1.NewSubscription().Build()
+	subscription, err := v1.NewSubscription().ID(subscriptionId).Build()
 	if err != nil {
 		return nil, err
 	}
@@ -104,11 +104,11 @@ func (c *Client) GetQuotaCost(organizationId string) (*v1.QuotaCost, error) {
 }
 
 func (c *Client) GetSubscription(subscriptionId string) (*v1.Subscription, error) {
-	subscription, err := v1.NewSubscription().Build()
+	resp, err := c.client.AccountsMgmt().V1().Subscriptions().Subscription(subscriptionId).Get().Send()
 	if err != nil {
 		return nil, err
 	}
-	return subscription, nil
+	return resp.Body(), nil
 }
 
 func (c *Client) GetSubscriptions(size, page int) (*v1.SubscriptionList, error) {
@@ -125,8 +125,14 @@ func (c *Client) GetSubscriptions(size, page int) (*v1.SubscriptionList, error) 
 }
 
 func (c *Client) DeleteSubscription(subscriptionId string) error {
+	_, err := c.client.AccountsMgmt().V1().Subscriptions().Subscription(subscriptionId).Delete().Send()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 // TODO: waiting on updates to the ocm sdk
-func (c *Client) QuotaAuthorization(accountUsername string) {}
+func (c *Client) QuotaAuthorization(accountUsername string) {
+	// c.client.AccountsMgmt().V1()
+}

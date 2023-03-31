@@ -12,7 +12,7 @@ require (
 	github.com/karlseguin/ccache v2.0.3+incompatible
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.19.0
-	github.com/openshift-online/ocm-sdk-go v0.1.327
+	github.com/openshift-online/ocm-sdk-go v0.1.328
 	github.com/prometheus/client_golang v1.12.1
 	github.com/redhatinsights/platform-go-middlewares v0.20.1-0.20230119152702-e3779317d1aa
 	github.com/sirupsen/logrus v1.8.1
