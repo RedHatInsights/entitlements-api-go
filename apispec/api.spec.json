@@ -94,7 +94,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Generic500Error"
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -133,7 +133,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/BadRequest"
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -167,7 +167,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/BadRequest"
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -177,7 +177,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Forbidden"
+                                    "$ref": "#/components/schemas/Error"
                                 }
                             }
                         }
@@ -342,22 +342,6 @@
                     "description": ""
                 }
             },
-            "BadRequest": {
-                "type": "object",
-                "properties": {
-                    "error": {
-                        "type": "string"
-                    }
-                }
-            },
-            "Forbidden": {
-                "type": "object",
-                "properties": {
-                    "error": {
-                        "type": "string"
-                    }
-                }
-            },
             "ComplianceScreeningErrorResponse": {
                 "type": "object",
                 "properties": {
@@ -409,7 +393,7 @@
                     }
                 }
             },
-            "Generic500Error": {
+            "Error": {
                 "type": "object",
                 "properties": {
                     "error": {

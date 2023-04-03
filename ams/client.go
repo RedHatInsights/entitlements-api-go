@@ -2,6 +2,7 @@ package ams
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	sdk "github.com/openshift-online/ocm-sdk-go"
@@ -14,7 +15,7 @@ type AMSInterface interface {
 	GetSubscription(subscriptionId string) (*v1.Subscription, error)
 	GetSubscriptions(size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
-	QuotaAuthorization(accountUsername string)
+	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationsPostResponse, error)
 }
 
 var _ AMSInterface = &TestClient{}
@@ -30,7 +31,13 @@ func (c *TestClient) GetQuotaCost(organizationId string) (*v1.QuotaCost, error) 
 }
 
 func (c *TestClient) GetSubscription(subscriptionId string) (*v1.Subscription, error) {
-	subscription, err := v1.NewSubscription().ID(subscriptionId).Build()
+	if subscriptionId == "" {
+		return nil, fmt.Errorf("subscriptionId cannot be an empty string")
+	}
+	subscription, err := v1.NewSubscription().
+		ID(subscriptionId).
+		OrganizationID("4384938490324").
+		Build()
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +49,9 @@ func (c *TestClient) DeleteSubscription(subscriptionId string) error {
 }
 
 // TODO: waiting on updates to the ocm sdk
-func (c *TestClient) QuotaAuthorization(accountUsername string) {}
+func (c *TestClient) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationsPostResponse, error) {
+	return nil, nil
+}
 
 func (c *TestClient) GetSubscriptions(size, page int) (*v1.SubscriptionList, error) {
 	lst, err := v1.NewSubscriptionList().
@@ -132,7 +141,22 @@ func (c *Client) DeleteSubscription(subscriptionId string) error {
 	return nil
 }
 
-// TODO: waiting on updates to the ocm sdk
-func (c *Client) QuotaAuthorization(accountUsername string) {
-	// c.client.AccountsMgmt().V1()
+func (c *Client) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationsPostResponse, error) {
+
+	rr := v1.NewReservedResource().
+		ResourceName("ansible.wisdom").
+		ResourceType("seat")
+
+	req, err := v1.NewQuotaAuthorizationRequest().
+		AccountUsername(accountUsername).
+		Reserve(true).
+		ProductID("AnsibleWisdom").
+		Resources(rr).
+		QuotaVersion(quotaVersion).
+		Build()
+
+	if err != nil {
+		return nil, err
+	}
+	return c.client.AccountsMgmt().V1().QuotaAuthorizations().Post().Request(req).Send()
 }

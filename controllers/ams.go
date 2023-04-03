@@ -1,5 +1,5 @@
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen --config=types.cfg.yaml ../apispec/api.spec.json
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen --config=server.cfg.yaml ../apispec/api.spec.json
+//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4 --config=types.cfg.yaml ../apispec/api.spec.json
+//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4 --config=server.cfg.yaml ../apispec/api.spec.json
 
 package controllers
 
@@ -10,7 +10,6 @@ import (
 
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
-	"github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
 
@@ -39,26 +38,24 @@ func NewMockSeatManagerApi() *SeatManagerApi {
 	}
 }
 
-func do500(w http.ResponseWriter, err error) {
-	response := api.Generic500Error{
+func doError(w http.ResponseWriter, code int, err error) {
+	response := api.Error{
 		Error: toPtr(err.Error()),
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
+	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(response)
+}
+
+func do500(w http.ResponseWriter, err error) {
+	doError(w, http.StatusInternalServerError, err)
 }
 
 func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, id string) {
 	idObj := identity.Get(r.Context()).Identity
 
 	if !idObj.User.OrgAdmin {
-		msg := fmt.Sprintf("Not allowed to delete subscription %s", id)
-		response := api.Forbidden{
-			Error: &msg,
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(403)
-		json.NewEncoder(w).Encode(response)
+		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s", id))
 		return
 	}
 
@@ -74,19 +71,15 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 	}
 
 	if orgId != idObj.Internal.OrgID {
-		msg := fmt.Sprintf("Not allowed to delete subscription %s", id)
-		response := api.Forbidden{
-			Error: &msg,
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(403)
-		json.NewEncoder(w).Encode(response)
+		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s", id))
 	}
 
 	if err = s.client.DeleteSubscription(id); err != nil {
 		do500(w, err)
 		return
 	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func toPtr[T any](s T) *T {
@@ -110,6 +103,17 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 	fillDefaults(&params)
 	size := int(*params.Limit)
 	offset := int(*params.Offset)
+
+	if size < 1 {
+		doError(w, http.StatusBadRequest, fmt.Errorf("size must be > 0"))
+		return
+	}
+
+	if offset < 0 {
+		doError(w, http.StatusBadRequest, fmt.Errorf("offset must be >= 0"))
+		return
+	}
+
 	page := 1 + (offset / size)
 
 	subs, err := s.client.GetSubscriptions(size, page)
@@ -135,7 +139,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	if err = json.NewEncoder(w).Encode(resp); err != nil {
 		do500(w, err)
 		return
@@ -147,13 +151,7 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 	idObj := identity.Get(r.Context()).Identity
 
 	if !idObj.User.OrgAdmin {
-		msg := "Not allowed to assign seats"
-		response := api.Forbidden{
-			Error: &msg,
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(403)
-		json.NewEncoder(w).Encode(response)
+		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats"))
 		return
 	}
 
@@ -163,7 +161,31 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	logger.Log.Infof("PostSeats: %+v", seat)
-	// TODO: call quota_cost to get quota version
-	// TODO: call quota_authorization
+
+	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
+	if err != nil {
+		do500(w, err)
+		return
+	}
+
+	resp, err := s.client.QuotaAuthorization(idObj.User.Username, quotaCost.Version())
+	if err != nil {
+		do500(w, err)
+		return
+	}
+
+	sub := resp.Response().Subscription()
+	subId := sub.ID()
+	userName := sub.Creator().Username()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err = json.NewEncoder(w).Encode(api.Seat{
+		SubscriptionId:  &subId,
+		AccountUsername: &userName,
+	}); err != nil {
+		do500(w, err)
+		return
+	}
+
 }

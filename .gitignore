@@ -5,3 +5,4 @@ local
 /bundle-sync
 entitlements-api-go
 *.gen.go
+coverage.out
