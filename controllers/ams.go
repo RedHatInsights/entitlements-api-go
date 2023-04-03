@@ -93,10 +93,21 @@ func toPtr[T any](s T) *T {
 	return &s
 }
 
+func fillDefaults(params *api.GetSeatsParams) {
+	if params.Limit == nil {
+		params.Limit = toPtr(10)
+	}
+
+	if params.Offset == nil {
+		params.Offset = toPtr(0)
+	}
+}
+
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
 
 	// AMS uses fixed pages rather than offsets So we are forcing the
 	// offset to be tied to the nearest previous page.
+	fillDefaults(&params)
 	size := int(*params.Limit)
 	offset := int(*params.Offset)
 	page := 1 + (offset / size)

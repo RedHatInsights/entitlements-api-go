@@ -266,10 +266,20 @@ var _ = Describe("Identity Controller", func() {
 		It("should set values based on response from the featureStatus request", func() {
 			fakeResponse := SubscriptionsResponse{
 				StatusCode: 200,
+				Body:       "",
+				Error:      nil,
 				Data: FeatureStatus{
-					[]Feature{
-						{Name: "TestBundle1", IsEval: false, Entitled: false},
-						{Name: "TestBundle2", IsEval: true, Entitled: true},
+					Features: []Feature{
+						{
+							Name:     "TestBundle1",
+							IsEval:   false,
+							Entitled: false,
+						},
+						{
+							Name:     "TestBundle2",
+							IsEval:   true,
+							Entitled: true,
+						},
 					},
 				},
 				CacheHit: false,

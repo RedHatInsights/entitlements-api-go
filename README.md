@@ -98,8 +98,6 @@ go build -o ./bundle-sync bundle_sync/main.go
 ## Running the Unit Tests
 
 * To run the unit tests, execute the following commands from the terminal:
-    `cd controllers`
-    `go test`
+    make test
 * To include benchmarks:
-    `cd controllers`
-    `go test -bench=.`
+    make bench
