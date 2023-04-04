@@ -135,6 +135,26 @@ var _ = Describe("Listing Seats", func() {
 			Expect(*result.Data[0].AccountUsername).To(Equal("testuser"))
 
 		})
+		Context("and limit is too small", func() {
+			It("should return a bad request", func() {
+				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
+				seatApi.GetSeats(rr, req, api.GetSeatsParams{
+					Limit: toPtr(int(0)),
+				})
+
+				Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("and offset is too small", func() {
+			It("should return a bad request", func() {
+				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
+				seatApi.GetSeats(rr, req, api.GetSeatsParams{
+					Offset: toPtr(int(-1)),
+				})
+
+				Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
+			})
+		})
 	})
 })
 

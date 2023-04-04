@@ -101,11 +101,11 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 	// AMS uses fixed pages rather than offsets So we are forcing the
 	// offset to be tied to the nearest previous page.
 	fillDefaults(&params)
-	size := int(*params.Limit)
+	limit := int(*params.Limit)
 	offset := int(*params.Offset)
 
-	if size < 1 {
-		doError(w, http.StatusBadRequest, fmt.Errorf("size must be > 0"))
+	if limit < 1 {
+		doError(w, http.StatusBadRequest, fmt.Errorf("limit must be > 0"))
 		return
 	}
 
@@ -114,9 +114,9 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 		return
 	}
 
-	page := 1 + (offset / size)
+	page := 1 + (offset / limit)
 
-	subs, err := s.client.GetSubscriptions(size, page)
+	subs, err := s.client.GetSubscriptions(limit, page)
 	if err != nil {
 		do500(w, err)
 		return
@@ -187,5 +187,4 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 		do500(w, err)
 		return
 	}
-
 }
