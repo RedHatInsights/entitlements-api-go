@@ -154,6 +154,7 @@ func initialize() {
 	options.SetDefault(Keys.RunBundleSync, false)
 	options.SetDefault(Keys.EntitleAll, false)
 	options.SetDefault(Keys.AMSHost, "https://api.openshift.com")
+	options.SetDefault(Keys.TokenURL, "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token")
 	options.SetDefault(Keys.Debug, false)
 
 	options.SetEnvPrefix("ENT")
