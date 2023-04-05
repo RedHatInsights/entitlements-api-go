@@ -140,9 +140,9 @@ func initialize() {
 	options.SetDefault(Keys.Port, "3000")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.ComplianceHost, "https://export-compliance.api.redhat.com")
-	options.SetDefault(Keys.CaPath, "./resources/ca.crt")
-	options.SetDefault(Keys.Cert, "./test_data/test.cert") // default values of Cert and Key are for testing purposes only
-	options.SetDefault(Keys.Key, "./test_data/test.key")
+	options.SetDefault(Keys.CaPath, "../resources/ca.crt")
+	options.SetDefault(Keys.Cert, "../test_data/test.cert") // default values of Cert and Key are for testing purposes only
+	options.SetDefault(Keys.Key, "../test_data/test.key")
 	options.SetDefault(Keys.OpenAPISpecPath, "./apispec/api.spec.json")
 	options.SetDefault(Keys.BundleInfoYaml, "./bundles/bundles.yml")
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")

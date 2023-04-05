@@ -17,6 +17,8 @@ type SeatManagerApi struct {
 	client ams.AMSInterface
 }
 
+const BASE_LINK_URL = "/api/entitlements/v1/seats"
+
 var _ api.ServerInterface = &SeatManagerApi{}
 
 func NewSeatManagerApi() *SeatManagerApi {
@@ -130,11 +132,23 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 		})
 	}
 
+	// AMS api for subscriptions doesn't return the information needed to calculate last
+	prev_offset := offset - limit
+	if prev_offset < 0 {
+		prev_offset = 0
+	}
+
+	links := &api.PaginationLinks{
+		First:    toPtr(fmt.Sprintf("%s/?limit=%d&offset=0", BASE_LINK_URL, limit)),
+		Next:     toPtr(fmt.Sprintf("%s/?limit=%d&offset=%d", BASE_LINK_URL, limit, offset+limit)),
+		Previous: toPtr(fmt.Sprintf("%s/?limit=%d&offset=%d", BASE_LINK_URL, limit, prev_offset)),
+	}
+
 	resp := api.ListSeatsResponsePagination{
 		Meta: &api.PaginationMeta{
 			Count: toPtr(int64(len(seats))),
 		},
-		Links: &api.PaginationLinks{},
+		Links: links,
 		Data:  seats,
 	}
 
