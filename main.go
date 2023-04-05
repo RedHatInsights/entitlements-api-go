@@ -22,7 +22,9 @@ func main() {
 	var dsn string = os.Getenv("GLITCHTIP_DSN")
 
 	if dsn != "" {
-		err := sentry.Init(sentry.ClientOptions{})
+		err := sentry.Init(sentry.ClientOptions{
+			Dsn: dsn,
+		})
 		if err != nil {
 			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry SDK with GLITCHTIP_DSN")
 		} else {
