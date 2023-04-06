@@ -21,22 +21,9 @@ const BASE_LINK_URL = "/api/entitlements/v1/seats"
 
 var _ api.ServerInterface = &SeatManagerApi{}
 
-func NewSeatManagerApi() *SeatManagerApi {
-
-	c, err := ams.NewClient()
-	if err != nil {
-		panic(err)
-	}
-
-	api := &SeatManagerApi{
-		client: c,
-	}
-	return api
-}
-
-func NewMockSeatManagerApi() *SeatManagerApi {
+func NewSeatManagerApi(cl ams.AMSInterface) *SeatManagerApi {
 	return &SeatManagerApi{
-		client: &ams.TestClient{},
+		client: cl,
 	}
 }
 

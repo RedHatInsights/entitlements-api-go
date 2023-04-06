@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -69,16 +70,18 @@ func MakeRequest(method, path string, body io.Reader, options ...opt) *http.Requ
 
 }
 
-var _ = Describe("Removing a user from a seat", func() {
+var _ = Describe("using the seat managment api", func() {
+	var client ams.AMSInterface
 	var seatApi *SeatManagerApi
 	var rr *httptest.ResponseRecorder
 
 	BeforeEach(func() {
-		seatApi = NewMockSeatManagerApi()
+		client = &ams.TestClient{}
+		seatApi = NewSeatManagerApi(client)
 		rr = httptest.NewRecorder()
 	})
 
-	When("there are subscribed users", func() {
+	When("removing a user from a seat", func() {
 		Context("and the caller is an org admin", func() {
 			It("should remove the requested user's subscription", func() {
 				req := MakeRequest("DELETE", "", nil)
@@ -108,19 +111,8 @@ var _ = Describe("Removing a user from a seat", func() {
 			})
 		})
 	})
-})
 
-var _ = Describe("Listing Seats", func() {
-
-	var seatApi *SeatManagerApi
-	var rr *httptest.ResponseRecorder
-
-	BeforeEach(func() {
-		seatApi = NewMockSeatManagerApi()
-		rr = httptest.NewRecorder()
-	})
-
-	When("there are subscribed users", func() {
+	When("listing seats", func() {
 		It("should return a list", func() {
 			req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
 			seatApi.GetSeats(rr, req, api.GetSeatsParams{})
@@ -156,42 +148,34 @@ var _ = Describe("Listing Seats", func() {
 			})
 		})
 	})
-})
 
-var _ = Describe("Adding a user to a seat", func() {
+	When("adding a user to a seat", func() {
+		Context("the caller is an org admin", func() {
+			It("should return a 200", func() {
+				b, err := json.Marshal(api.SeatRequest{
+					AccountUsername: toPtr("test-user"),
+				})
+				Expect(err).To(BeNil())
 
-	var seatApi *SeatManagerApi
-	var rr *httptest.ResponseRecorder
+				req := MakeRequest("POST", "/api/entitlements/v1/seats", bytes.NewBuffer(b))
+				seatApi.PostSeats(rr, req)
 
-	BeforeEach(func() {
-		seatApi = NewMockSeatManagerApi()
-		rr = httptest.NewRecorder()
-	})
-	When("the caller is an org admin", func() {
-		It("should return a 200", func() {
-			b, err := json.Marshal(api.SeatRequest{
-				AccountUsername: toPtr("test-user"),
+				Expect(rr.Result().StatusCode).To(Equal(200))
 			})
-			Expect(err).To(BeNil())
-
-			req := MakeRequest("POST", "/api/entitlements/v1/seats", bytes.NewBuffer(b))
-			seatApi.PostSeats(rr, req)
-
-			Expect(rr.Result().StatusCode).To(Equal(200))
 		})
-	})
 
-	When("the caller is not an org admin", func() {
-		It("should return a 403", func() {
-			b, err := json.Marshal(api.SeatRequest{
-				AccountUsername: toPtr("test-user"),
+		Context("the caller is not an org admin", func() {
+			It("should return a 403", func() {
+				b, err := json.Marshal(api.SeatRequest{
+					AccountUsername: toPtr("test-user"),
+				})
+				Expect(err).To(BeNil())
+
+				req := MakeRequest("POST", "/api/entitlements/v1/seats", bytes.NewBuffer(b), OrgAdmin(false))
+				seatApi.PostSeats(rr, req)
+
+				Expect(rr.Result().StatusCode).To(Equal(403))
 			})
-			Expect(err).To(BeNil())
-
-			req := MakeRequest("POST", "/api/entitlements/v1/seats", bytes.NewBuffer(b), OrgAdmin(false))
-			seatApi.PostSeats(rr, req)
-
-			Expect(rr.Result().StatusCode).To(Equal(403))
 		})
 	})
 })
