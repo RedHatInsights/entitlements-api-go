@@ -37,7 +37,7 @@ ginkgo: generate
 	ENT_KEY=$(PWD)/test_data/test.key \
 	ENT_CERT=$(PWD)/test_data/test.cert \
 	ginkgo --race --coverprofile=coverage.out --covermode=atomic ./...
-bench:
+bench: generate
 	ENT_CA_PATH=$(PWD)/resources/ca.crt \
 	ENT_KEY=$(PWD)/test_data/test.key \
 	ENT_CERT=$(PWD)/test_data/test.cert \
