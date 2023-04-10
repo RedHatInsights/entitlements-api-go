@@ -5,6 +5,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
 	"github.com/RedHatInsights/entitlements-api-go/apispec"
+	"github.com/RedHatInsights/entitlements-api-go/bop"
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/controllers"
 	log "github.com/RedHatInsights/entitlements-api-go/logger"
@@ -40,11 +41,16 @@ func DoRoutes() chi.Router {
 		panic(err)
 	}
 
+	bopClient, err := bop.GetClient(debug)
+	if err != nil {
+		panic(err)
+	}
+
 	// This is odd, but the generated code will register handlers
 	// and return a http.Handler.  This is normally used with .Mount,
 	// but since only part of the server is using code gen this is
 	// a way to hack it in
-	seatManagerApi := controllers.NewSeatManagerApi(amsClient)
+	seatManagerApi := controllers.NewSeatManagerApi(amsClient, bopClient)
 	api.HandlerFromMuxWithBaseURL(seatManagerApi, r, "/api/entitlements/v1")
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {

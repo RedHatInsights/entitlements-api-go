@@ -10,20 +10,23 @@ import (
 
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
+	"github.com/RedHatInsights/entitlements-api-go/bop"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
 
 type SeatManagerApi struct {
 	client ams.AMSInterface
+	bop    bop.Bop
 }
 
 const BASE_LINK_URL = "/api/entitlements/v1/seats"
 
 var _ api.ServerInterface = &SeatManagerApi{}
 
-func NewSeatManagerApi(cl ams.AMSInterface) *SeatManagerApi {
+func NewSeatManagerApi(cl ams.AMSInterface, bopClient bop.Bop) *SeatManagerApi {
 	return &SeatManagerApi{
 		client: cl,
+		bop:    bopClient,
 	}
 }
 
@@ -164,6 +167,15 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: validate that the requested user is in the same org as the requester
+	user, err := s.bop.GetUser(*seat.AccountUsername)
+	if err != nil {
+		do500(w, err)
+		return
+	}
+
+	if user.OrgId != idObj.Internal.OrgID {
+		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats to users outside of Organization %s", idObj.Internal.OrgID))
+	}
 
 	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
