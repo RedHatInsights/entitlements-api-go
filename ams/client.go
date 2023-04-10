@@ -186,7 +186,8 @@ func (c *Client) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.Q
 
 	rr := v1.NewReservedResource().
 		ResourceName("ansible.wisdom").
-		ResourceType("seat")
+		ResourceType("seat").
+		Count(1)
 
 	req, err := v1.NewQuotaAuthorizationRequest().
 		AccountUsername(accountUsername).
