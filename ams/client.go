@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
+	"github.com/karlseguin/ccache"
 	sdk "github.com/openshift-online/ocm-sdk-go"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/openshift-online/ocm-sdk-go/logging"
@@ -16,6 +17,11 @@ import (
 var quotaCostTime = promauto.NewHistogram(prometheus.HistogramOpts{
 	Name:    "quota_cost_service_request_time_taken",
 	Help:    "quota_cost service latency distributions.",
+	Buckets: prometheus.LinearBuckets(0.25, 0.25, 20),
+})
+var orgListTime = promauto.NewHistogram(prometheus.HistogramOpts{
+	Name:    "org_list_service_request_time_taken",
+	Help:    "org_list service latency distributions.",
 	Buckets: prometheus.LinearBuckets(0.25, 0.25, 20),
 })
 var getSubscriptionTime = promauto.NewHistogram(prometheus.HistogramOpts{
@@ -42,7 +48,7 @@ var quotaAuthorizationTime = promauto.NewHistogram(prometheus.HistogramOpts{
 type AMSInterface interface {
 	GetQuotaCost(organizationId string) (*v1.QuotaCost, error)
 	GetSubscription(subscriptionId string) (*v1.Subscription, error)
-	GetSubscriptions(size, page int) (*v1.SubscriptionList, error)
+	GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
 	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationsPostResponse, error)
 }
@@ -77,12 +83,11 @@ func (c *TestClient) DeleteSubscription(subscriptionId string) error {
 	return nil
 }
 
-// TODO: waiting on updates to the ocm sdk
 func (c *TestClient) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationsPostResponse, error) {
 	return nil, nil
 }
 
-func (c *TestClient) GetSubscriptions(size, page int) (*v1.SubscriptionList, error) {
+func (c *TestClient) GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error) {
 	lst, err := v1.NewSubscriptionList().
 		Items(
 			v1.NewSubscription().
@@ -97,6 +102,7 @@ func (c *TestClient) GetSubscriptions(size, page int) (*v1.SubscriptionList, err
 
 type Client struct {
 	client *sdk.Connection
+	cache  ccache.Cache
 }
 
 var _ AMSInterface = &Client{}
@@ -132,12 +138,38 @@ func NewClient(debug bool) (AMSInterface, error) {
 
 	return &Client{
 		client: client,
+		cache:  *ccache.New(ccache.Configure()),
 	}, err
 }
 
-func (c *Client) GetQuotaCost(organizationId string) (*v1.QuotaCost, error) {
+func (c *Client) convertOrg(organizationId string) (string, error) {
+
+	item := c.cache.Get(organizationId)
+	if item != nil && !item.Expired() {
+		return item.Value().(string), nil
+	}
+
 	start := time.Now()
-	resp, err := c.client.AccountsMgmt().V1().Organizations().Organization(organizationId).QuotaCost().List().Search(
+	listResp, err := c.client.AccountsMgmt().V1().Organizations().List().Search(fmt.Sprintf("external_id = %s", organizationId)).Send()
+	orgListTime.Observe(time.Since(start).Seconds())
+	if err != nil {
+		return "", err
+	}
+
+	converted, err := listResp.Items().Get(0).ID(), nil
+	c.cache.Set(organizationId, converted, time.Minute*30)
+	return converted, err
+}
+
+func (c *Client) GetQuotaCost(organizationId string) (*v1.QuotaCost, error) {
+
+	amsOrgId, err := c.convertOrg(organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	start := time.Now()
+	resp, err := c.client.AccountsMgmt().V1().Organizations().Organization(amsOrgId).QuotaCost().List().Search(
 		"quota_id LIKE 'seat|ansible.wisdom%'",
 	).Send()
 	quotaCostTime.Observe(time.Since(start).Seconds())
@@ -157,10 +189,18 @@ func (c *Client) GetSubscription(subscriptionId string) (*v1.Subscription, error
 	return resp.Body(), nil
 }
 
-func (c *Client) GetSubscriptions(size, page int) (*v1.SubscriptionList, error) {
+func (c *Client) GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error) {
+	amsOrgId, err := c.convertOrg(organizationId)
+	if err != nil {
+		return nil, err
+	}
+	q := "plan.id = AnsibleWisdom"
+	q += " AND "
+	q += fmt.Sprintf("organization_id = '%s'", amsOrgId)
+
 	start := time.Now()
 	req := c.client.AccountsMgmt().V1().Subscriptions().List().
-		Search("quota_id LIKE 'seat|ansible.wisdom'%").
+		Search(q).
 		Size(size).
 		Page(page)
 

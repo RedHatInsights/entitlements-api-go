@@ -51,7 +51,7 @@ func DoRoutes() chi.Router {
 	// but since only part of the server is using code gen this is
 	// a way to hack it in
 	seatManagerApi := controllers.NewSeatManagerApi(amsClient, bopClient)
-	api.HandlerFromMuxWithBaseURL(seatManagerApi, r, "/api/entitlements/v1")
+	api.HandlerFromMuxWithBaseURL(seatManagerApi, r.With(identity.EnforceIdentity), "/api/entitlements/v1")
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.With(identity.EnforceIdentity).Route("/", controllers.LubDub)

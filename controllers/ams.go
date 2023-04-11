@@ -90,6 +90,8 @@ func fillDefaults(params *api.GetSeatsParams) {
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
 
+	idObj := identity.Get(r.Context()).Identity
+
 	// AMS uses fixed pages rather than offsets So we are forcing the
 	// offset to be tied to the nearest previous page.
 	fillDefaults(&params)
@@ -108,7 +110,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 
 	page := 1 + (offset / limit)
 
-	subs, err := s.client.GetSubscriptions(limit, page)
+	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, limit, page)
 	if err != nil {
 		do500(w, err)
 		return
@@ -166,7 +168,6 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: validate that the requested user is in the same org as the requester
 	user, err := s.bop.GetUser(*seat.AccountUsername)
 	if err != nil {
 		do500(w, err)

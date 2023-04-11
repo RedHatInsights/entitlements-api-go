@@ -16,8 +16,13 @@ generate: $(gen_files)
 
 image:
 	podman build -t entitlements-api-go .
-run: generate
+debug-run: generate
 	ENT_DEBUG=1 \
+	ENT_CA_PATH=$(PWD)/resources/ca.crt \
+	ENT_KEY=$(PWD)/test_data/test.key \
+	ENT_CERT=$(PWD)/test_data/test.cert \
+	go run main.go
+run: generate
 	ENT_CA_PATH=$(PWD)/resources/ca.crt \
 	ENT_KEY=$(PWD)/test_data/test.key \
 	ENT_CERT=$(PWD)/test_data/test.cert \
