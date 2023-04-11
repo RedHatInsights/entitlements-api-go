@@ -10,7 +10,7 @@ require (
 	github.com/karlseguin/ccache v2.0.3+incompatible
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.27.1
-	github.com/prometheus/client_golang v1.9.0
+	github.com/prometheus/client_golang v1.11.1
 	github.com/redhatinsights/platform-go-middlewares v0.19.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.3.2
@@ -33,8 +33,8 @@ require (
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/pelletier/go-toml v1.2.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
-	github.com/prometheus/common v0.15.0 // indirect
-	github.com/prometheus/procfs v0.2.0 // indirect
+	github.com/prometheus/common v0.26.0 // indirect
+	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/spf13/afero v1.1.2 // indirect
 	github.com/spf13/cast v1.3.0 // indirect
 	github.com/spf13/jwalterweatherman v1.0.0 // indirect
