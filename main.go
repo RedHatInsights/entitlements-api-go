@@ -19,17 +19,19 @@ func main() {
 	// Init the logger first thing
 	logger.InitLogger()
 
-	var dsn string = os.Getenv("SENTRY_DSN")
+	var dsn string = os.Getenv("GLITCHTIP_DSN")
 
 	if dsn != "" {
-		err := sentry.Init(sentry.ClientOptions{})
+		err := sentry.Init(sentry.ClientOptions{
+			Dsn: dsn,
+		})
 		if err != nil {
-			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry SDK")
+			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry SDK with GLITCHTIP_DSN")
 		} else {
-			logger.Log.Info("Sentry SDK initialization was successful!")
+			logger.Log.Info("Sentry SDK initialization using Glitchtip was successful!")
 		}
 	} else {
-		logger.Log.Info("SENTRY_DSN was not set, skipping Sentry initialization.")
+		logger.Log.Info("GLITCHTIP_DSN was not set, skipping Glitchtip initialization.")
 	}
 
 	// init config here
