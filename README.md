@@ -47,7 +47,7 @@ To run the Entitlements API locally, you will need an Enterprise Services cert w
 
 You'll need to make a config file specific to your machine.
 Create a local config directory: `mkdir -p ./local`
-Add a file that contains your local configuration options: `$EDITOR ./local/qa.conf.sh`
+Add a file that contains your local configuration options: `$EDITOR ./local/development.env.sh`
 The contents should look like this:
 
 ```sh
