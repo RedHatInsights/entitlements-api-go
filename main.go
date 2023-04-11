@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"os"
 	"time"
 
@@ -30,7 +29,6 @@ func main() {
 			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry SDK with GLITCHTIP_DSN")
 		} else {
 			logger.Log.Info("Sentry SDK initialization using Glitchtip was successful!")
-			sentry.CaptureException(errors.New("Testing glitchtip configuration"))
 		}
 	} else {
 		logger.Log.Info("GLITCHTIP_DSN was not set, skipping Glitchtip initialization.")
