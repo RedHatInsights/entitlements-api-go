@@ -10,6 +10,7 @@ import (
 
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
+	"github.com/RedHatInsights/entitlements-api-go/bop"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
@@ -72,12 +73,14 @@ func MakeRequest(method, path string, body io.Reader, options ...opt) *http.Requ
 
 var _ = Describe("using the seat managment api", func() {
 	var client ams.AMSInterface
+	var bopClient bop.Bop
 	var seatApi *SeatManagerApi
 	var rr *httptest.ResponseRecorder
 
 	BeforeEach(func() {
 		client = &ams.TestClient{}
-		seatApi = NewSeatManagerApi(client)
+		bopClient, _ = bop.GetClient(true)
+		seatApi = NewSeatManagerApi(client, bopClient)
 		rr = httptest.NewRecorder()
 	})
 

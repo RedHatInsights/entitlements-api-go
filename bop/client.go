@@ -1,5 +1,8 @@
 package bop
 
+// TODO: Factor this out
+const DEFAULT_ORG_ID string = "4384938490324"
+
 type UserDetail struct {
 	UserName string
 	OrgId    string
@@ -34,7 +37,7 @@ func (m *Mock) GetUser(userName string) (*UserDetail, error) {
 func GetClient(debug bool) (Bop, error) {
 	if debug {
 		return &Mock{
-			OrgId: "12345678",
+			OrgId: DEFAULT_ORG_ID,
 		}, nil
 	}
 	return &Client{}, nil
