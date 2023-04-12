@@ -201,7 +201,7 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 
 	sub := resp.Response().Subscription()
 	subId := sub.ID()
-	userName := sub.Creator().Username()
+	userName := seat.AccountUsername
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
