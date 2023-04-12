@@ -3,6 +3,7 @@ package bop
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -39,11 +40,7 @@ type Client struct {
 var _ Bop = &Client{}
 
 type userRequest struct {
-	Users []string
-}
-
-type responseBody struct {
-	Records []UserDetail
+	Users []string `json:"users"`
 }
 
 func makeRequestBody(userName string) (*bytes.Buffer, error) {
@@ -79,12 +76,18 @@ func (c *Client) GetUser(userName string) (*UserDetail, error) {
 	if err != nil {
 		return nil, err
 	}
-	var decoded responseBody
+	var decoded []UserDetail
+
 	defer resp.Body.Close()
 	if err = json.NewDecoder(resp.Body).Decode(&decoded); err != nil {
 		return nil, err
 	}
-	return &decoded.Records[0], nil
+
+	if len(decoded) < 1 {
+		return nil, fmt.Errorf("no records returned when searching for '%s'", userName)
+	}
+
+	return &decoded[0], nil
 }
 
 type Mock struct {

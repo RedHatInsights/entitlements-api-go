@@ -433,6 +433,9 @@
             },
             "SeatRequest": {
                 "type": "object",
+                "required": [
+                    "account_username"
+                ],
                 "properties": {
                     "account_username": {
                         "type": "string"
@@ -455,6 +458,14 @@
                                 "items": {
                                     "$ref": "#/components/schemas/Seat"
                                 }
+                            },
+                            "allowed": {
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "consumed": {
+                                "type": "integer",
+                                "format": "int64"
                             }
                         }
                     }

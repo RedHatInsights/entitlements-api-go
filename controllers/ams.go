@@ -116,6 +116,12 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 		return
 	}
 
+	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
+	if err != nil {
+		do500(w, err)
+		return
+	}
+
 	var seats []api.Seat
 	for _, sub := range subs.Slice() {
 		seats = append(seats, api.Seat{
@@ -140,8 +146,10 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 		Meta: &api.PaginationMeta{
 			Count: toPtr(int64(len(seats))),
 		},
-		Links: links,
-		Data:  seats,
+		Links:    links,
+		Data:     seats,
+		Allowed:  toPtr(int64(quotaCost.Allowed())),
+		Consumed: toPtr(int64(quotaCost.Consumed())),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -168,7 +176,7 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := s.bop.GetUser(*seat.AccountUsername)
+	user, err := s.bop.GetUser(seat.AccountUsername)
 	if err != nil {
 		do500(w, err)
 		return
@@ -180,13 +188,14 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 
 	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
-		do500(w, err)
+
+		do500(w, fmt.Errorf("GetQuotaCost [%w]", err))
 		return
 	}
 
-	resp, err := s.client.QuotaAuthorization(idObj.User.Username, quotaCost.Version())
+	resp, err := s.client.QuotaAuthorization(seat.AccountUsername, quotaCost.Version())
 	if err != nil {
-		do500(w, err)
+		do500(w, fmt.Errorf("QuotaAuthorization: [%w]", err))
 		return
 	}
 

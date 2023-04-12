@@ -194,13 +194,14 @@ func (c *Client) GetSubscriptions(organizationId string, size, page int) (*v1.Su
 	if err != nil {
 		return nil, err
 	}
-	q := "plan.id = AnsibleWisdom"
+	q := "plan.id LIKE 'AnsibleWisdom'"
 	q += " AND "
 	q += fmt.Sprintf("organization_id = '%s'", amsOrgId)
 
 	start := time.Now()
 	req := c.client.AccountsMgmt().V1().Subscriptions().List().
 		Search(q).
+		Parameter("fetchAccounts", true).
 		Size(size).
 		Page(page)
 
@@ -227,7 +228,8 @@ func (c *Client) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.Q
 	rr := v1.NewReservedResource().
 		ResourceName("ansible.wisdom").
 		ResourceType("seat").
-		Count(1)
+		Count(1).
+		BYOC(false)
 
 	req, err := v1.NewQuotaAuthorizationRequest().
 		AccountUsername(accountUsername).
