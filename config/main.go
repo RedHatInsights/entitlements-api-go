@@ -48,6 +48,9 @@ type EntitlementsConfigKeysType struct {
 	ClientSecret    string
 	TokenURL        string
 	Debug           string
+	BOPClientID     string
+	BOPToken        string
+	BOPURL          string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -75,6 +78,9 @@ var Keys = EntitlementsConfigKeysType{
 	ClientID:        "OIDC_CLIENT_ID",
 	ClientSecret:    "OIDC_CLIENT_SECRET",
 	TokenURL:        "OAUTH_TOKEN_URL",
+	BOPClientID:     "BOP_CLIENT_ID",
+	BOPToken:        "BOP_TOKEN",
+	BOPURL:          "BOP_URL",
 	Debug:           "DEBUG",
 }
 
@@ -155,6 +161,7 @@ func initialize() {
 	options.SetDefault(Keys.EntitleAll, false)
 	options.SetDefault(Keys.AMSHost, "https://api.openshift.com")
 	options.SetDefault(Keys.TokenURL, "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token")
+	options.SetDefault(Keys.BOPURL, "https://backoffice-proxy.apps.ext.spoke.prod.us-west-2.aws.paas.redhat.com/v1/users")
 	options.SetDefault(Keys.Debug, false)
 
 	options.SetEnvPrefix("ENT")
