@@ -82,13 +82,13 @@ func (c *Client) GetUser(userName string) (*UserDetail, error) {
 	bopRequestTime.Observe(time.Since(start).Seconds())
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error from sending BOP GetUser request [%w]", err)
 	}
 	var decoded []UserDetail
 
 	defer resp.Body.Close()
 	if err = json.NewDecoder(resp.Body).Decode(&decoded); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error from decoding BOP GetUser response [%w]", err)
 	}
 
 	if len(decoded) < 1 {
