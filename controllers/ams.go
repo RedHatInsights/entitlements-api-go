@@ -181,7 +181,7 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 
 	user, err := s.bop.GetUser(seat.AccountUsername)
 	if err != nil {
-		do500(w, err)
+		do500(w, fmt.Errorf("BOP GetUser [%w]", err))
 		return
 	}
 
