@@ -187,11 +187,11 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 
 	if user.OrgId != idObj.Internal.OrgID {
 		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats to users outside of Organization %s", idObj.Internal.OrgID))
+		return
 	}
 
 	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
-
 		do500(w, fmt.Errorf("GetQuotaCost [%w]", err))
 		return
 	}
