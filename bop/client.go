@@ -109,10 +109,42 @@ func GetClient(debug bool) (Bop, error) {
 			OrgId: DEFAULT_ORG_ID,
 		}, nil
 	}
+
+	options := config.GetConfig().Options
+	clientId := options.GetString(config.Keys.BOPClientID)
+	token := options.GetString(config.Keys.BOPToken)
+	url := options.GetString(config.Keys.BOPURL)
+
+	if err := validateBOPSettings(clientId, token, url); err != nil {
+		return nil, err
+	}
+
 	return &Client{
-		clientId:   config.GetConfig().Options.GetString(config.Keys.BOPClientID),
-		token:      config.GetConfig().Options.GetString(config.Keys.BOPToken),
-		url:        config.GetConfig().Options.GetString(config.Keys.BOPURL),
+		clientId:   clientId,
+		token:      token,
+		url:        url,
 		httpClient: http.Client{},
 	}, nil
+}
+
+func validateBOPSettings(clientId string, token string, url string) error {
+	missingConfig := make([]string, 0)
+
+	if clientId == "" {
+		missingConfig = append(missingConfig, config.Keys.BOPClientID)
+	}
+
+	if token == "" {
+		missingConfig = append(missingConfig, config.Keys.BOPToken)
+	}
+
+	if url == "" {
+		missingConfig = append(missingConfig, config.Keys.BOPURL)
+	}
+
+	if len(missingConfig) > 0 {
+		return fmt.Errorf("Error configuring BOP client. Must provide the following env variables which are missing: %v", missingConfig)
+	}
+
+	return nil
 }

@@ -6,6 +6,8 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/sirupsen/logrus"
 	"net/http"
 
 	"github.com/RedHatInsights/entitlements-api-go/ams"
@@ -40,6 +42,7 @@ func doError(w http.ResponseWriter, code int, err error) {
 }
 
 func do500(w http.ResponseWriter, err error) {
+	logger.Log.WithFields(logrus.Fields{"error": err}).Error(err)
 	doError(w, http.StatusInternalServerError, err)
 }
 
