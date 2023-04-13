@@ -156,7 +156,7 @@ var _ = Describe("using the seat managment api", func() {
 		Context("the caller is an org admin", func() {
 			It("should return a 200", func() {
 				b, err := json.Marshal(api.SeatRequest{
-					AccountUsername: toPtr("test-user"),
+					AccountUsername: "test-user",
 				})
 				Expect(err).To(BeNil())
 
@@ -170,12 +170,29 @@ var _ = Describe("using the seat managment api", func() {
 		Context("the caller is not an org admin", func() {
 			It("should return a 403", func() {
 				b, err := json.Marshal(api.SeatRequest{
-					AccountUsername: toPtr("test-user"),
+					AccountUsername: "test-user",
 				})
 				Expect(err).To(BeNil())
 
 				req := MakeRequest("POST", "/api/entitlements/v1/seats", bytes.NewBuffer(b), OrgAdmin(false))
 				seatApi.PostSeats(rr, req)
+
+				Expect(rr.Result().StatusCode).To(Equal(403))
+			})
+		})
+
+		Context("the target is in a different org from the caller", func() {
+			It("should not assign the user a seat", func() {
+				mismatchApi := NewSeatManagerApi(client, &bop.Mock{
+					OrgId: "12345",
+				})
+				b, err := json.Marshal(api.SeatRequest{
+					AccountUsername: "test-user",
+				})
+				Expect(err).To(BeNil())
+
+				req := MakeRequest("POST", "/api/entitlements/v1/seats", bytes.NewBuffer(b), OrgAdmin(false))
+				mismatchApi.PostSeats(rr, req)
 
 				Expect(rr.Result().StatusCode).To(Equal(403))
 			})

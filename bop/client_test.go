@@ -23,4 +23,12 @@ var _ = Describe("BOP Client", func() {
 			Expect(actualRequest).To(Equal(expected))
 		})
 	})
+
+	Context("When passed a userName and url", func() {
+		It("should construct a request object", func() {
+			req, err := makeRequest("testuser", "fakeurl.com")
+			Expect(err).To(BeNil())
+			Expect(req.Header.Get("Content-Type")).To(Equal("application/json"))
+		})
+	})
 })

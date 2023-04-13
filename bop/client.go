@@ -54,18 +54,26 @@ func makeRequestBody(userName string) (*bytes.Buffer, error) {
 	return bytes.NewBuffer(encoded), nil
 }
 
-func (c *Client) GetUser(userName string) (*UserDetail, error) {
+func makeRequest(userName, url string) (*http.Request, error) {
 	buf, err := makeRequestBody(userName)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", c.url, buf)
+	req, err := http.NewRequest("POST", url, buf)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	return req, nil
+}
+
+func (c *Client) GetUser(userName string) (*UserDetail, error) {
+	req, err := makeRequest(userName, c.url)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Set("x-rh-clientid", c.clientId)
 	req.Header.Set("x-rh-apitoken", c.token)
 
