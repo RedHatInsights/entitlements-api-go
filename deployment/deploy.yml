@@ -126,12 +126,12 @@ objects:
           - name: ENT_BOP_CLIENT_ID
             valueFrom:
               secretKeyRef:
-                name: bop
+                name: entitlements-api
                 key: client_id
           - name: ENT_BOP_TOKEN
             valueFrom:
               secretKeyRef:
-                name: bop
+                name: entitlements-api
                 key: token
           envFrom:
           - secretRef:
