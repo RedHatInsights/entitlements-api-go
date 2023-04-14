@@ -175,7 +175,7 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 	seat := new(api.SeatRequest)
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(seat); err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		doError(w, http.StatusBadRequest, fmt.Errorf("PostSeats [%w]", err))
 		return
 	}
 
@@ -187,11 +187,11 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 
 	if user.OrgId != idObj.Internal.OrgID {
 		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats to users outside of Organization %s", idObj.Internal.OrgID))
+		return
 	}
 
 	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
-
 		do500(w, fmt.Errorf("GetQuotaCost [%w]", err))
 		return
 	}
@@ -199,6 +199,15 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 	resp, err := s.client.QuotaAuthorization(seat.AccountUsername, quotaCost.Version())
 	if err != nil {
 		do500(w, fmt.Errorf("QuotaAuthorization: [%w]", err))
+		return
+	}
+
+	if !resp.Response().Allowed() {
+		if len(resp.Response().ExcessResources()) > 0 {
+			doError(w, http.StatusConflict, fmt.Errorf("Assignment request was denied due to excessive resource requests"))
+			return
+		}
+		doError(w, http.StatusForbidden, fmt.Errorf("Assignment request was denied"))
 		return
 	}
 
