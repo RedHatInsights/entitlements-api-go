@@ -41,7 +41,7 @@ func DoRoutes() chi.Router {
 		panic(err)
 	}
 
-	bopClient, err := bop.GetClient(debug)
+	bopClient, err := bop.NewClient(debug)
 	if err != nil {
 		panic(err)
 	}

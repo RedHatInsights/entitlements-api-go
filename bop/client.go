@@ -85,8 +85,6 @@ func (c *Client) GetUser(userName string) (*UserDetail, error) {
 		return nil, fmt.Errorf("Error from sending BOP GetUser request [%w]", err)
 	}
 	var decoded []UserDetail
-
-	defer resp.Body.Close()
 	if err = json.NewDecoder(resp.Body).Decode(&decoded); err != nil {
 		return nil, fmt.Errorf("Error from decoding BOP GetUser response [%w]", err)
 	}
@@ -111,7 +109,7 @@ func (m *Mock) GetUser(userName string) (*UserDetail, error) {
 	}, nil
 }
 
-func GetClient(debug bool) (Bop, error) {
+func NewClient(debug bool) (Bop, error) {
 	if debug {
 		return &Mock{
 			OrgId: DEFAULT_ORG_ID,
