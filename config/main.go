@@ -167,7 +167,7 @@ func initialize() {
 	options.SetDefault(Keys.AMSHost, "https://api.openshift.com")
 	options.SetDefault(Keys.TokenURL, "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token")
 	options.SetDefault(Keys.BOPURL, "https://backoffice-proxy.apps.ext.spoke.prod.us-west-2.aws.paas.redhat.com/v1/users")
-	options.SetDefault(Keys.BOPMockResponse, `{"orgId": "4384938490324", "getUserCode":200, "getUserBody":""}`)
+	options.SetDefault(Keys.BOPMockResponse, `{"orgId":"4384938490324", "code":200, "users":"[{\"org_id\":\"4384938490324\", \"username\":\"foo\"}]"}`)
 	options.SetDefault(Keys.Debug, false)
 
 	options.SetEnvPrefix("ENT")
