@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/sirupsen/logrus"
+	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
-
-// TODO: Factor this out
-const DEFAULT_ORG_ID string = "4384938490324"
 
 var bopRequestTime = promauto.NewHistogram(prometheus.HistogramOpts{
 	Name:    "bop_service_request_time_taken",
@@ -97,10 +98,10 @@ func (c *Client) GetUser(userName string) (*UserDetail, error) {
 }
 
 type Mock struct {
-	OrgId string
+	OrgId           string `json:"orgId"`
+	GetUserRespCode int    `json:"getUserCode"`
+	GetUserRespBody string `json:"getUserBody"`
 }
-
-var _ Bop = &Mock{}
 
 func (m *Mock) GetUser(userName string) (*UserDetail, error) {
 	return &UserDetail{
@@ -110,13 +111,18 @@ func (m *Mock) GetUser(userName string) (*UserDetail, error) {
 }
 
 func NewClient(debug bool) (Bop, error) {
+	options := config.GetConfig().Options
+
 	if debug {
-		return &Mock{
-			OrgId: DEFAULT_ORG_ID,
-		}, nil
+		mockResp := options.GetString(config.Keys.BOPMockResponse)
+		mock := &Mock{}
+		err := json.Unmarshal([]byte(mockResp), mock)
+		if err != nil {
+			return nil, err
+		}
+		return mock, nil
 	}
 
-	options := config.GetConfig().Options
 	clientId := options.GetString(config.Keys.BOPClientID)
 	token := options.GetString(config.Keys.BOPToken)
 	url := options.GetString(config.Keys.BOPURL)
