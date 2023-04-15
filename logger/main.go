@@ -1,16 +1,16 @@
 package logger
 
 import (
-	"os"
 	"flag"
 	"io/ioutil"
+	"os"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	lc "github.com/redhatinsights/platform-go-middlewares/logging/cloudwatch"
-	"github.com/RedHatInsights/entitlements-api-go/config"
+	"github.com/sirupsen/logrus"
 )
 
 // Log is an instance of the global logrus.Logger
@@ -19,9 +19,14 @@ var Log *logrus.Logger
 // InitLogger initializes the Entitlements API logger
 func InitLogger() *logrus.Logger {
 	if Log == nil {
-		logLevel := logrus.InfoLevel
 		test := flag.Lookup("test.v") != nil
 		confOpts := config.GetConfig().Options
+
+		logLevel := confOpts.GetString(config.Keys.LogLevel)
+		logrusLogLevel, err := logrus.ParseLevel(logLevel)
+		if err != nil {
+			panic(err)
+		}
 
 		cwKey := confOpts.GetString(config.Keys.CwKey)
 		cwSecret := confOpts.GetString(config.Keys.CwSecret)
@@ -31,7 +36,7 @@ func InitLogger() *logrus.Logger {
 
 		Log = &logrus.Logger{
 			Out:          os.Stdout,
-			Level:        logLevel,
+			Level:        logrusLogLevel,
 			ReportCaller: true,
 			Hooks:        make(logrus.LevelHooks),
 		}

@@ -69,6 +69,8 @@ objects:
               name: default-entitlements-config
         containers:
         - env:
+          - name: ENT_LOG_LEVEL
+            value: ${LOG_LEVEL}
           - name: ENT_ENTITLE_ALL
             value: ${ENTITLE_ALL}
           - name: ENT_CERTS_FROM_ENV
@@ -197,6 +199,10 @@ objects:
   status:
     loadBalancer: {}
 parameters:
+- description: Log level for the application
+  name: LOG_LEVEL
+  required: false
+  value: info
 - description: Subscriptions Service API endpoint
   name: SUBS_HOST
   value: https://subscription.qa.api.redhat.com

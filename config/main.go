@@ -26,6 +26,7 @@ type EntitlementsConfigKeysType struct {
 	Key             string
 	Cert            string
 	Port            string
+	LogLevel        string
 	CertsFromEnv    string
 	SubsHost        string
 	ComplianceHost  string
@@ -51,6 +52,7 @@ type EntitlementsConfigKeysType struct {
 	BOPClientID     string
 	BOPToken        string
 	BOPURL          string
+	BOPMockResponse string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -58,6 +60,7 @@ var Keys = EntitlementsConfigKeysType{
 	Key:             "KEY",
 	Cert:            "CERT",
 	Port:            "PORT",
+	LogLevel:        "LOG_LEVEL",
 	CertsFromEnv:    "CERTS_FROM_ENV",
 	SubsHost:        "SUBS_HOST",
 	ComplianceHost:  "COMPLIANCE_HOST",
@@ -144,6 +147,7 @@ func initialize() {
 
 	options.SetDefault(Keys.CertsFromEnv, false)
 	options.SetDefault(Keys.Port, "3000")
+	options.SetDefault(Keys.LogLevel, "info")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.ComplianceHost, "https://export-compliance.api.redhat.com")
 	options.SetDefault(Keys.CaPath, "../resources/ca.crt")
