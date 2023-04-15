@@ -4,10 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/RedHatInsights/entitlements-api-go/logger"
-	"github.com/spf13/viper"
 	"net/http"
-	"net/http/httptest"
 	"strconv"
 	"time"
 
@@ -145,21 +142,25 @@ func incBopFailure(statusCode int) {
 }
 
 type Mock struct {
-	OrgId      string `json:"orgId"`
-	Code       int    `json:"code"`
-	Users      string `json:"users"`
-	RealClient *Client
+	OrgId string
 }
 
+var _ Bop = &Mock{}
+
 func (m *Mock) GetUser(userName string) (*UserDetail, error) {
-	return m.RealClient.GetUser(userName)
+	return &UserDetail{
+		UserName: userName,
+		OrgId:    m.OrgId,
+	}, nil
 }
 
 func NewClient(debug bool) (Bop, error) {
 	options := config.GetConfig().Options
 
 	if debug {
-		return getMockClient(options)
+		return &Mock{
+			OrgId: options.GetString(config.Keys.BOPMockOrgId),
+		}, nil
 	}
 
 	clientId := options.GetString(config.Keys.BOPClientID)
@@ -176,32 +177,6 @@ func NewClient(debug bool) (Bop, error) {
 		url:        url,
 		httpClient: http.Client{},
 	}, nil
-}
-
-func getMockClient(options *viper.Viper) (Bop, error) {
-	mockResp := options.GetString(config.Keys.BOPMockResponse)
-	mock := &Mock{}
-	err := json.Unmarshal([]byte(mockResp), mock)
-	if err != nil {
-		return nil, err
-	}
-
-	// set up a fake http server to mock bop
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(mock.Code)
-		w.Write([]byte(mock.Users))
-	}))
-
-	logger.Log.Debug(fmt.Sprintf("Mock BOP server running at %s", ts.URL))
-
-	mock.RealClient = &Client{
-		clientId:   "foo",
-		token:      "bar",
-		url:        ts.URL,
-		httpClient: *ts.Client(),
-	}
-
-	return mock, nil
 }
 
 func validateBOPSettings(clientId string, token string, url string) error {
