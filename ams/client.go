@@ -50,7 +50,7 @@ type AMSInterface interface {
 	GetSubscription(subscriptionId string) (*v1.Subscription, error)
 	GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
-	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationsPostResponse, error)
+	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error)
 }
 
 type TestClient struct{}
@@ -83,8 +83,9 @@ func (c *TestClient) DeleteSubscription(subscriptionId string) error {
 	return nil
 }
 
-func (c *TestClient) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationsPostResponse, error) {
-	return nil, nil
+func (c *TestClient) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error) {
+	resp, err := v1.NewQuotaAuthorizationResponse().Allowed(true).Build()
+	return resp, err
 }
 
 func (c *TestClient) GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error) {
@@ -223,7 +224,7 @@ func (c *Client) DeleteSubscription(subscriptionId string) error {
 	return nil
 }
 
-func (c *Client) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationsPostResponse, error) {
+func (c *Client) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error) {
 
 	rr := v1.NewReservedResource().
 		ResourceName("ansible.wisdom").
@@ -244,5 +245,6 @@ func (c *Client) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.Q
 	}
 	start := time.Now()
 	defer quotaAuthorizationTime.Observe(time.Since(start).Seconds())
-	return c.client.AccountsMgmt().V1().QuotaAuthorizations().Post().Request(req).Send()
+	postResponse, err := c.client.AccountsMgmt().V1().QuotaAuthorizations().Post().Request(req).Send()
+	return postResponse.Response(), err
 }

@@ -209,8 +209,8 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !resp.Response().Allowed() {
-		if len(resp.Response().ExcessResources()) > 0 {
+	if !resp.Allowed() {
+		if len(resp.ExcessResources()) > 0 {
 			doError(w, http.StatusConflict, fmt.Errorf("Assignment request was denied due to excessive resource requests"))
 			return
 		}
@@ -218,7 +218,7 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sub := resp.Response().Subscription()
+	sub := resp.Subscription()
 	subId := sub.ID()
 	userName := seat.AccountUsername
 
