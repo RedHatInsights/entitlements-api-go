@@ -26,6 +26,7 @@ type EntitlementsConfigKeysType struct {
 	Key             string
 	Cert            string
 	Port            string
+	LogLevel        string
 	CertsFromEnv    string
 	SubsHost        string
 	ComplianceHost  string
@@ -51,6 +52,7 @@ type EntitlementsConfigKeysType struct {
 	BOPClientID     string
 	BOPToken        string
 	BOPURL          string
+	BOPMockOrgId    string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -58,6 +60,7 @@ var Keys = EntitlementsConfigKeysType{
 	Key:             "KEY",
 	Cert:            "CERT",
 	Port:            "PORT",
+	LogLevel:        "LOG_LEVEL",
 	CertsFromEnv:    "CERTS_FROM_ENV",
 	SubsHost:        "SUBS_HOST",
 	ComplianceHost:  "COMPLIANCE_HOST",
@@ -81,6 +84,7 @@ var Keys = EntitlementsConfigKeysType{
 	BOPClientID:     "BOP_CLIENT_ID",
 	BOPToken:        "BOP_TOKEN",
 	BOPURL:          "BOP_URL",
+	BOPMockOrgId:    "BOP_MOCK_ORG_ID",
 	Debug:           "DEBUG",
 }
 
@@ -144,6 +148,7 @@ func initialize() {
 
 	options.SetDefault(Keys.CertsFromEnv, false)
 	options.SetDefault(Keys.Port, "3000")
+	options.SetDefault(Keys.LogLevel, "info")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.ComplianceHost, "https://export-compliance.api.redhat.com")
 	options.SetDefault(Keys.CaPath, "../resources/ca.crt")
@@ -162,6 +167,7 @@ func initialize() {
 	options.SetDefault(Keys.AMSHost, "https://api.openshift.com")
 	options.SetDefault(Keys.TokenURL, "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token")
 	options.SetDefault(Keys.BOPURL, "https://backoffice-proxy.apps.ext.spoke.prod.us-west-2.aws.paas.redhat.com/v1/users")
+	options.SetDefault(Keys.BOPMockOrgId, "4384938490324")
 	options.SetDefault(Keys.Debug, false)
 
 	options.SetEnvPrefix("ENT")

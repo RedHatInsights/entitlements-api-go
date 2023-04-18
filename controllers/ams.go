@@ -5,6 +5,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/sirupsen/logrus"
@@ -33,6 +34,7 @@ func NewSeatManagerApi(cl ams.AMSInterface, bopClient bop.Bop) *SeatManagerApi {
 }
 
 func doError(w http.ResponseWriter, code int, err error) {
+	logger.Log.WithFields(logrus.Fields{"error": err, "status": code}).Debug("ams request error")
 	response := api.Error{
 		Error: toPtr(err.Error()),
 	}
@@ -42,7 +44,7 @@ func doError(w http.ResponseWriter, code int, err error) {
 }
 
 func do500(w http.ResponseWriter, err error) {
-	logger.Log.WithFields(logrus.Fields{"error": err}).Error(err)
+	logger.Log.WithFields(logrus.Fields{"error": err}).Error("ams request error")
 	doError(w, http.StatusInternalServerError, err)
 }
 
@@ -181,6 +183,11 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 
 	user, err := s.bop.GetUser(seat.AccountUsername)
 	if err != nil {
+		var userDetailErr *bop.UserDetailError
+		if errors.As(err, &userDetailErr) {
+			doError(w, userDetailErr.StatusCode, userDetailErr)
+			return
+		}
 		do500(w, fmt.Errorf("BOP GetUser [%w]", err))
 		return
 	}
