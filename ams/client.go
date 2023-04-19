@@ -150,7 +150,7 @@ func (c *Client) convertOrg(organizationId string) (string, error) {
 	item := c.cache.Get(organizationId)
 	if item != nil && !item.Expired() {
 		converted := item.Value().(string)
-		l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": organizationId}).Debug("pull converted ams org id from cache")
+		l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": organizationId}).Info("pull converted ams org id from cache")
 		return converted, nil
 	}
 
@@ -164,7 +164,7 @@ func (c *Client) convertOrg(organizationId string) (string, error) {
 	converted, err := listResp.Items().Get(0).ID(), nil
 	c.cache.Set(organizationId, converted, time.Minute*30)
 
-	l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": organizationId}).Debug("converted org id to ams org ig")
+	l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": organizationId}).Info("converted org id to ams org ig")
 
 	return converted, err
 }
