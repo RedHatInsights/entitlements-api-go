@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+
+	clowder "github.com/redhatinsights/app-common-go/pkg/api/v1"
 )
 
 var config *EntitlementsConfig
@@ -180,6 +182,17 @@ func initialize() {
 		Certs:   getCerts(options),
 		RootCAs: getRootCAs(options.GetString(Keys.CaPath)),
 		Options: options,
+	}
+
+	if clowder.IsClowderEnabled() {
+		cfg := clowder.LoadedConfig
+
+		// Cloudwatch
+		options.Set(Keys.CwLogGroup, cfg.Logging.Cloudwatch.LogGroup)
+		options.Set(Keys.CwLogStream, cfg.Logging.Cloudwatch.LogGroup)
+		options.Set(Keys.CwRegion, cfg.Logging.Cloudwatch.Region)
+		options.Set(Keys.CwKey, cfg.Logging.Cloudwatch.AccessKeyId)
+		options.Set(Keys.CwSecret, cfg.Logging.Cloudwatch.SecretAccessKey)
 	}
 }
 
