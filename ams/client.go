@@ -150,7 +150,7 @@ func (c *Client) convertOrg(organizationId string) (string, error) {
 	item := c.cache.Get(organizationId)
 	if item != nil && !item.Expired() {
 		converted := item.Value().(string)
-		l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": organizationId}).Info("pulled converted ams org id from cache")
+		l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": organizationId}).Info("found converted ams org id in cache")
 		return converted, nil
 	}
 
