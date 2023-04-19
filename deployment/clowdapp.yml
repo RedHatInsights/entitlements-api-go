@@ -9,8 +9,6 @@ objects:
   metadata:
     name: entitlements-api-go
   spec:
-    optionalDependencies:
-    - rbac
     envName: ${ENV_NAME}
     deployments:
     - name: service
