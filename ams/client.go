@@ -3,6 +3,8 @@ package ams
 import (
 	"context"
 	"fmt"
+	"github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/sirupsen/logrus"
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
@@ -159,6 +161,9 @@ func (c *Client) convertOrg(organizationId string) (string, error) {
 
 	converted, err := listResp.Items().Get(0).ID(), nil
 	c.cache.Set(organizationId, converted, time.Minute*30)
+
+	logger.Log.WithFields(logrus.Fields{"ams_org_id":converted, "org_id": organizationId}).Debug("converted org id to ams org ig")
+
 	return converted, err
 }
 
