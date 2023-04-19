@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
+	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/karlseguin/ccache"
 	sdk "github.com/openshift-online/ocm-sdk-go"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
@@ -147,7 +148,9 @@ func (c *Client) convertOrg(organizationId string) (string, error) {
 
 	item := c.cache.Get(organizationId)
 	if item != nil && !item.Expired() {
-		return item.Value().(string), nil
+		amsOrgId := item.Value().(string)
+		l.Log.Debugf("convertOrg: organizationId(%s) => amsOrgId(%s)", organizationId, amsOrgId)
+		return amsOrgId, nil
 	}
 
 	start := time.Now()
@@ -158,6 +161,7 @@ func (c *Client) convertOrg(organizationId string) (string, error) {
 	}
 
 	converted, err := listResp.Items().Get(0).ID(), nil
+	l.Log.Debugf("convertOrg: organizationId(%s) -> amsOrgId(%s)", organizationId, converted)
 	c.cache.Set(organizationId, converted, time.Minute*30)
 	return converted, err
 }
