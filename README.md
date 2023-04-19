@@ -25,6 +25,12 @@ Then, install the project's Go dependencies by running:
 bash ./scripts/dev_deps.sh
 ```
 
+Build the project and generate the openapi types and stubs:
+
+```sh
+make
+```
+
 ## Certificates and Configuration
 
 ### Getting an Enterprise Cert
@@ -70,7 +76,7 @@ bash ./scripts/watch.sh ./local/development.env.sh
 To run locally with Docker:
 
 ```bash
-docker build -t entitlements-api-go .
+make image
 docker run -p 3000:3000 entitlements-api-go
 ```
 
@@ -92,8 +98,6 @@ go build -o ./bundle-sync bundle_sync/main.go
 ## Running the Unit Tests
 
 * To run the unit tests, execute the following commands from the terminal:
-    `cd controllers`
-    `go test`
+    make test
 * To include benchmarks:
-    `cd controllers`
-    `go test -bench=.`
+    make bench
