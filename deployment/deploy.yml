@@ -85,8 +85,8 @@ objects:
             value: /apispec/api.spec.json
           - name: ENT_BUNDLE_INFO_YAML
             value: /bundles/bundles.yml
-          - name: ENT_AMS_URL
-            value: ${AMS_URL}
+          - name: ENT_AMS_HOST
+            value: ${AMS_HOST}
           - name: ENT_BOP_URL
             value: ${BOP_URL}
           - name: ENT_CW_LOG_GROUP
