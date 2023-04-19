@@ -58,7 +58,7 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 
 	subscription, err := s.client.GetSubscription(id)
 	if err != nil {
-		do500(w, err)
+		do500(w, fmt.Errorf("AMS GetSubscription [%w]", err))
 		return
 	}
 	orgId, ok := subscription.GetOrganizationID()
@@ -72,7 +72,7 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 	}
 
 	if err = s.client.DeleteSubscription(id); err != nil {
-		do500(w, err)
+		do500(w, fmt.Errorf("AMS DeleteSubscription [%w]", err))
 		return
 	}
 
@@ -117,13 +117,13 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 
 	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, limit, page)
 	if err != nil {
-		do500(w, err)
+		do500(w, fmt.Errorf("AMS GetSubscriptions [%w]", err))
 		return
 	}
 
 	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
-		do500(w, err)
+		do500(w, fmt.Errorf("AMS GetQuotaCost [%w]", err))
 		return
 	}
 
@@ -160,7 +160,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err = json.NewEncoder(w).Encode(resp); err != nil {
-		do500(w, err)
+		do500(w, fmt.Errorf("Unexpected error encoding response [%w]", err))
 		return
 	}
 
@@ -228,7 +228,7 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 		SubscriptionId:  &subId,
 		AccountUsername: &userName,
 	}); err != nil {
-		do500(w, err)
+		do500(w, fmt.Errorf("Unexpected error encoding response [%w]", err))
 		return
 	}
 }
