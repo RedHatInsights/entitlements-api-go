@@ -5,6 +5,8 @@ import (
 	"fmt"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/sirupsen/logrus"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
@@ -53,6 +55,27 @@ type AMSInterface interface {
 	GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
 	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error)
+}
+
+type ClientError struct {
+	Message    string
+	StatusCode int
+	OrgId      string
+	AmsOrgId   string
+}
+
+func (e *ClientError) Error() string {
+	b := strings.Builder{}
+
+	b.WriteString(e.Message)
+	if e.OrgId != "" {
+		b.WriteString(fmt.Sprintf(" [OrgId: %s]", e.OrgId))
+	}
+	if e.AmsOrgId != "" {
+		b.WriteString(fmt.Sprintf(" [AMS OrgId: %s]", e.AmsOrgId))
+	}
+
+	return b.String()
 }
 
 type TestClient struct{}
@@ -164,7 +187,12 @@ func (c *Client) convertOrg(organizationId string) (string, error) {
 	converted, err := listResp.Items().Get(0).ID(), nil
 
 	if converted == "" {
-		return "", fmt.Errorf("no ams org id found for org id: %s", organizationId)
+		return "", &ClientError{
+			Message:    "no corresponding ams org id found for user org",
+			StatusCode: http.StatusBadRequest,
+			OrgId:      organizationId,
+			AmsOrgId:   "",
+		}
 	}
 
 	c.cache.Set(organizationId, converted, time.Minute*30)
