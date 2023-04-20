@@ -1,5 +1,7 @@
 #!/bin/bash
 
+env
+
 set -exv
 
 IMAGE="quay.io/cloudservices/entitlements-api-go"
