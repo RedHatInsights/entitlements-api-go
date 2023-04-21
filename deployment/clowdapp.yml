@@ -156,7 +156,7 @@ objects:
       protocol: TCP
       targetPort: 8000
     selector:
-      app: entitlements-service
+      app: entitlements-api-go
     sessionAffinity: None
     type: ClusterIP
   status:
