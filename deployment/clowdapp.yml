@@ -15,8 +15,12 @@ objects:
       webServices:
         public:
           enabled: True
-      minReplicas: ${{API_REPLICAS}}
+      minReplicas: ${{REPLICAS}}
       podSpec:
+        volumes:
+        - configMap:
+            name: ${CONFIG_MAP_NAME}
+          name: default-entitlements-config
         initContainers:
           - name: bundle-sync
             image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
@@ -30,13 +34,22 @@ objects:
                 value: 'true'
               - name: ENT_RUN_BUNDLE_SYNC
                 value: ${RUN_BUNDLE_SYNC}
-            envFrom:
-              - secretRef:
-                  name: go-api-certs
+              - name: ENT_CERT
+                valueFrom:
+                  secretKeyRef:
+                    name: go-api-certs
+                    key: ENT_CERT
+                    optional: true
+              - name: ENT_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: go-api-certs
+                    key: ENT_KEY
+                    optional: true
             volumeMounts:
             - mountPath: /bundles
               name: default-entitlements-config
-            inheritEnv: true    
+            inheritEnv: true
         minReadySeconds: 15
         progressDeadlineSeconds: 600
         image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
@@ -44,15 +57,15 @@ objects:
           failureThreshold: 3
           httpGet:
             path: /status
-            port: 3000
+            port: 8000
           initialDelaySeconds: 20
           timeoutSeconds: 60
-          readinessProbe:
-            httpGet:
-              path: /status
-              port: 3000
-            initialDelaySeconds: 30
-            timeoutSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 8000
+          initialDelaySeconds: 30
+          timeoutSeconds: 60
           resources:
             limits:
               cpu: 500m
@@ -60,63 +73,78 @@ objects:
             requests:
               cpu: 100m
               memory: 250Mi
-      envFrom:
-        - secretRef:
-            name: go-api-certs
-      env:
-        - name: ENT_PORT
-          value: ${PORT}
-        - name: ENT_ENTITLE_ALL
-          value: ${ENTITLE_ALL}
-        - name: ENT_CERTS_FROM_ENV
-          value: 'true'
-        - name: ENT_LOG_LEVEL
-          value: ${LOG_LEVEL}
-        - name: ENT_AMS_HOST
-          value: ${AMS_HOST}
-        - name: ENT_BOP_URL
-          value: ${BOP_URL}
-        - name: ENT_CA_PATH
-          value: /resources/ca.crt
-        - name: ENT_SUBS_HOST
-          value: ${SUBS_HOST}
-        - name: ENT_COMPLIANCE_HOST
-          value: ${COMPLIANCE_HOST}
-        - name: ENT_OPENAPI_SPEC_PATH
-          value: /apispec/api.spec.json
-        - name: ENT_BUNDLE_INFO_YAML
-          value: /bundles/bundles.yml
-        - name: GLITCHTIP_DSN
-          valueFrom:
-            secretKeyRef:
-              name: ${GLITCHTIP_SECRET}
-              key: dsn
-              optional: true
-        - name: ENT_OIDC_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: oidc
-              key: client_id
-        - name: ENT_OIDC_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: oidc
-              key: client_secret
-        - name: ENT_BOP_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: entitlements-api
-              key: client_id
-        - name: ENT_BOP_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: entitlements-api
-              key: token
+        volumeMounts:
+        - mountPath: /bundles
+          name: default-entitlements-config
+        env:
+          - name: ENT_PORT
+            value: ${PORT}
+          - name: ENT_ENTITLE_ALL
+            value: ${ENTITLE_ALL}
+          - name: ENT_CERTS_FROM_ENV
+            value: 'true'
+          - name: ENT_LOG_LEVEL
+            value: ${LOG_LEVEL}
+          - name: ENT_AMS_HOST
+            value: ${AMS_HOST}
+          - name: ENT_BOP_URL
+            value: ${BOP_URL}
+          - name: ENT_CA_PATH
+            value: /resources/ca.crt
+          - name: ENT_SUBS_HOST
+            value: ${SUBS_HOST}
+          - name: ENT_COMPLIANCE_HOST
+            value: ${COMPLIANCE_HOST}
+          - name: ENT_OPENAPI_SPEC_PATH
+            value: /apispec/api.spec.json
+          - name: ENT_BUNDLE_INFO_YAML
+            value: /bundles/bundles.yml
+          - name: GLITCHTIP_DSN
+            valueFrom:
+              secretKeyRef:
+                name: ${GLITCHTIP_SECRET}
+                key: dsn
+                optional: true
+          - name: ENT_CERT
+            valueFrom:
+              secretKeyRef:
+                name: go-api-certs
+                key: ENT_CERT
+                optional: true
+          - name: ENT_KEY
+            valueFrom:
+              secretKeyRef:
+                name: go-api-certs
+                key: ENT_KEY
+          - name: ENT_OIDC_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: client_id
+          - name: ENT_OIDC_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: client_secret
+          - name: ENT_BOP_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: entitlements-api
+                key: client_id
+          - name: ENT_BOP_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: entitlements-api
+                key: token
+        volumes:
+        - configMap:
+            name: ${CONFIG_MAP_NAME}
+          name: default-entitlements-config
 - apiVersion: v1
   kind: Service
   metadata:
     annotations:
-      prometheus.io/port: '3000'
+      prometheus.io/port: '8000'
       prometheus.io/scrape: 'true'
     labels:
       app: entitlements-api-go
@@ -128,7 +156,7 @@ objects:
       protocol: TCP
       targetPort: 8000
     selector:
-      app: entitlements-service
+      app: entitlements-api-go
     sessionAffinity: None
     type: ClusterIP
   status:
@@ -175,3 +203,6 @@ parameters:
   name: GLITCHTIP_SECRET
   required: false
   value: 'entitlements-secret'
+- description: ClowdEnv Name
+  name: ENV_NAME
+  required: true
