@@ -41,10 +41,10 @@ objects:
         progressDeadlineSeconds: 600
         image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
         livenessProbe:
-          failureThreshold:
-            httpGet:
-              path: /status
-              port: 3000
+          failureThreshold: 3
+          httpGet:
+            path: /status
+            port: 3000
           initialDelaySeconds: 20
           timeoutSeconds: 60
           readinessProbe:
