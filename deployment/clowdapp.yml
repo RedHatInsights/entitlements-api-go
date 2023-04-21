@@ -42,9 +42,9 @@ objects:
         image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
         livenessProbe:
           failureThreshold: 3
-            httpGet:
-              path: /status
-              port: 3000
+          httpGet:
+            path: /status
+            port: 3000
           initialDelaySeconds: 20
           timeoutSeconds: 60
           readinessProbe:
@@ -70,6 +70,12 @@ objects:
           value: ${ENTITLE_ALL}
         - name: ENT_CERTS_FROM_ENV
           value: 'true'
+        - name: ENT_LOG_LEVEL
+          value: ${LOG_LEVEL}
+        - name: ENT_AMS_HOST
+          value: ${AMS_HOST}
+        - name: ENT_BOP_URL
+          value: ${BOP_URL}
         - name: ENT_CA_PATH
           value: /resources/ca.crt
         - name: ENT_SUBS_HOST
@@ -86,6 +92,26 @@ objects:
               name: ${GLITCHTIP_SECRET}
               key: dsn
               optional: true
+        - name: ENT_OIDC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: oidc
+              key: client_id
+        - name: ENT_OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: oidc
+              key: client_secret
+        - name: ENT_BOP_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: entitlements-api
+              key: client_id
+        - name: ENT_BOP_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: entitlements-api
+              key: token
 - apiVersion: v1
   kind: Service
   metadata:
@@ -109,12 +135,22 @@ objects:
     loadBalancer: {}
 
 parameters:
+- description: Log level for the application
+  name: LOG_LEVEL
+  required: false
+  value: info
 - description: Port for listener
   name: PORT
   value: '8000'
 - description: Subscriptions Service API endpoint
   name: SUBS_HOST
   value: https://subscription.qa.api.redhat.com
+- description: Account Management Service URL
+  name: AMS_HOST
+  value: https://api.openshift.com
+- description: Back Office Proxy URL
+  name: BOP_URL
+  value: https://backoffice-proxy.apps.ext.spoke.prod.us-west-2.aws.paas.redhat.com/v1/users
 - description: Export Compliance Service API endpoint
   name: COMPLIANCE_HOST
   value: https://export-compliance.dev.api.redhat.com
