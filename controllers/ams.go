@@ -61,9 +61,10 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 		do500(w, fmt.Errorf("AMS GetSubscription [%w]", err))
 		return
 	}
-	orgId, ok := subscription.GetOrganizationID()
-	if !ok {
-		do500(w, fmt.Errorf("subscription %s does not have an organization", id))
+
+	orgId, err := s.client.GetSubscriptionOrgId(subscription)
+	if err != nil {
+		do500(w, fmt.Errorf("AMS GetSubscriptionOrgId [%w]", err))
 		return
 	}
 

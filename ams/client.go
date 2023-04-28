@@ -55,6 +55,7 @@ type AMSInterface interface {
 	GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
 	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error)
+	GetSubscriptionOrgId(subscription *v1.Subscription) (string, error)
 }
 
 type ClientError struct {
@@ -124,6 +125,10 @@ func (c *TestClient) GetSubscriptions(organizationId string, size, page int) (*v
 		return nil, err
 	}
 	return lst, nil
+}
+
+func (c *TestClient) GetSubscriptionOrgId(subscription *v1.Subscription) (string, error) {
+	return "", nil // TODO
 }
 
 type Client struct {
@@ -287,4 +292,25 @@ func (c *Client) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.Q
 	defer quotaAuthorizationTime.Observe(time.Since(start).Seconds())
 	postResponse, err := c.client.AccountsMgmt().V1().QuotaAuthorizations().Post().Request(req).Send()
 	return postResponse.Response(), err
+}
+
+func (c *Client) GetSubscriptionOrgId(subscription *v1.Subscription) (string, error) {
+	amsOrgId, ok := subscription.GetOrganizationID()
+	if !ok {
+		return "", fmt.Errorf("subscription %s does not have an ams organization", subscription.ID())
+	}
+
+	// TODO: implement caching for this
+
+	resp, err := c.client.AccountsMgmt().V1().Organizations().Organization(amsOrgId).Get().Send()
+	if err != nil {
+		return "", fmt.Errorf("error retrieving ams org %s [%w]", amsOrgId, err)
+	}
+
+	amsOrg, ok := resp.GetBody()
+	if !ok {
+		return "", fmt.Errorf("ams organization %s does not have a body / must not exist", amsOrgId)
+	}
+
+	return amsOrg.ExternalID(), nil
 }
