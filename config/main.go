@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -54,6 +53,7 @@ type EntitlementsConfigKeysType struct {
 	BOPClientID     string
 	BOPToken        string
 	BOPURL          string
+	BOPEnv          string
 	BOPMockOrgId    string
 }
 
@@ -87,6 +87,7 @@ var Keys = EntitlementsConfigKeysType{
 	BOPToken:        "BOP_TOKEN",
 	BOPURL:          "BOP_URL",
 	BOPMockOrgId:    "BOP_MOCK_ORG_ID",
+	BOPEnv:          "BOP_ENV",
 	Debug:           "DEBUG",
 }
 
@@ -106,7 +107,7 @@ func getRootCAs(localCertFile string) *x509.CertPool {
 		panic(fmt.Sprintf("Could not load system CA certs: %v", err))
 	}
 
-	certs, err := ioutil.ReadFile(localCertFile)
+	certs, err := os.ReadFile(localCertFile)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to append %q to RootCAs: %v", localCertFile, err))
 	}
@@ -170,6 +171,7 @@ func initialize() {
 	options.SetDefault(Keys.TokenURL, "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token")
 	options.SetDefault(Keys.BOPURL, "https://backoffice-proxy.apps.ext.spoke.prod.us-west-2.aws.paas.redhat.com/v1/users")
 	options.SetDefault(Keys.BOPMockOrgId, "4384938490324")
+	options.SetDefault(Keys.BOPEnv, "stage")
 	options.SetDefault(Keys.Debug, false)
 
 	options.SetEnvPrefix("ENT")
