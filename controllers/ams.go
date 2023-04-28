@@ -52,7 +52,7 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 	idObj := identity.Get(r.Context()).Identity
 
 	if !idObj.User.OrgAdmin {
-		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s", id))
+		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s. User must be org admin", id))
 		return
 	}
 
@@ -68,7 +68,9 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 	}
 
 	if orgId != idObj.Internal.OrgID {
-		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s", id))
+		doError(w, http.StatusForbidden,
+			fmt.Errorf("Not allowed to delete subscription %s. Subscription org id [%s] must match user org id [%s]}", id, orgId, idObj.Internal.OrgID))
+		return
 	}
 
 	if err = s.client.DeleteSubscription(id); err != nil {
