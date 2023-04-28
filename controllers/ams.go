@@ -229,12 +229,14 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 	sub := resp.Subscription()
 	subId := sub.ID()
 	userName := seat.AccountUsername
+	status := sub.Status()
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err = json.NewEncoder(w).Encode(api.Seat{
 		SubscriptionId:  &subId,
 		AccountUsername: &userName,
+		Status: &status,
 	}); err != nil {
 		do500(w, fmt.Errorf("Unexpected error encoding response [%w]", err))
 		return
