@@ -139,6 +139,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 		seats = append(seats, api.Seat{
 			AccountUsername: toPtr(sub.Creator().Username()),
 			SubscriptionId:  toPtr(sub.ID()),
+			Status: toPtr(sub.Status()),
 		})
 	}
 

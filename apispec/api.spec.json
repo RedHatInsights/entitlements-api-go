@@ -428,6 +428,9 @@
                     },
                     "account_username": {
                         "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
                     }
                 }
             },
