@@ -97,7 +97,7 @@ func (c *TestClient) GetSubscription(subscriptionId string) (*v1.Subscription, e
 	}
 	subscription, err := v1.NewSubscription().
 		ID(subscriptionId).
-		OrganizationID("4384938490324").
+		OrganizationID("AMSORG4384938490324").
 		Build()
 	if err != nil {
 		return nil, err
@@ -128,7 +128,10 @@ func (c *TestClient) GetSubscriptions(organizationId string, size, page int) (*v
 }
 
 func (c *TestClient) ConvertUserOrgId(userOrgId string) (string, error) {
-	return "", nil // TODO
+	if userOrgId == "4384938490324" {
+		return "AMSORG4384938490324", nil
+	}
+	return "AMSORG1", nil
 }
 
 type Client struct {
