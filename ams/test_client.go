@@ -9,7 +9,7 @@ type TestClient struct{}
 
 var _ AMSInterface = &TestClient{}
 
-var GetQuotaCost = func(organizationId string) (*v1.QuotaCost, error) {
+var MockGetQuotaCost = func(organizationId string) (*v1.QuotaCost, error) {
     quotaCost, err := v1.NewQuotaCost().QuotaID("seat|ansible.wisdom").Build()
     if err != nil {
         return nil, err
@@ -17,10 +17,10 @@ var GetQuotaCost = func(organizationId string) (*v1.QuotaCost, error) {
     return quotaCost, nil
 }
 func (c *TestClient) GetQuotaCost(organizationId string) (*v1.QuotaCost, error) {
-    return GetQuotaCost(organizationId)
+    return MockGetQuotaCost(organizationId)
 }
 
-var GetSubscription = func(subscriptionId string) (*v1.Subscription, error) {
+var MockGetSubscription = func(subscriptionId string) (*v1.Subscription, error) {
     if subscriptionId == "" {
         return nil, fmt.Errorf("subscriptionId cannot be an empty string")
     }
@@ -34,25 +34,25 @@ var GetSubscription = func(subscriptionId string) (*v1.Subscription, error) {
     return subscription, nil
 }
 func (c *TestClient) GetSubscription(subscriptionId string) (*v1.Subscription, error) {
-    return GetSubscription(subscriptionId)
+    return MockGetSubscription(subscriptionId)
 }
 
-var DeleteSubscription = func(subscriptionId string) error {
+var MockDeleteSubscription = func(subscriptionId string) error {
     return nil
 }
 func (c *TestClient) DeleteSubscription(subscriptionId string) error {
-    return DeleteSubscription(subscriptionId)
+    return MockDeleteSubscription(subscriptionId)
 }
 
-var QuotaAuthorization = func(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error) {
+var MockQuotaAuthorization = func(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error) {
     resp, err := v1.NewQuotaAuthorizationResponse().Allowed(true).Build()
     return resp, err
 }
 func (c *TestClient) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error) {
-    return QuotaAuthorization(accountUsername, quotaVersion)
+    return MockQuotaAuthorization(accountUsername, quotaVersion)
 }
 
-var GetSubscriptions = func(organizationId string, size, page int) (*v1.SubscriptionList, error) {
+var MockGetSubscriptions = func(organizationId string, size, page int) (*v1.SubscriptionList, error) {
     lst, err := v1.NewSubscriptionList().
         Items(
             v1.NewSubscription().
@@ -66,15 +66,15 @@ var GetSubscriptions = func(organizationId string, size, page int) (*v1.Subscrip
     return lst, nil
 }
 func (c *TestClient) GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error) {
-    return GetSubscriptions(organizationId, size, page)
+    return MockGetSubscriptions(organizationId, size, page)
 }
 
-var ConvertUserOrgId = func(userOrgId string) (string, error) {
+var MockConvertUserOrgId = func(userOrgId string) (string, error) {
     if userOrgId == "4384938490324" {
         return "AMSORG4384938490324", nil
     }
     return "AMSORG1", nil
 }
 func (c *TestClient) ConvertUserOrgId(userOrgId string) (string, error) {
-    return ConvertUserOrgId(userOrgId)
+    return MockConvertUserOrgId(userOrgId)
 }
