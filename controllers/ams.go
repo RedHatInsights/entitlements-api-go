@@ -8,8 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/RedHatInsights/entitlements-api-go/logger"
+	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"strings"
 
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
@@ -52,7 +54,7 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 	idObj := identity.Get(r.Context()).Identity
 
 	if !idObj.User.OrgAdmin {
-		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s", id))
+		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s. User must be org admin", id))
 		return
 	}
 
@@ -61,14 +63,23 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 		do500(w, fmt.Errorf("AMS GetSubscription [%w]", err))
 		return
 	}
-	orgId, ok := subscription.GetOrganizationID()
+
+	subOrgId, ok := subscription.GetOrganizationID()
 	if !ok {
-		do500(w, fmt.Errorf("subscription %s does not have an organization", id))
+		do500(w, fmt.Errorf("Subscription with id [%s] does not have a corresponding ams org id, cannot verify subscription org", id))
+	}
+
+	amsUserOrgId, err := s.client.ConvertUserOrgId(idObj.Internal.OrgID)
+	if err != nil {
+		do500(w, fmt.Errorf("AMS ConvertUserOrgId [%w]", err))
 		return
 	}
 
-	if orgId != idObj.Internal.OrgID {
-		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s", id))
+	if subOrgId != amsUserOrgId {
+		doError(w, http.StatusForbidden,
+			fmt.Errorf("Not allowed to delete subscription %s. Subscription org [%s] must match user ams org id [%s]}. User org [%s]",
+				id, subOrgId, amsUserOrgId, idObj.Internal.OrgID))
+		return
 	}
 
 	if err = s.client.DeleteSubscription(id); err != nil {
@@ -132,24 +143,34 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 		return
 	}
 
-	var seats []api.Seat
-	for _, sub := range subs.Slice() {
-		seats = append(seats, api.Seat{
-			AccountUsername: toPtr(sub.Creator().Username()),
-			SubscriptionId:  toPtr(sub.ID()),
-		})
+	var seats = make([]api.Seat, 0)
+	excludeStatus := make(map[string]int)
+	if params.ExcludeStatus != nil && len(*params.ExcludeStatus) > 0 {
+		for index, element := range *params.ExcludeStatus { // convert to a map so we only have to iterate once
+			excludeStatus[strings.ToLower(element)] = index
+		}
 	}
+	subs.Each(func(sub *v1.Subscription) bool {
+		if _, exclude := excludeStatus[strings.ToLower(sub.Status())]; !exclude {
+			seats = append(seats, api.Seat{
+				AccountUsername: toPtr(sub.Creator().Username()),
+				SubscriptionId:  toPtr(sub.ID()),
+				Status:          toPtr(sub.Status()),
+			})
+		}
+		return true
+	})
 
 	// AMS api for subscriptions doesn't return the information needed to calculate last
-	prev_offset := offset - limit
-	if prev_offset < 0 {
-		prev_offset = 0
+	prevOffset := offset - limit
+	if prevOffset < 0 {
+		prevOffset = 0
 	}
 
 	links := &api.PaginationLinks{
 		First:    toPtr(fmt.Sprintf("%s/?limit=%d&offset=0", BASE_LINK_URL, limit)),
 		Next:     toPtr(fmt.Sprintf("%s/?limit=%d&offset=%d", BASE_LINK_URL, limit, offset+limit)),
-		Previous: toPtr(fmt.Sprintf("%s/?limit=%d&offset=%d", BASE_LINK_URL, limit, prev_offset)),
+		Previous: toPtr(fmt.Sprintf("%s/?limit=%d&offset=%d", BASE_LINK_URL, limit, prevOffset)),
 	}
 
 	resp := api.ListSeatsResponsePagination{

@@ -55,6 +55,7 @@ type AMSInterface interface {
 	GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
 	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error)
+	ConvertUserOrgId(userOrgId string) (string, error)
 }
 
 type ClientError struct {
@@ -76,54 +77,6 @@ func (e *ClientError) Error() string {
 	}
 
 	return b.String()
-}
-
-type TestClient struct{}
-
-var _ AMSInterface = &TestClient{}
-
-func (c *TestClient) GetQuotaCost(organizationId string) (*v1.QuotaCost, error) {
-	quotaCost, err := v1.NewQuotaCost().QuotaID("seat|ansible.wisdom").Build()
-	if err != nil {
-		return nil, err
-	}
-	return quotaCost, nil
-}
-
-func (c *TestClient) GetSubscription(subscriptionId string) (*v1.Subscription, error) {
-	if subscriptionId == "" {
-		return nil, fmt.Errorf("subscriptionId cannot be an empty string")
-	}
-	subscription, err := v1.NewSubscription().
-		ID(subscriptionId).
-		OrganizationID("4384938490324").
-		Build()
-	if err != nil {
-		return nil, err
-	}
-	return subscription, nil
-}
-
-func (c *TestClient) DeleteSubscription(subscriptionId string) error {
-	return nil
-}
-
-func (c *TestClient) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error) {
-	resp, err := v1.NewQuotaAuthorizationResponse().Allowed(true).Build()
-	return resp, err
-}
-
-func (c *TestClient) GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error) {
-	lst, err := v1.NewSubscriptionList().
-		Items(
-			v1.NewSubscription().
-				Creator(v1.NewAccount().Username("testuser")).
-				Plan(v1.NewPlan().Type("AnsibleWisdom").Name("AnsibleWisdom")),
-		).Build()
-	if err != nil {
-		return nil, err
-	}
-	return lst, nil
 }
 
 type Client struct {
@@ -168,43 +121,9 @@ func NewClient(debug bool) (AMSInterface, error) {
 	}, err
 }
 
-func (c *Client) convertOrg(organizationId string) (string, error) {
-
-	item := c.cache.Get(organizationId)
-	if item != nil && !item.Expired() {
-		converted := item.Value().(string)
-		l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": organizationId}).Debug("found converted ams org id in cache")
-		return converted, nil
-	}
-
-	start := time.Now()
-	listResp, err := c.client.AccountsMgmt().V1().Organizations().List().Search(fmt.Sprintf("external_id = %s", organizationId)).Send()
-	orgListTime.Observe(time.Since(start).Seconds())
-	if err != nil {
-		return "", err
-	}
-
-	converted, err := listResp.Items().Get(0).ID(), nil
-
-	if converted == "" {
-		return "", &ClientError{
-			Message:    "no corresponding ams org id found for user org",
-			StatusCode: http.StatusBadRequest,
-			OrgId:      organizationId,
-			AmsOrgId:   "",
-		}
-	}
-
-	c.cache.Set(organizationId, converted, time.Minute*30)
-
-	l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": organizationId}).Debug("converted org id to ams org ig")
-
-	return converted, err
-}
-
 func (c *Client) GetQuotaCost(organizationId string) (*v1.QuotaCost, error) {
 
-	amsOrgId, err := c.convertOrg(organizationId)
+	amsOrgId, err := c.ConvertUserOrgId(organizationId)
 	if err != nil {
 		return nil, err
 	}
@@ -231,7 +150,7 @@ func (c *Client) GetSubscription(subscriptionId string) (*v1.Subscription, error
 }
 
 func (c *Client) GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error) {
-	amsOrgId, err := c.convertOrg(organizationId)
+	amsOrgId, err := c.ConvertUserOrgId(organizationId)
 	if err != nil {
 		return nil, err
 	}
@@ -287,4 +206,38 @@ func (c *Client) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.Q
 	defer quotaAuthorizationTime.Observe(time.Since(start).Seconds())
 	postResponse, err := c.client.AccountsMgmt().V1().QuotaAuthorizations().Post().Request(req).Send()
 	return postResponse.Response(), err
+}
+
+// ConvertUserOrgId Convert a user org id from rh-identity header to an ams org id
+func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
+	item := c.cache.Get(userOrgId)
+	if item != nil && !item.Expired() {
+		converted := item.Value().(string)
+		l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": userOrgId}).Debug("found converted ams org id in cache")
+		return converted, nil
+	}
+
+	start := time.Now()
+	listResp, err := c.client.AccountsMgmt().V1().Organizations().List().Search(fmt.Sprintf("external_id = %s", userOrgId)).Send()
+	orgListTime.Observe(time.Since(start).Seconds())
+	if err != nil {
+		return "", err
+	}
+
+	converted, err := listResp.Items().Get(0).ID(), nil
+
+	if converted == "" {
+		return "", &ClientError{
+			Message:    "no corresponding ams org id found for user org",
+			StatusCode: http.StatusBadRequest,
+			OrgId:      userOrgId,
+			AmsOrgId:   "",
+		}
+	}
+
+	c.cache.Set(userOrgId, converted, time.Minute*30)
+
+	l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": userOrgId}).Debug("converted org id to ams org ig")
+
+	return converted, err
 }

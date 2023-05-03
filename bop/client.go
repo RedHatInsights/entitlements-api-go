@@ -2,6 +2,7 @@ package bop
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -50,6 +51,7 @@ type Client struct {
 	token      string
 	url        string
 	httpClient http.Client
+	env        string
 }
 
 var _ Bop = &Client{}
@@ -91,6 +93,7 @@ func (c *Client) GetUser(userName string) (*UserDetail, error) {
 	}
 	req.Header.Set("x-rh-clientid", c.clientId)
 	req.Header.Set("x-rh-apitoken", c.token)
+	req.Header.Set("x-rh-insights-env", c.env)
 
 	start := time.Now()
 	resp, err := c.httpClient.Do(req)
@@ -166,16 +169,24 @@ func NewClient(debug bool) (Bop, error) {
 	clientId := options.GetString(config.Keys.BOPClientID)
 	token := options.GetString(config.Keys.BOPToken)
 	url := options.GetString(config.Keys.BOPURL)
+	env := options.GetString(config.Keys.BOPEnv)
 
 	if err := validateBOPSettings(clientId, token, url); err != nil {
 		return nil, err
 	}
 
 	return &Client{
-		clientId:   clientId,
-		token:      token,
-		url:        url,
-		httpClient: http.Client{},
+		clientId: clientId,
+		token:    token,
+		url:      url,
+		env:      env,
+		httpClient: http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					RootCAs: config.GetConfig().RootCAs,
+				},
+			},
+		},
 	}, nil
 }
 

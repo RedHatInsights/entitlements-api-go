@@ -89,6 +89,8 @@ objects:
             value: ${AMS_HOST}
           - name: ENT_BOP_URL
             value: ${BOP_URL}
+          - name: ENT_BOP_ENV
+            value: ${BOP_ENV}
           - name: ENT_CA_PATH
             value: /resources/ca.crt
           - name: ENT_SUBS_HOST
@@ -179,6 +181,10 @@ parameters:
 - description: Back Office Proxy URL
   name: BOP_URL
   value: https://backoffice-proxy.apps.ext.spoke.prod.us-west-2.aws.paas.redhat.com/v1/users
+- description: Back Office Proxy environment to query for users in
+  name: BOP_ENV
+  value: 'stage'
+  required: true
 - description: Export Compliance Service API endpoint
   name: COMPLIANCE_HOST
   value: https://export-compliance.dev.api.redhat.com
