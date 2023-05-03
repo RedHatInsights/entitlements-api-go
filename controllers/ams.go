@@ -11,6 +11,7 @@ import (
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"strings"
 
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
@@ -144,13 +145,13 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 
 	var seats = make([]api.Seat, 0)
 	excludeStatus := make(map[string]int)
-	if params.ExcludeStatus != nil {
+	if params.ExcludeStatus != nil && len(*params.ExcludeStatus) > 0 {
 		for index, element := range *params.ExcludeStatus { // convert to a map so we only have to iterate once
-			excludeStatus[element] = index
+			excludeStatus[strings.ToLower(element)] = index
 		}
 	}
 	subs.Each(func(sub *v1.Subscription) bool {
-		if _, exclude := excludeStatus[sub.Status()]; !exclude {
+		if _, exclude := excludeStatus[strings.ToLower(sub.Status())]; !exclude {
 			seats = append(seats, api.Seat{
 				AccountUsername: toPtr(sub.Creator().Username()),
 				SubscriptionId:  toPtr(sub.ID()),

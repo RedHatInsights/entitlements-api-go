@@ -119,7 +119,8 @@ func (c *TestClient) GetSubscriptions(organizationId string, size, page int) (*v
 		Items(
 			v1.NewSubscription().
 				Creator(v1.NewAccount().Username("testuser")).
-				Plan(v1.NewPlan().Type("AnsibleWisdom").Name("AnsibleWisdom")),
+				Plan(v1.NewPlan().Type("AnsibleWisdom").Name("AnsibleWisdom")).
+				Status("Active"),
 		).Build()
 	if err != nil {
 		return nil, err
