@@ -71,6 +71,8 @@ func MakeRequest(method, path string, body io.Reader, options ...opt) *http.Requ
 
 }
 
+
+
 var _ = Describe("using the seat managment api", func() {
 	var client ams.AMSInterface
 	var bopClient bop.Bop
