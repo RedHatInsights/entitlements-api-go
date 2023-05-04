@@ -271,7 +271,7 @@
                     "items": {
                         "type": "string",
                         "enum": ["Active", "Deprovisioned"],
-                        "default": []
+                        "default": ""
                     }
                 }
             },
