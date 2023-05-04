@@ -6,7 +6,7 @@ IMAGE="quay.io/cloudservices/entitlements-api-go"
 IMAGE_TAG=$(git rev-parse --short=7 HEAD)
 LATEST_TAG="latest"
 QA_TAG="qa"
-SECURITY_COMPLIANCE_TAG="sc-$(date +%y%m%d)"
+SECURITY_COMPLIANCE_TAG="sc-$(date +%Y%m%d)"
 
 if [[ -z "$QUAY_USER" || -z "$QUAY_TOKEN" ]]; then
     echo "QUAY_USER and QUAY_TOKEN must be set"
