@@ -1,4 +1,4 @@
-package controllers
+package bop
 
 import (
 	"testing"
@@ -11,5 +11,5 @@ import (
 func TestControllers(t *testing.T) {
 	InitLogger()
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Controllers Suite")
+	RunSpecs(t, "BOP Suite")
 }

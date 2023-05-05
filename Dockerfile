@@ -1,7 +1,8 @@
 # Manual Build: 2023-04-20
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
-FROM registry.redhat.io/ubi8/go-toolset as builder
+# FROM registry.redhat.io/ubi8/go-toolset as builder
+FROM quay.io/projectquay/golang:1.19 as builder
 
 WORKDIR /go/src/app
 
@@ -13,8 +14,7 @@ COPY . .
 
 USER 0
 
-RUN go build -o entitlements-api-go main.go
-RUN go build -o ./bundle-sync bundle_sync/main.go
+RUN make
 
 # Using ubi8-minimal due to its smaller footprint
 FROM registry.redhat.io/ubi8/ubi-minimal
