@@ -91,6 +91,10 @@ objects:
             value: ${BOP_URL}
           - name: ENT_BOP_ENV
             value: ${BOP_ENV}
+          - name: ENT_FEATURES
+            value: ${FEATURES}
+          - name: ENT_DISABLE_SEAT_MANAGER
+            value: ${DISABLE_SEAT_MANAGER}
           - name: ENT_CW_LOG_GROUP
             valueFrom:
               secretKeyRef:
@@ -242,3 +246,9 @@ parameters:
   name: GLITCHTIP_SECRET
   required: false
   value: 'entitlements-secret'
+- description: List of feature bundles to onboard during bundle sync
+  name: FEATURES
+  required: false
+- description: Flag to disable seat manager by not exposing any of the apis related to the feature
+  name: DISABLE_SEAT_MANAGER
+  required: false
