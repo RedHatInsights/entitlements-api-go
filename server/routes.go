@@ -34,7 +34,8 @@ func DoRoutes() chi.Router {
 	r.Use(chilogger.NewLogrusMiddleware("router", log.Log))
 	r.Use(sentryMiddleware.Handle)
 
-	debug := config.GetConfig().Options.GetBool(config.Keys.Debug)
+	configOptions := config.GetConfig().Options
+	debug := configOptions.GetBool(config.Keys.Debug)
 	amsClient, err := ams.NewClient(debug)
 
 	if err != nil {
@@ -50,8 +51,10 @@ func DoRoutes() chi.Router {
 	// and return a http.Handler.  This is normally used with .Mount,
 	// but since only part of the server is using code gen this is
 	// a way to hack it in
-	seatManagerApi := controllers.NewSeatManagerApi(amsClient, bopClient)
-	api.HandlerFromMuxWithBaseURL(seatManagerApi, r.With(identity.EnforceIdentity), "/api/entitlements/v1")
+	if !configOptions.GetBool(config.Keys.DisableSeatManager) {
+		seatManagerApi := controllers.NewSeatManagerApi(amsClient, bopClient)
+		api.HandlerFromMuxWithBaseURL(seatManagerApi, r.With(identity.EnforceIdentity), "/api/entitlements/v1")	
+	}
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.With(identity.EnforceIdentity).Route("/", controllers.LubDub)
