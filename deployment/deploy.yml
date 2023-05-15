@@ -9,6 +9,8 @@ objects:
     labels:
       app: entitlements-api-go
     name: entitlements-api-go
+    annotations:
+      ignore-check.kube-linter.io/minimum-three-replicas: "for entitlements we dont need 3 replicas"
   spec:
     minReadySeconds: 15
     progressDeadlineSeconds: 600
