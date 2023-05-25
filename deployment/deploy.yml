@@ -54,6 +54,13 @@ objects:
           - name: bundle-sync
             image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
             command: ["/bundle-sync"]
+            resources:
+              limits:
+                cpu: 200m
+                memory: 200Mi
+              requests:
+                cpu: 100m
+                memory: 100Mi
             env:
               - name: ENT_SUBS_HOST
                 value: ${SUBS_HOST}
