@@ -56,6 +56,9 @@ type EntitlementsConfigKeysType struct {
 	BOPEnv             string
 	BOPMockOrgId       string
 	DisableSeatManager string
+	SubsCacheDuration  string
+	SubsCacheMaxSize   string
+	SubsCacheItemPrune string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -91,6 +94,9 @@ var Keys = EntitlementsConfigKeysType{
 	BOPEnv:             "BOP_ENV",
 	Debug:              "DEBUG",
 	DisableSeatManager: "DISABLE_SEAT_MANAGER",
+	SubsCacheDuration:  "SUBS_CACHE_DURATION_SECONDS",
+	SubsCacheMaxSize:   "SUBS_CACHE_MAX_SIZE",
+	SubsCacheItemPrune: "SUBS_CACHE_ITEM_PRUNE",
 }
 
 func getBaseFeaturesPath(options *viper.Viper) string {
@@ -176,6 +182,9 @@ func initialize() {
 	options.SetDefault(Keys.BOPEnv, "stage")
 	options.SetDefault(Keys.Debug, false)
 	options.SetDefault(Keys.DisableSeatManager, false)
+	options.SetDefault(Keys.SubsCacheDuration, 1800) // seconds
+	options.SetDefault(Keys.SubsCacheMaxSize, 500)
+	options.SetDefault(Keys.SubsCacheItemPrune, 50)
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
