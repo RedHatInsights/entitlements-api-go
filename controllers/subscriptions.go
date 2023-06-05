@@ -22,9 +22,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type getter func(string) []string
+var configOptions = config.GetConfig().Options
+var cache = ccache.New(
+	ccache.Configure().
+		MaxSize(configOptions.GetInt64(config.Keys.SubsCacheMaxSize)).
+		ItemsToPrune(configOptions.GetUint32(config.Keys.SubsCacheItemPrune)),
+)
+var cacheDurationSeconds = time.Second * time.Duration(configOptions.GetInt64(config.Keys.SubsCacheDuration))
 
-var cache = ccache.New(ccache.Configure().MaxSize(500).ItemsToPrune(50))
 var bundleInfo []types.Bundle
 var subsFailure = promauto.NewCounterVec(
 	prometheus.CounterOpts{
@@ -60,7 +65,7 @@ func SetBundleInfo(yamlFilePath string) error {
 // GetFeatureStatus calls the IT subs service features endpoint and returns the entitlements for specified features/bundles
 var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 	item := cache.Get(orgID)
-	entitleAll := config.GetConfig().Options.GetString(config.Keys.EntitleAll)
+	entitleAll := configOptions.GetString(config.Keys.EntitleAll)
 
 	if item != nil && !item.Expired() {
 		return types.SubscriptionsResponse{
@@ -78,8 +83,8 @@ var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 		}
 	}
 
-	q := config.GetConfig().Options.GetString(config.Keys.FeaturesPath)
-	req := config.GetConfig().Options.GetString(config.Keys.SubsHost) +
+	q := configOptions.GetString(config.Keys.FeaturesPath)
+	req := configOptions.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/featureStatus" +
 		q + "&accountId=" + orgID
 
@@ -111,7 +116,7 @@ var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 	var FeatureStatus types.FeatureStatus
 	json.Unmarshal(body, &FeatureStatus)
 
-	cache.Set(orgID, FeatureStatus, time.Minute*30)
+	cache.Set(orgID, FeatureStatus, cacheDurationSeconds)
 
 	return types.SubscriptionsResponse{
 		StatusCode: resp.StatusCode,
@@ -125,7 +130,7 @@ func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w htt
 		DependencyFailure: true,
 		Service:           "Subscriptions Service",
 		Status:            res.StatusCode,
-		Endpoint:          config.GetConfig().Options.GetString(config.Keys.SubsHost),
+		Endpoint:          configOptions.GetString(config.Keys.SubsHost),
 		Message:           errMsg,
 	}
 
@@ -184,7 +189,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		for _, b := range bundleInfo {
 			entitle := true
 			trial := false
-			entitleAll := config.GetConfig().Options.GetString(config.Keys.EntitleAll)
+			entitleAll := configOptions.GetString(config.Keys.EntitleAll)
 
 			if entitleAll == "true" {
 				entitlementsResponse[b.Name] = setBundlePayload(entitle, trial)

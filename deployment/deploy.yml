@@ -104,6 +104,12 @@ objects:
             value: ${FEATURES}
           - name: ENT_DISABLE_SEAT_MANAGER
             value: ${DISABLE_SEAT_MANAGER}
+          - name: ENT_SUBS_CACHE_DURATION_SECONDS
+            value: ${SUBS_CACHE_DURATION}
+          - name: ENT_SUBS_CACHE_MAX_SIZE
+            value: ${SUBS_CACHE_MAX_SIZE}
+          - name: ENT_SUBS_CACHE_ITEM_PRUNE
+            value: ${SUBS_CACHE_ITEM_PRUNE}
           - name: ENT_CW_LOG_GROUP
             valueFrom:
               secretKeyRef:
@@ -260,4 +266,13 @@ parameters:
   required: false
 - description: Flag to disable seat manager by not exposing any of the apis related to the feature
   name: DISABLE_SEAT_MANAGER
+  required: false
+- description: Duration, in seconds, for items in the subs cache before they are expired
+  name: SUBS_CACHE_DURATION
+  required: false
+- description: Max size of the subs cache
+  name: SUBS_CACHE_MAX_SIZE
+  required: false
+- description: Items to prune for the subs cache (when memory is low)
+  name: SUBS_CACHE_ITEM_PRUNE
   required: false
