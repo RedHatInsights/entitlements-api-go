@@ -178,7 +178,7 @@ parameters:
   value: '8000'
 - description: Subscriptions Service API endpoint
   name: SUBS_HOST
-  value: https://subscription.qa.api.redhat.com
+  value: https://subscription.stage.api.redhat.com
 - description: Account Management Service URL
   name: AMS_HOST
   value: https://api.openshift.com
