@@ -10,8 +10,8 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/onsi/ginkgo"
 	. "github.com/RedHatInsights/entitlements-api-go/types"
+	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
@@ -298,16 +298,11 @@ var _ = Describe("Identity Controller", func() {
 	})
 
 	Context("When the request contains query filters", func() {
-	Context("When ENT_ENTITLE_ALL is set", func() {
-		AfterEach(func() {
-			os.Setenv("ENT_ENTITLE_ALL", "")
-		})
 		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
 			Data:       FeatureStatus{},
 			CacheHit:   false,
 		}
-
 		It("should only return bundles included in include_bundles", func() {
 			rr, body, _ := testRequest("GET", "/?include_bundles=TestBundle2,TestBundle3", "123456", DEFAULT_ORG_ID, false, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
@@ -362,7 +357,18 @@ var _ = Describe("Identity Controller", func() {
 			Expect(found).To(BeTrue())
 			_, found = body["TestBundle3"]
 			Expect(found).To(BeFalse())
+		})
+	})
 
+	Context("When ENT_ENTITLE_ALL is set", func() {
+		AfterEach(func() {
+			os.Setenv("ENT_ENTITLE_ALL", "")
+		})
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       FeatureStatus{},
+			CacheHit:   false,
+		}
 		It("should skip IT calls and entitle all bundles when true", func() {
 			os.Setenv("ENT_ENTITLE_ALL", "true")
 			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
