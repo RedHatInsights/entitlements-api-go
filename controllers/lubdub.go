@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 // LubDub responds back with a simple heartbeat

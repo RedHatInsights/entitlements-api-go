@@ -1,66 +1,30 @@
+---
 apiVersion: v1
 kind: Template
 metadata:
   name: entitlements-api-go
 objects:
-- apiVersion: apps/v1
-  kind: Deployment
+- apiVersion: cloud.redhat.com/v1alpha1
+  kind: ClowdApp
   metadata:
-    labels:
-      app: entitlements-api-go
     name: entitlements-api-go
-    annotations:
-      ignore-check.kube-linter.io/minimum-three-replicas: "for entitlements we dont need 3 replicas"
   spec:
-    minReadySeconds: 15
-    progressDeadlineSeconds: 600
-    replicas: ${{REPLICAS}}
-    revisionHistoryLimit: 9
-    selector:
-      matchLabels:
-        app: entitlements-api-go
-    strategy:
-      rollingUpdate:
-        maxSurge: 25%
-        maxUnavailable: 25%
-      type: RollingUpdate
-    template:
-      metadata:
-        labels:
-          app: entitlements-api-go
-      spec:
-        affinity:
-          podAntiAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
-            - podAffinityTerm:
-                labelSelector:
-                  matchExpressions:
-                  - key: app
-                    operator: In
-                    values:
-                    - entitlements-api-go
-                topologyKey: failure-domain.beta.kubernetes.io/zone
-              weight: 100
-            - podAffinityTerm:
-                labelSelector:
-                  matchExpressions:
-                  - key: app
-                    operator: In
-                    values:
-                    - entitlements-api-go
-                topologyKey: kubernetes.io/hostname
-              weight: 99
+    envName: ${ENV_NAME}
+    deployments:
+    - name: service
+      webServices:
+        public:
+          enabled: True
+      minReplicas: ${{REPLICAS}}
+      podSpec:
+        volumes:
+        - configMap:
+            name: ${CONFIG_MAP_NAME}
+          name: default-entitlements-config
         initContainers:
           - name: bundle-sync
             image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
             command: ["/bundle-sync"]
-            resources:
-              limits:
-                cpu: 200m
-                memory: 200Mi
-              requests:
-                cpu: 100m
-                memory: 100Mi
             env:
               - name: ENT_SUBS_HOST
                 value: ${SUBS_HOST}
@@ -70,20 +34,63 @@ objects:
                 value: 'true'
               - name: ENT_RUN_BUNDLE_SYNC
                 value: ${RUN_BUNDLE_SYNC}
-            envFrom:
-              - secretRef:
-                  name: go-api-certs
+              - name: ENT_CERT
+                valueFrom:
+                  secretKeyRef:
+                    name: go-api-certs
+                    key: ENT_CERT
+                    optional: true
+              - name: ENT_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: go-api-certs
+                    key: ENT_KEY
+                    optional: true
             volumeMounts:
             - mountPath: /bundles
               name: default-entitlements-config
-        containers:
-        - env:
-          - name: ENT_LOG_LEVEL
-            value: ${LOG_LEVEL}
+            inheritEnv: true
+        minReadySeconds: 15
+        progressDeadlineSeconds: 600
+        image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /status
+            port: 8000
+          initialDelaySeconds: 20
+          timeoutSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 8000
+          initialDelaySeconds: 30
+          timeoutSeconds: 60
+          resources:
+            limits:
+              cpu: 500m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 250Mi
+        volumeMounts:
+        - mountPath: /bundles
+          name: default-entitlements-config
+        env:
+          - name: ENT_PORT
+            value: ${PORT}
           - name: ENT_ENTITLE_ALL
             value: ${ENTITLE_ALL}
           - name: ENT_CERTS_FROM_ENV
             value: 'true'
+          - name: ENT_LOG_LEVEL
+            value: ${LOG_LEVEL}
+          - name: ENT_AMS_HOST
+            value: ${AMS_HOST}
+          - name: ENT_BOP_URL
+            value: ${BOP_URL}
+          - name: ENT_BOP_ENV
+            value: ${BOP_ENV}
           - name: ENT_CA_PATH
             value: /resources/ca.crt
           - name: ENT_SUBS_HOST
@@ -94,12 +101,6 @@ objects:
             value: /apispec/api.spec.json
           - name: ENT_BUNDLE_INFO_YAML
             value: /bundles/bundles.yml
-          - name: ENT_AMS_HOST
-            value: ${AMS_HOST}
-          - name: ENT_BOP_URL
-            value: ${BOP_URL}
-          - name: ENT_BOP_ENV
-            value: ${BOP_ENV}
           - name: ENT_FEATURES
             value: ${FEATURES}
           - name: ENT_DISABLE_SEAT_MANAGER
@@ -110,32 +111,23 @@ objects:
             value: ${SUBS_CACHE_MAX_SIZE}
           - name: ENT_SUBS_CACHE_ITEM_PRUNE
             value: ${SUBS_CACHE_ITEM_PRUNE}
-          - name: ENT_CW_LOG_GROUP
-            valueFrom:
-              secretKeyRef:
-                key: log_group_name
-                name: cloudwatch
-          - name: ENT_CW_REGION
-            valueFrom:
-              secretKeyRef:
-                key: aws_region
-                name: cloudwatch
-          - name: ENT_CW_SECRET
-            valueFrom:
-              secretKeyRef:
-                key: aws_secret_access_key
-                name: cloudwatch
-          - name: ENT_CW_KEY
-            valueFrom:
-              secretKeyRef:
-                key: aws_access_key_id
-                name: cloudwatch
           - name: GLITCHTIP_DSN
             valueFrom:
               secretKeyRef:
                 name: ${GLITCHTIP_SECRET}
                 key: dsn
                 optional: true
+          - name: ENT_CERT
+            valueFrom:
+              secretKeyRef:
+                name: go-api-certs
+                key: ENT_CERT
+                optional: true
+          - name: ENT_KEY
+            valueFrom:
+              secretKeyRef:
+                name: go-api-certs
+                key: ENT_KEY
           - name: ENT_OIDC_CLIENT_ID
             valueFrom:
               secretKeyRef:
@@ -156,44 +148,6 @@ objects:
               secretKeyRef:
                 name: entitlements-api
                 key: token
-          envFrom:
-          - secretRef:
-              name: go-api-certs
-          image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
-          imagePullPolicy: IfNotPresent
-          livenessProbe:
-            httpGet:
-              path: /status
-              port: 3000
-            initialDelaySeconds: 20
-            timeoutSeconds: 60
-          name: entitlements-api-go
-          readinessProbe:
-            httpGet:
-              path: /status
-              port: 3000
-            initialDelaySeconds: 30
-            timeoutSeconds: 60
-          resources:
-            limits:
-              cpu: 500m
-              memory: 500Mi
-            requests:
-              cpu: 100m
-              memory: 250Mi
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          volumeMounts:
-          - mountPath: /bundles
-            name: default-entitlements-config
-        dnsPolicy: ClusterFirst
-        imagePullSecrets:
-        - name: quay-cloudservices-pull
-        - name: rh-registry-pull
-        restartPolicy: Always
-        schedulerName: default-scheduler
-        securityContext: {}
-        terminationGracePeriodSeconds: 30
         volumes:
         - configMap:
             name: ${CONFIG_MAP_NAME}
@@ -202,7 +156,7 @@ objects:
   kind: Service
   metadata:
     annotations:
-      prometheus.io/port: '3000'
+      prometheus.io/port: '8000'
       prometheus.io/scrape: 'true'
     labels:
       app: entitlements-api-go
@@ -212,18 +166,22 @@ objects:
     - name: 3000-tcp
       port: 3000
       protocol: TCP
-      targetPort: 3000
+      targetPort: 8000
     selector:
       app: entitlements-api-go
     sessionAffinity: None
     type: ClusterIP
   status:
     loadBalancer: {}
+
 parameters:
 - description: Log level for the application
   name: LOG_LEVEL
   required: false
   value: info
+- description: Port for listener
+  name: PORT
+  value: '8000'
 - description: Subscriptions Service API endpoint
   name: SUBS_HOST
   value: https://subscription.stage.api.redhat.com
@@ -276,3 +234,6 @@ parameters:
 - description: Items to prune for the subs cache (when memory is low)
   name: SUBS_CACHE_ITEM_PRUNE
   required: false
+- description: ClowdEnv Name
+  name: ENV_NAME
+  required: true

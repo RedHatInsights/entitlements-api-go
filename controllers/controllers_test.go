@@ -7,10 +7,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
-	. "github.com/RedHatInsights/entitlements-api-go/types"
 	. "github.com/onsi/ginkgo"
+	. "github.com/RedHatInsights/entitlements-api-go/types"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
@@ -265,10 +267,20 @@ var _ = Describe("Identity Controller", func() {
 		It("should set values based on response from the featureStatus request", func() {
 			fakeResponse := SubscriptionsResponse{
 				StatusCode: 200,
+				Body:       "",
+				Error:      nil,
 				Data: FeatureStatus{
-					[]Feature{
-						{Name: "TestBundle1", IsEval: false, Entitled: false},
-						{Name: "TestBundle2", IsEval: true, Entitled: true},
+					Features: []Feature{
+						{
+							Name:     "TestBundle1",
+							IsEval:   false,
+							Entitled: false,
+						},
+						{
+							Name:     "TestBundle2",
+							IsEval:   true,
+							Entitled: true,
+						},
 					},
 				},
 				CacheHit: false,
@@ -286,11 +298,16 @@ var _ = Describe("Identity Controller", func() {
 	})
 
 	Context("When the request contains query filters", func() {
+	Context("When ENT_ENTITLE_ALL is set", func() {
+		AfterEach(func() {
+			os.Setenv("ENT_ENTITLE_ALL", "")
+		})
 		fakeResponse := SubscriptionsResponse{
 			StatusCode: 200,
 			Data:       FeatureStatus{},
 			CacheHit:   false,
 		}
+
 		It("should only return bundles included in include_bundles", func() {
 			rr, body, _ := testRequest("GET", "/?include_bundles=TestBundle2,TestBundle3", "123456", DEFAULT_ORG_ID, false, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
@@ -345,6 +362,37 @@ var _ = Describe("Identity Controller", func() {
 			Expect(found).To(BeTrue())
 			_, found = body["TestBundle3"]
 			Expect(found).To(BeFalse())
+
+		It("should skip IT calls and entitle all bundles when true", func() {
+			os.Setenv("ENT_ENTITLE_ALL", "true")
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle4"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle5"].IsEntitled).To(Equal(true))
+		})
+
+		It("should return as normal when false", func() {
+			os.Setenv("ENT_ENTITLE_ALL", "false")
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle4"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
+		})
+
+		It("should return as normal when unset", func() {
+			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
+			Expect(body["TestBundle4"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
 		})
 	})
 })
