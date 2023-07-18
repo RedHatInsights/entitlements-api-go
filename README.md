@@ -58,11 +58,12 @@ export ENT_SUBS_HOST=https://subscription.dev.api.redhat.com
 export ENT_COMPLIANCE_HOST=https://export-compliance.dev.api.redhat.com
 ```
 
-Replace {path_to_key} and {path_to_cert} with the locations of the .key and .crt files from the previous section.
+Replace `{path_to_key}` and `{path_to_cert}` with the locations of the `.key` and `.crt` files from the previous section.
 
 ### Set up your local entitlement bundles
 
 Copy the `/bundles/bundles.example.yml` to `/bundles/bundles.yml` in order to have your local app consume bundle data. You can modify this file for local testing.
+
 **Note:** _This file is for local testing only. If you wish to make changes to the actual bundles, please refer to https://github.com/RedHatInsights/entitlements-config_
 
 ## Running the Application
@@ -82,7 +83,7 @@ docker run -p 3000:3000 entitlements-api-go
 
 ## Testing Entitlements API with curl
 
-The Entitlements API requires that you pass in a valid x-redhat-identity header or it rejects requests.
+The Entitlements API requires that you pass in a valid `x-redhat-identity` header or it rejects requests.
 For an example see `cat ./scripts/xrhid_helper.sh`
 
 ## Testing the bundle-sync
@@ -98,6 +99,6 @@ go build -o ./bundle-sync bundle_sync/main.go
 ## Running the Unit Tests
 
 * To run the unit tests, execute the following commands from the terminal:
-    make test
+    `make test`
 * To include benchmarks:
-    make bench
+    `make bench`
