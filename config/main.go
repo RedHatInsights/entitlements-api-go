@@ -4,11 +4,12 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/spf13/viper"
+
+	clowder "github.com/redhatinsights/app-common-go/pkg/api/v1"
 )
 
 var config *EntitlementsConfig
@@ -23,49 +24,79 @@ type EntitlementsConfig struct {
 
 // EntitlementsConfigKeysType is the definition of the struct hat houses all the env variables key names
 type EntitlementsConfigKeysType struct {
-	Key             string
-	Cert            string
-	Port            string
-	CertsFromEnv    string
-	SubsHost        string
-	ComplianceHost  string
-	CaPath          string
-	OpenAPISpecPath string
-	BundleInfoYaml  string
-	CwLogGroup      string
-	CwLogStream     string
-	CwRegion        string
-	CwKey           string
-	CwSecret        string
-	Features        string
-	FeaturesPath    string
-	SubAPIBasePath  string
-	CompAPIBasePath string
-	RunBundleSync   string
-	EntitleAll      string
+	Key                string
+	Cert               string
+	Port               string
+	LogLevel           string
+	CertsFromEnv       string
+	SubsHost           string
+	ComplianceHost     string
+	CaPath             string
+	OpenAPISpecPath    string
+	BundleInfoYaml     string
+	CwLogGroup         string
+	CwLogStream        string
+	CwRegion           string
+	CwKey              string
+	CwSecret           string
+	Features           string
+	FeaturesPath       string
+	SubAPIBasePath     string
+	CompAPIBasePath    string
+	RunBundleSync      string
+	EntitleAll         string
+	AMSHost            string
+	ClientID           string
+	ClientSecret       string
+	TokenURL           string
+	Debug              string
+	BOPClientID        string
+	BOPToken           string
+	BOPURL             string
+	BOPEnv             string
+	BOPMockOrgId       string
+	DisableSeatManager string
+	SubsCacheDuration  string
+	SubsCacheMaxSize   string
+	SubsCacheItemPrune string
 }
 
 // Keys is a struct that houses all the env variables key names
 var Keys = EntitlementsConfigKeysType{
-	Key:             "KEY",
-	Cert:            "CERT",
-	Port:            "PORT",
-	CertsFromEnv:    "CERTS_FROM_ENV",
-	SubsHost:        "SUBS_HOST",
-	ComplianceHost:  "COMPLIANCE_HOST",
-	CaPath:          "CA_PATH",
-	OpenAPISpecPath: "OPENAPI_SPEC_PATH",
-	BundleInfoYaml:  "BUNDLE_INFO_YAML",
-	CwLogGroup:      "CW_LOG_GROUP",
-	CwLogStream:     "CW_LOG_STEAM",
-	CwRegion:        "CW_REGION",
-	CwKey:           "CW_KEY",
-	CwSecret:        "CW_SECRET",
-	Features:        "FEATURES",
-	SubAPIBasePath:  "SUB_API_BASE_PATH",
-	CompAPIBasePath: "COMP_API_BASE_PATH",
-	RunBundleSync:   "RUN_BUNDLE_SYNC",
-	EntitleAll:      "ENTITLE_ALL",
+	Key:                "KEY",
+	Cert:               "CERT",
+	Port:               "PORT",
+	LogLevel:           "LOG_LEVEL",
+	CertsFromEnv:       "CERTS_FROM_ENV",
+	SubsHost:           "SUBS_HOST",
+	ComplianceHost:     "COMPLIANCE_HOST",
+	CaPath:             "CA_PATH",
+	OpenAPISpecPath:    "OPENAPI_SPEC_PATH",
+	BundleInfoYaml:     "BUNDLE_INFO_YAML",
+	CwLogGroup:         "CW_LOG_GROUP",
+	CwLogStream:        "CW_LOG_STEAM",
+	CwRegion:           "CW_REGION",
+	CwKey:              "CW_KEY",
+	CwSecret:           "CW_SECRET",
+	Features:           "FEATURES",
+	SubAPIBasePath:     "SUB_API_BASE_PATH",
+	CompAPIBasePath:    "COMP_API_BASE_PATH",
+	RunBundleSync:      "RUN_BUNDLE_SYNC",
+	EntitleAll:         "ENTITLE_ALL",
+	AMSHost:            "AMS_HOST",
+	ClientID:           "OIDC_CLIENT_ID",
+	ClientSecret:       "OIDC_CLIENT_SECRET",
+	TokenURL:           "OAUTH_TOKEN_URL",
+	BOPClientID:        "BOP_CLIENT_ID",
+	BOPToken:           "BOP_TOKEN",
+	BOPURL:             "BOP_URL",
+	BOPMockOrgId:       "BOP_MOCK_ORG_ID",
+	BOPEnv:             "BOP_ENV",
+	Debug:              "DEBUG",
+	DisableSeatManager: "DISABLE_SEAT_MANAGER",
+	SubsCacheDuration:  "SUBS_CACHE_DURATION_SECONDS",
+	SubsCacheMaxSize:   "SUBS_CACHE_MAX_SIZE",
+	SubsCacheItemPrune: "SUBS_CACHE_ITEM_PRUNE",
 }
 
 func getBaseFeaturesPath(options *viper.Viper) string {
@@ -84,7 +115,7 @@ func getRootCAs(localCertFile string) *x509.CertPool {
 		panic(fmt.Sprintf("Could not load system CA certs: %v", err))
 	}
 
-	certs, err := ioutil.ReadFile(localCertFile)
+	certs, err := os.ReadFile(localCertFile)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to append %q to RootCAs: %v", localCertFile, err))
 	}
@@ -128,6 +159,7 @@ func initialize() {
 
 	options.SetDefault(Keys.CertsFromEnv, false)
 	options.SetDefault(Keys.Port, "3000")
+	options.SetDefault(Keys.LogLevel, "info")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.ComplianceHost, "https://export-compliance.api.redhat.com")
 	options.SetDefault(Keys.CaPath, "../resources/ca.crt")
@@ -143,6 +175,16 @@ func initialize() {
 	options.SetDefault(Keys.CompAPIBasePath, "/v1/screening")
 	options.SetDefault(Keys.RunBundleSync, false)
 	options.SetDefault(Keys.EntitleAll, false)
+	options.SetDefault(Keys.AMSHost, "https://api.openshift.com")
+	options.SetDefault(Keys.TokenURL, "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token")
+	options.SetDefault(Keys.BOPURL, "https://backoffice-proxy.apps.ext.spoke.prod.us-west-2.aws.paas.redhat.com/v1/users")
+	options.SetDefault(Keys.BOPMockOrgId, "4384938490324")
+	options.SetDefault(Keys.BOPEnv, "stage")
+	options.SetDefault(Keys.Debug, false)
+	options.SetDefault(Keys.DisableSeatManager, false)
+	options.SetDefault(Keys.SubsCacheDuration, 1800) // seconds
+	options.SetDefault(Keys.SubsCacheMaxSize, 500)
+	options.SetDefault(Keys.SubsCacheItemPrune, 50)
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
@@ -154,6 +196,17 @@ func initialize() {
 		Certs:   getCerts(options),
 		RootCAs: getRootCAs(options.GetString(Keys.CaPath)),
 		Options: options,
+	}
+
+	if clowder.IsClowderEnabled() {
+		cfg := clowder.LoadedConfig
+
+		// Cloudwatch
+		options.Set(Keys.CwLogGroup, cfg.Logging.Cloudwatch.LogGroup)
+		options.Set(Keys.CwLogStream, cfg.Logging.Cloudwatch.LogGroup)
+		options.Set(Keys.CwRegion, cfg.Logging.Cloudwatch.Region)
+		options.Set(Keys.CwKey, cfg.Logging.Cloudwatch.AccessKeyId)
+		options.Set(Keys.CwSecret, cfg.Logging.Cloudwatch.SecretAccessKey)
 	}
 }
 

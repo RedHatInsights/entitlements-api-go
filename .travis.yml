@@ -1,14 +1,14 @@
 language: go
 go:
-  - 1.13.x
+  - 1.19.x
 
 before_install:
-  - export GO111MODULE="on"
+  - make generate
   - go mod tidy
   - go get -t -v ./...
 
 script:
-  - go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+  - make test-all
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

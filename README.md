@@ -25,6 +25,12 @@ Then, install the project's Go dependencies by running:
 bash ./scripts/dev_deps.sh
 ```
 
+Build the project and generate the openapi types and stubs:
+
+```sh
+make
+```
+
 ## Certificates and Configuration
 
 ### Getting an Enterprise Cert
@@ -41,7 +47,7 @@ To run the Entitlements API locally, you will need an Enterprise Services cert w
 
 You'll need to make a config file specific to your machine.
 Create a local config directory: `mkdir -p ./local`
-Add a file that contains your local configuration options: `$EDITOR ./local/qa.conf.sh`
+Add a file that contains your local configuration options: `$EDITOR ./local/development.env.sh`
 The contents should look like this:
 
 ```sh
@@ -52,11 +58,12 @@ export ENT_SUBS_HOST=https://subscription.dev.api.redhat.com
 export ENT_COMPLIANCE_HOST=https://export-compliance.dev.api.redhat.com
 ```
 
-Replace {path_to_key} and {path_to_cert} with the locations of the .key and .crt files from the previous section.
+Replace `{path_to_key}` and `{path_to_cert}` with the locations of the `.key` and `.crt` files from the previous section.
 
 ### Set up your local entitlement bundles
 
 Copy the `/bundles/bundles.example.yml` to `/bundles/bundles.yml` in order to have your local app consume bundle data. You can modify this file for local testing.
+
 **Note:** _This file is for local testing only. If you wish to make changes to the actual bundles, please refer to https://github.com/RedHatInsights/entitlements-config_
 
 ## Running the Application
@@ -70,13 +77,13 @@ bash ./scripts/watch.sh ./local/development.env.sh
 To run locally with Docker:
 
 ```bash
-docker build -t entitlements-api-go .
+make image
 docker run -p 3000:3000 entitlements-api-go
 ```
 
 ## Testing Entitlements API with curl
 
-The Entitlements API requires that you pass in a valid x-redhat-identity header or it rejects requests.
+The Entitlements API requires that you pass in a valid `x-redhat-identity` header or it rejects requests.
 For an example see `cat ./scripts/xrhid_helper.sh`
 
 ## Testing the bundle-sync
@@ -92,8 +99,6 @@ go build -o ./bundle-sync bundle_sync/main.go
 ## Running the Unit Tests
 
 * To run the unit tests, execute the following commands from the terminal:
-    `cd controllers`
-    `go test`
+    `make test`
 * To include benchmarks:
-    `cd controllers`
-    `go test -bench=.`
+    `make bench`

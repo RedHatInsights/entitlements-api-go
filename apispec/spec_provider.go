@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 // OpenAPISpec responds back with the openapi spec
