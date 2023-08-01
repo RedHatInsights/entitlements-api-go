@@ -34,6 +34,10 @@ objects:
                 value: 'true'
               - name: ENT_RUN_BUNDLE_SYNC
                 value: ${RUN_BUNDLE_SYNC}
+              - name: SERVICE_MIGRATE_AND_SEED_ON_INIT
+                value: 'true'
+              - name: WORKER_MIGRATE_AND_SEED_ON_INIT
+                value: 'false'
               - name: ENT_CERT
                 valueFrom:
                   secretKeyRef:
