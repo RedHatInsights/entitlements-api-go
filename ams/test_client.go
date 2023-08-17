@@ -56,7 +56,7 @@ var MockGetSubscriptions = func(organizationId string, size, page int) (*v1.Subs
     lst, err := v1.NewSubscriptionList().
         Items(
             v1.NewSubscription().
-                Creator(v1.NewAccount().Username("testuser")).
+                Creator(v1.NewAccount().Username("testuser").FirstName("test").LastName("user")).
                 Plan(v1.NewPlan().Type("AnsibleWisdom").Name("AnsibleWisdom")).
                 Status("Active"),
         ).Build()

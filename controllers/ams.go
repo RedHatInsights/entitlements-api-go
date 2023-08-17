@@ -46,7 +46,6 @@ func doError(w http.ResponseWriter, code int, err error) {
 }
 
 func do500(w http.ResponseWriter, err error) {
-	logger.Log.WithFields(logrus.Fields{"error": err}).Error("ams request error")
 	doError(w, http.StatusInternalServerError, err)
 }
 
@@ -152,10 +151,18 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 	}
 	subs.Each(func(sub *v1.Subscription) bool {
 		if _, exclude := excludeStatus[strings.ToLower(sub.Status())]; !exclude {
+			creator, ok := sub.GetCreator()
+			if !ok {
+				logger.Log.WithFields(logrus.Fields{"warning": fmt.Sprintf("Missing creator data for subscription [%s]", sub.ID())}).Warn("missing ams creator data")
+				creator, _ = v1.NewAccount().FirstName("UNKNOWN").LastName("UNKNOWN").Username("UNKNOWN").Build()
+			}
+
 			seats = append(seats, api.Seat{
-				AccountUsername: toPtr(sub.Creator().Username()),
+				AccountUsername: toPtr(creator.Username()),
 				SubscriptionId:  toPtr(sub.ID()),
 				Status:          toPtr(sub.Status()),
+				FirstName: 		 toPtr(creator.FirstName()),
+				LastName: 		 toPtr(creator.LastName()),
 			})
 		}
 		return true
