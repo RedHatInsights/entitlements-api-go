@@ -80,7 +80,7 @@ type SubModel struct {
 	Rules Rules  `json:"rules"`
 }
 
-// Rules contains match and exlude product arrays
+// Rules contains match and exclude product arrays
 type Rules struct {
 	MatchProducts   []MatchProducts   `json:"matchProducts,omitempty"`
 	ExcludeProducts []ExcludeProducts `json:"excludeProducts,omitempty"`

@@ -1517,7 +1517,7 @@ data:
     }
 kind: ConfigMap
 metadata:
-  name: grafana-dashboard-consoledot-entilements-operations
+  name: grafana-dashboard-consoledot-entitlements-operations
   labels:
     grafana_dashboard: "true"
   annotations:
