@@ -13,6 +13,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/bop"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
 
@@ -71,8 +72,6 @@ func MakeRequest(method, path string, body io.Reader, options ...opt) *http.Requ
 
 }
 
-
-
 var _ = Describe("using the seat managment api", func() {
 	var client ams.AMSInterface
 	var bopClient bop.Bop
@@ -130,6 +129,9 @@ var _ = Describe("using the seat managment api", func() {
 
 			Expect(*result.Meta.Count).To(Equal(int64(1)))
 			Expect(*result.Data[0].AccountUsername).To(Equal("testuser"))
+			Expect(*result.Data[0].FirstName).To(Equal("test"))
+			Expect(*result.Data[0].LastName).To(Equal("user"))
+			Expect(*result.Data[0].Status).To(Equal("Active"))
 
 		})
 		Context("and seats with active status is excluded", func() {
@@ -200,6 +202,33 @@ var _ = Describe("using the seat managment api", func() {
 				})
 
 				Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
+			})
+		})
+		Context("and creator info is missing", func() {
+			It("should not fail and fill in missing data", func() {
+				ams.MockGetSubscriptions = func(organizationId string, size, page int) (*v1.SubscriptionList, error) {
+					lst, err := v1.NewSubscriptionList().
+						Items(
+							v1.NewSubscription().
+								Plan(v1.NewPlan().Type("AnsibleWisdom").Name("AnsibleWisdom")).
+								Status("Active"),
+						).Build()
+					if err != nil {
+						return nil, err
+					}
+					return lst, nil
+				}
+
+				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
+				seatApi.GetSeats(rr, req, api.GetSeatsParams{})
+
+				var result api.ListSeatsResponsePagination
+				json.NewDecoder(rr.Result().Body).Decode(&result)
+
+				Expect(*result.Meta.Count).To(Equal(int64(1)))
+				Expect(*result.Data[0].AccountUsername).To(Equal("UNKNOWN"))
+				Expect(*result.Data[0].FirstName).To(Equal("UNKNOWN"))
+				Expect(*result.Data[0].LastName).To(Equal("UNKNOWN"))
 			})
 		})
 	})
