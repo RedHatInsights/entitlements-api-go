@@ -19,9 +19,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// assertEq compares two slices of strings and returns true if they are equalzs
+// assertEq compares two slices of strings and returns true if they are equal
 func assertEq(test []string, ans []string) bool {
-    return reflect.DeepEqual(test, ans)
+	return reflect.DeepEqual(test, ans)
 }
 
 // getClient sets up the http client for the subscriptions API
@@ -72,12 +72,11 @@ func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 	return currentSubs, nil
 }
 
-func getUpdates(cfg *viper.Viper) ([]t.Bundle, error){
+func getUpdates(cfg *viper.Viper) ([]t.Bundle, error) {
 	bundlesYaml, err := ioutil.ReadFile(cfg.GetString("BUNDLE_INFO_YAML"))
 	if err != nil {
 		return []t.Bundle{}, err
 	}
-
 
 	var m []t.Bundle
 	err = yaml.Unmarshal(bundlesYaml, &m)
@@ -101,7 +100,6 @@ func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
 
 }
 
-
 func main() {
 	c := cfg.GetConfig()
 	client := getClient(c)
@@ -118,10 +116,10 @@ func main() {
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
 		url := fmt.Sprintf("%s%s%s",
-						   options.GetString("SUBS_HOST"),
-						   options.GetString("SUB_API_BASE_PATH"),
-						   "features/")
-		current, err := getCurrent(client, url + endpoint)
+			options.GetString("SUBS_HOST"),
+			options.GetString("SUB_API_BASE_PATH"),
+			"features/")
+		current, err := getCurrent(client, url+endpoint)
 		if err != nil {
 			log.Fatalf("Unable to get current subscriptions: %s", err)
 			os.Exit(1)

@@ -88,7 +88,7 @@ For an example see `cat ./scripts/xrhid_helper.sh`
 
 ## Testing the bundle-sync
 
-To test the bundle sync behavior, you'll need to configure your environment similar to the insructions above, build the script, and run it against the dev environment:
+To test the bundle sync behavior, you'll need to configure your environment similar to the instructions above, build the script, and run it against the dev environment:
 
 ```sh
 . ./local/development.env.sh

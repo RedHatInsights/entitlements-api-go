@@ -11,7 +11,7 @@
         }
     ],
     "info": {
-        "description": "Service for determining subscriptions in cloud management\n[cloud.redhat.com](http://cloud.redhat.com/api/v1/entitlements)\n",
+        "description": "Service for determining subscriptions in cloud management\n[console.redhat.com](http://console.redhat.com/api/v1/entitlements)\n",
         "version": "1.0.0",
         "title": "Entitlements",
         "contact": {
