@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+
 	chilogger "github.com/766b/chi-logger"
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
@@ -39,12 +41,12 @@ func DoRoutes() chi.Router {
 	amsClient, err := ams.NewClient(debug)
 
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Error constructing ams client: [%w]", err))
 	}
 
 	bopClient, err := bop.NewClient(debug)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Error constructing bop client: [%w]", err))
 	}
 
 	// This is odd, but the generated code will register handlers
