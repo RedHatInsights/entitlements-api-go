@@ -128,7 +128,7 @@ func getRootCAs(localCertFile string) *x509.CertPool {
 }
 
 func loadCerts(options *viper.Viper) (tls.Certificate, error) {
-	if options.GetBool("CERTS_FROM_ENV") == true {
+	if options.GetBool(Keys.CertsFromEnv) {
 		return tls.X509KeyPair(
 			[]byte(options.GetString(Keys.Cert)),
 			[]byte(options.GetString(Keys.Key)),
@@ -157,14 +157,19 @@ func initialize() {
 		hostname = "entitlements"
 	}
 
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error getting current directory, some default config settings might not be set correctly. Err: [%w]", err)
+	}
+
 	options.SetDefault(Keys.CertsFromEnv, false)
 	options.SetDefault(Keys.Port, "3000")
 	options.SetDefault(Keys.LogLevel, "info")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.ComplianceHost, "https://export-compliance.api.redhat.com")
-	options.SetDefault(Keys.CaPath, "../resources/ca.crt")
-	options.SetDefault(Keys.Cert, "../test_data/test.cert") // default values of Cert and Key are for testing purposes only
-	options.SetDefault(Keys.Key, "../test_data/test.key")
+	options.SetDefault(Keys.CaPath, fmt.Sprintf("%s/resources/ca.crt", wd))
+	options.SetDefault(Keys.Cert, fmt.Sprintf("%s/test_data/test.cert", wd)) // default values of Cert and Key are for testing purposes only
+	options.SetDefault(Keys.Key, fmt.Sprintf("%s/test_data/test.key", wd))
 	options.SetDefault(Keys.OpenAPISpecPath, "./apispec/api.spec.json")
 	options.SetDefault(Keys.BundleInfoYaml, "./bundles/bundles.yml")
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
