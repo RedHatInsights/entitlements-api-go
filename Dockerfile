@@ -17,7 +17,7 @@ USER 0
 RUN make
 
 # Using ubi8-minimal due to its smaller footprint
-FROM registry.redhat.io/ubi8/ubi-minimal
+FROM registry.access.redhat.com/ubi8/ubi-minimal
 
 WORKDIR /
 

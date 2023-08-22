@@ -11,11 +11,11 @@
         }
     ],
     "info": {
-        "description": "Service for determining subscriptions in cloud management\n[cloud.redhat.com](http://cloud.redhat.com/api/v1/entitlements)\n",
+        "description": "Service for determining subscriptions in cloud management\n[console.redhat.com](http://console.redhat.com/api/v1/entitlements)\n",
         "version": "1.0.0",
         "title": "Entitlements",
         "contact": {
-            "email": "tefaz@redhat.com"
+            "email": "platform-accessmanagement@redhat.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -72,6 +72,10 @@
                 ],
                 "parameters": [
                     {
+                        "$ref": "#/components/parameters/ExcludeStatus"
+                    },
+                    {
+
                         "$ref": "#/components/parameters/QueryLimit"
                     },
                     {
@@ -258,6 +262,20 @@
     },
     "components": {
         "parameters": {
+            "ExcludeStatus": {
+                "in": "query",
+                "name": "excludeStatus",
+                "required": false,
+                "description": "List of statuses to exclude subscriptions from result set if they have any of these statuses",
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": ["Active", "Deprovisioned"],
+                        "default": ""
+                    }
+                }
+            },
             "QueryOffset": {
                 "in": "query",
                 "name": "offset",
@@ -427,6 +445,15 @@
                         "type": "string"
                     },
                     "account_username": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
                         "type": "string"
                     }
                 }
