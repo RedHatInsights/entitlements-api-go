@@ -5,6 +5,8 @@ import (
 	"crypto/x509"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -157,9 +159,12 @@ func initialize() {
 		hostname = "entitlements"
 	}
 
-	wd, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Error getting current directory, some default config settings might not be set correctly. Err: [%w]", err)
+	wd := "."
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		fmt.Printf("Error getting runtime caller, some default config settings might not be set correctly. Working directory set to: [%s]\n", wd)
+	} else {
+		wd = filepath.Dir(filename)
 	}
 
 	options.SetDefault(Keys.CertsFromEnv, false)
@@ -167,9 +172,9 @@ func initialize() {
 	options.SetDefault(Keys.LogLevel, "info")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.ComplianceHost, "https://export-compliance.api.redhat.com")
-	options.SetDefault(Keys.CaPath, fmt.Sprintf("%s/resources/ca.crt", wd))
-	options.SetDefault(Keys.Cert, fmt.Sprintf("%s/test_data/test.cert", wd)) // default values of Cert and Key are for testing purposes only
-	options.SetDefault(Keys.Key, fmt.Sprintf("%s/test_data/test.key", wd))
+	options.SetDefault(Keys.CaPath, fmt.Sprintf("%s/../resources/ca.crt", wd))
+	options.SetDefault(Keys.Cert, fmt.Sprintf("%s/../test_data/test.cert", wd)) // default values of Cert and Key are for testing purposes only
+	options.SetDefault(Keys.Key, fmt.Sprintf("%s/../test_data/test.key", wd))
 	options.SetDefault(Keys.OpenAPISpecPath, "./apispec/api.spec.json")
 	options.SetDefault(Keys.BundleInfoYaml, "./bundles/bundles.yml")
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
