@@ -124,6 +124,7 @@ func NewClient(debug bool) (AMSInterface, error) {
 func (c *Client) GetQuotaCost(organizationId string) (*v1.QuotaCost, error) {
 
 	amsOrgId, err := c.ConvertUserOrgId(organizationId)
+
 	if err != nil {
 		return nil, err
 	}
@@ -241,3 +242,4 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 
 	return converted, err
 }
+
