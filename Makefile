@@ -16,6 +16,8 @@ generate: $(gen_files)
 
 image:
 	podman build -t entitlements-api-go .
+exe: all
+	./entitlements-api-go
 debug-run: generate
 	ENT_DEBUG=1 \
 	go run main.go
