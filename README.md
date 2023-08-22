@@ -1,5 +1,10 @@
 # Entitlements Service
 
+Entitlements service serves as a proxy to various backend redhat IT services. It performs the following functions:
+* `/subscriptions`: query IT for a list of subscriptions that a user is entitled to
+* `/compliance`: query IT for user compliance checks
+* `/seats`: query AMS from OCM to read, assign, and delete user subscriptions (a seat is considered an openshift subscription assignable to a user)
+
 ## SKU/Bundle changes
 - The `/bundles/bundles.example.yml` file in this repo is for **local testing only**
 - To run the app, be sure to copy `/bundles/bundles.example.yml` to `/bundles/bundles.yml`
@@ -22,7 +27,7 @@ git clone git@github.com:RedHatInsights/entitlements-api-go.git
 Then, install the project's Go dependencies by running:
 
 ```sh
-bash ./scripts/dev_deps.sh
+go get ./...
 ```
 
 Build the project and generate the openapi types and stubs:
@@ -56,9 +61,12 @@ export ENT_CERT=./{path_to_cert}.crt
 export ENT_CA_PATH=./{path_to_ca_cert}.crt
 export ENT_SUBS_HOST=https://subscription.dev.api.redhat.com
 export ENT_COMPLIANCE_HOST=https://export-compliance.dev.api.redhat.com
+export ENT_DEBUG=true
 ```
 
 Replace `{path_to_key}` and `{path_to_cert}` with the locations of the `.key` and `.crt` files from the previous section.
+ENT_DEBUG will use mock clients for ams and bop, if this is not set to true you will need more config to setup those clients.
+See the bop and ams client files for what config is needed.
 
 ### Set up your local entitlement bundles
 
@@ -71,7 +79,13 @@ Copy the `/bundles/bundles.example.yml` to `/bundles/bundles.yml` in order to ha
 Now that everything is set up, you can run the application using:
 
 ```bash
-bash ./scripts/watch.sh ./local/development.env.sh
+# this will generate, build, and run the built executable (good for debugging)
+make exe
+```
+or you can also run 
+```bash
+# this will run `go run ...` which will build a stripped down optimized version of the app
+make run 
 ```
 
 To run locally with Docker:
@@ -90,15 +104,23 @@ For an example see `cat ./scripts/xrhid_helper.sh`
 
 To test the bundle sync behavior, you'll need to configure your environment similar to the instructions above, build the script, and run it against the dev environment:
 
-```sh
-. ./local/development.env.sh
-go build -o ./bundle-sync bundle_sync/main.go
+```bash
+source ./local/development.env.sh
+make build
 ./bundle-sync
 ```
 
 ## Running the Unit Tests
 
 * To run the unit tests, execute the following commands from the terminal:
-    `make test`
+    ```bash
+    make test
+    ```
+* To run the unit tests how they are run in our pr_check builds (generates output files):
+    ```bash
+    make test-all
+    ```
 * To include benchmarks:
-    `make bench`
+    ```bash
+    make bench
+    ```
