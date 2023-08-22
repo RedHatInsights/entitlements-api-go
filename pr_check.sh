@@ -19,14 +19,7 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-# manually paste dummy PR Check results until we setup iqe tests to run in build and they post results
+# ideally we could run iqe tests with cji_smoke_testand they will post results to this dir
 # see here for an example: https://github.com/RedHatInsights/insights-ingress-go/blob/master/pr_check.sh#L23-L25
-# with cji_smoke_test and post_test_results, we can run iqe tests and they will post results to this dir
+cp coverage.txt $ARTIFACTS_DIR
 source $CICD_ROOT/post_test_results.sh
-mkdir -p $WORKSPACE/artifacts
-cp coverage.txt $WORKSPACE/artifacts
-cat << EOF > $WORKSPACE/artifacts/junit-dummy.xml
-<testsuite tests="1">
-    <testcase classname="dummy" name="dummytest"/>
-</testsuite>
-EOF
