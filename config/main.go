@@ -128,7 +128,7 @@ func getRootCAs(localCertFile string) *x509.CertPool {
 }
 
 func loadCerts(options *viper.Viper) (tls.Certificate, error) {
-	if options.GetBool("CERTS_FROM_ENV") == true {
+	if options.GetBool(Keys.CertsFromEnv) {
 		return tls.X509KeyPair(
 			[]byte(options.GetString(Keys.Cert)),
 			[]byte(options.GetString(Keys.Key)),
