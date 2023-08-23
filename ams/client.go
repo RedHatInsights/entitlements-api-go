@@ -3,11 +3,12 @@ package ams
 import (
 	"context"
 	"fmt"
-	l "github.com/RedHatInsights/entitlements-api-go/logger"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 	"time"
+
+	l "github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/sirupsen/logrus"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/karlseguin/ccache"
@@ -52,7 +53,7 @@ var quotaAuthorizationTime = promauto.NewHistogram(prometheus.HistogramOpts{
 type AMSInterface interface {
 	GetQuotaCost(organizationId string) (*v1.QuotaCost, error)
 	GetSubscription(subscriptionId string) (*v1.Subscription, error)
-	GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error)
+	GetSubscriptions(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
 	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error)
 	ConvertUserOrgId(userOrgId string) (string, error)
@@ -149,18 +150,26 @@ func (c *Client) GetSubscription(subscriptionId string) (*v1.Subscription, error
 	return resp.Body(), nil
 }
 
-func (c *Client) GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error) {
+func (c *Client) GetSubscriptions(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
 	amsOrgId, err := c.ConvertUserOrgId(organizationId)
 	if err != nil {
 		return nil, err
 	}
-	q := "plan.id LIKE 'AnsibleWisdom'"
-	q += " AND "
-	q += fmt.Sprintf("organization_id = '%s'", amsOrgId)
+
+	queryBuilder := NewQueryBuilder().
+		Like("plan.id", "AnsibleWisdom").
+		And().
+		Equals("organization_id", amsOrgId)
+
+	if statuses != nil && len(statuses) > 0 {
+		queryBuilder = queryBuilder.And().In("status", statuses)
+	}
+
+	query := queryBuilder.Build()
 
 	start := time.Now()
 	req := c.client.AccountsMgmt().V1().Subscriptions().List().
-		Search(q).
+		Search(query).
 		Parameter("fetchAccounts", true).
 		Size(size).
 		Page(page)

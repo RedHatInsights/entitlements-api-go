@@ -1,8 +1,9 @@
 package ams
 
 import (
-    "fmt"
-    v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
+	"fmt"
+
+	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 )
 
 type TestClient struct{}
@@ -52,7 +53,7 @@ func (c *TestClient) QuotaAuthorization(accountUsername, quotaVersion string) (*
     return MockQuotaAuthorization(accountUsername, quotaVersion)
 }
 
-var MockGetSubscriptions = func(organizationId string, size, page int) (*v1.SubscriptionList, error) {
+var MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
     lst, err := v1.NewSubscriptionList().
         Items(
             v1.NewSubscription().
@@ -65,8 +66,8 @@ var MockGetSubscriptions = func(organizationId string, size, page int) (*v1.Subs
     }
     return lst, nil
 }
-func (c *TestClient) GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error) {
-    return MockGetSubscriptions(organizationId, size, page)
+func (c *TestClient) GetSubscriptions(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
+    return MockGetSubscriptions(organizationId, statuses, size, page)
 }
 
 var MockConvertUserOrgId = func(userOrgId string) (string, error) {

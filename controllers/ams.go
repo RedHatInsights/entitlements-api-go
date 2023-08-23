@@ -7,11 +7,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/RedHatInsights/entitlements-api-go/logger"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"strings"
 
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
@@ -125,7 +126,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 
 	page := 1 + (offset / limit)
 
-	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, limit, page)
+	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, *params.Status, limit, page)
 	if err != nil {
 		do500(w, fmt.Errorf("AMS GetSubscriptions [%w]", err))
 		return
