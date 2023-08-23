@@ -47,6 +47,7 @@ func doError(w http.ResponseWriter, code int, err error) {
 }
 
 func do500(w http.ResponseWriter, err error) {
+	logger.Log.WithFields(logrus.Fields{"error": err}).Error("ams request error")
 	doError(w, http.StatusInternalServerError, err)
 }
 
@@ -109,6 +110,11 @@ func fillDefaults(params *api.GetSeatsParams) {
 }
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
+	// TODO: https://issues.redhat.com/browse/RHCLOUD-27871, delete ExcludeStatus param
+	if params.ExcludeStatus != nil && params.Status != nil {
+		doError(w, http.StatusBadRequest, fmt.Errorf("cannot use both 'excludeStatus' and 'status' in get seats query, use 'status' only"))
+		return
+	}
 
 	idObj := identity.Get(r.Context()).Identity
 

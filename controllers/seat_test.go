@@ -249,6 +249,22 @@ var _ = Describe("using the seat managment api", func() {
 				Expect(actual).To(HaveExactElements("active", "inactive", "a third one"))
 			})
 		})
+
+		Context("and both status / excludeStatus are used", func() {
+			It("should deny the request and return an error", func() {
+				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
+				seatApi.GetSeats(rr, req, api.GetSeatsParams{
+					Status: &api.Status{},
+					ExcludeStatus: &api.ExcludeStatus{},
+				})
+				
+				var result api.Error
+				json.NewDecoder(rr.Result().Body).Decode(&result)
+				
+				Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
+				Expect(*result.Error).To(ContainSubstring("cannot use both 'excludeStatus' and 'status'"))
+			})
+		})
 	})
 
 	When("adding a user to a seat", func() {
