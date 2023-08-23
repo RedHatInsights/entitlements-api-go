@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
-	cfg "github.com/RedHatInsights/entitlements-api-go/config"
 	t "github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
@@ -26,7 +25,7 @@ func assertEq(test []string, ans []string) bool {
 }
 
 // getClient sets up the http client for the subscriptions API
-func getClient(cfg *cfg.EntitlementsConfig) *http.Client {
+func getClient(cfg *config.EntitlementsConfig) *http.Client {
 
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{*cfg.Certs},
@@ -60,7 +59,7 @@ func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 	}
 	defer resp.Body.Close()
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return t.SubModel{}, err
 	}
@@ -74,7 +73,7 @@ func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 }
 
 func getUpdates(cfg *viper.Viper) ([]t.Bundle, error) {
-	bundlesYaml, err := ioutil.ReadFile(cfg.GetString("BUNDLE_INFO_YAML"))
+	bundlesYaml, err := os.ReadFile(cfg.GetString(config.Keys.BundleInfoYaml))
 	if err != nil {
 		return []t.Bundle{}, err
 	}
@@ -90,7 +89,7 @@ func getUpdates(cfg *viper.Viper) ([]t.Bundle, error) {
 }
 
 func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
-	url := fmt.Sprintf("%s%s%s", cfg.GetString("SUBS_HOST"), cfg.GetString("SUB_API_BASE_PATH"), "features/")
+	url := fmt.Sprintf("%s%s%s", cfg.GetString(config.Keys.SubsHost), cfg.GetString(config.Keys.SubAPIBasePath), "features/")
 	req, err := client.Post(url, "application/json", strings.NewReader(string(data)))
 	if err != nil {
 		return err
@@ -102,17 +101,17 @@ func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
 }
 
 func main() {
-	c := cfg.GetConfig()
+	c := config.GetConfig()
 	client := getClient(c)
 	options := c.Options
-	runSync := options.GetBool(cfg.Keys.RunBundleSync)
+	runSync := options.GetBool(config.Keys.RunBundleSync)
 
 	if !runSync {
 		fmt.Println("Bundle sync disabled")
 		return
 	}
 
-	endpoints := strings.Split(c.Options.GetString(cfg.Keys.Features), ",")
+	endpoints := strings.Split(c.Options.GetString(config.Keys.Features), ",")
 	for _, endpoint := range endpoints {
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
@@ -133,9 +132,7 @@ func main() {
 		}
 		for _, v := range sku_updates {
 			if v.Name == endpoint {
-				for _, sku := range v.Skus {
-					skus[endpoint] = append(skus[endpoint], sku)
-				}
+				skus[endpoint] = append(skus[endpoint], v.Skus...)
 			}
 		}
 

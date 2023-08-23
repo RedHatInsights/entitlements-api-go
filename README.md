@@ -1,9 +1,9 @@
 # Entitlements Service
 
-Entitlements service serves as a proxy to various backend redhat IT services. It performs the following functions:
+Entitlements service serves as a proxy to various backend Red Hat IT services. It performs the following functions:
 * `/subscriptions`: query IT for a list of subscriptions that a user is entitled to
 * `/compliance`: query IT for user compliance checks
-* `/seats`: query AMS from OCM to read, assign, and delete user subscriptions (a seat is considered an openshift subscription assignable to a user)
+* `/seats`: query AMS from OCM to read, assign, and delete user subscriptions (a seat is considered an Openshift subscription assignable to a user)
 
 ## SKU/Bundle changes
 - The `/bundles/bundles.example.yml` file in this repo is for **local testing only**
