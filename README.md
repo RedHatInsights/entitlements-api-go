@@ -79,6 +79,11 @@ Copy the `/bundles/bundles.example.yml` to `/bundles/bundles.yml` in order to ha
 Now that everything is set up, you can run the application using:
 
 ```bash
+source ./local/development.env.sh
+```
+then run one of the following
+
+```bash
 # this will generate, build, and run the built executable (good for debugging)
 make exe
 ```
