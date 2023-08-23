@@ -231,6 +231,24 @@ var _ = Describe("using the seat managment api", func() {
 				Expect(*result.Data[0].LastName).To(Equal("UNKNOWN"))
 			})
 		})
+
+		Context("and status param is not empty", func() {
+			It("should pass the list of statuses to the ams client", func() {
+				actual := []string{}
+				ams.MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
+					actual = statuses
+					return v1.NewSubscriptionList().Build()
+				}
+
+				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
+				seatApi.GetSeats(rr, req, api.GetSeatsParams{
+					Status: &[]string{"active", "inactive", "a third one"},
+				})
+				
+				Expect(actual).To(HaveLen(3))
+				Expect(actual).To(HaveExactElements("active", "inactive", "a third one"))
+			})
+		})
 	})
 
 	When("adding a user to a seat", func() {
