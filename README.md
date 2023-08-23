@@ -129,3 +129,12 @@ make build
     ```bash
     make bench
     ```
+
+## Releases
+
+**Versioning:** All releases should follow [SemVer](http://semver.org) versioning.
+
+**Release Tagging:** Releases are drafted with a version, and then `master` is tagged with the version number.
+For example, release [`Entitlements v1.16.1`](https://github.com/RedHatInsights/entitlements-api-go/releases/tag/v1.16.1) has a corresponding tag [`v1.16.1`](https://github.com/RedHatInsights/entitlements-api-go/tree/v1.16.1).
+
+**Deployment:** Once a PR merges to master, our [build-main](https://ci.ext.devshift.net/job/RedHatInsights-entitlements-api-go-gh-build-master/) jenkins job will build/deploy an image to `quay.io` and tag it with the commit sha. We then update the image tag of our deployment in app-interface to that same commit sha.
