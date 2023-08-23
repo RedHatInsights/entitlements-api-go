@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/RedHatInsights/entitlements-api-go/config"
 	cfg "github.com/RedHatInsights/entitlements-api-go/config"
 	t "github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/spf13/viper"
@@ -116,8 +117,8 @@ func main() {
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
 		url := fmt.Sprintf("%s%s%s",
-			options.GetString("SUBS_HOST"),
-			options.GetString("SUB_API_BASE_PATH"),
+			options.GetString(config.Keys.SubsHost),
+			options.GetString(config.Keys.SubAPIBasePath),
 			"features/")
 		current, err := getCurrent(client, url+endpoint)
 		if err != nil {
