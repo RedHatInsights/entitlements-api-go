@@ -206,7 +206,7 @@ var _ = Describe("using the seat managment api", func() {
 		})
 		Context("and creator info is missing", func() {
 			It("should not fail and fill in missing data", func() {
-				ams.MockGetSubscriptions = func(organizationId string, size, page int) (*v1.SubscriptionList, error) {
+				ams.MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
 					lst, err := v1.NewSubscriptionList().
 						Items(
 							v1.NewSubscription().

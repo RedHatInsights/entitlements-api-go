@@ -102,6 +102,10 @@ func fillDefaults(params *api.GetSeatsParams) {
 	if params.Offset == nil {
 		params.Offset = toPtr(0)
 	}
+
+	if params.Status == nil {
+		params.Status = toPtr([]string{})
+	}
 }
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
