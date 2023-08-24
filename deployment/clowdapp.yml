@@ -111,6 +111,8 @@ objects:
             value: ${SUBS_CACHE_MAX_SIZE}
           - name: ENT_SUBS_CACHE_ITEM_PRUNE
             value: ${SUBS_CACHE_ITEM_PRUNE}
+          - name: BUNDLES_SKUS_ALLOW_LIST
+            value; ${BUNDLES_SKU_ALLOW_LIST}
           - name: GLITCHTIP_DSN
             valueFrom:
               secretKeyRef:
@@ -237,3 +239,6 @@ parameters:
 - description: ClowdEnv Name
   name: ENV_NAME
   required: true
+- description: Application allows list for new bundles with skus to update the feature in the IT features API
+  name: BUNDLES_SKUS_ALLOW_LIST
+  value: ansible,smart_management_rods,rhoam,rhosak,openshift,rhel
