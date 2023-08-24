@@ -180,7 +180,7 @@ func initialize() {
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
 	options.SetDefault(Keys.CwLogStream, hostname)
 	options.SetDefault(Keys.CwRegion, "us-east-1")
-	options.SetDefault(Keys.Features, "ansible,smart_management,rhods,rhoam,rhosak,openshift,acs")
+	options.SetDefault(Keys.Features, os.Getenv("BUNDLES_SKUS_ALLOW_LIST"))
 	options.SetDefault(Keys.SubAPIBasePath, "/svcrest/subscription/v5/")
 	options.SetDefault(Keys.CompAPIBasePath, "/v1/screening")
 	options.SetDefault(Keys.RunBundleSync, false)
