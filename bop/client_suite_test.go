@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestControllers(t *testing.T) {
+func TestBop(t *testing.T) {
 	InitLogger()
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "BOP Suite")
