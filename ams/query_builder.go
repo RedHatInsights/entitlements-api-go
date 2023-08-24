@@ -25,7 +25,7 @@ func NewQueryBuilder() *QueryBuilder {
 
 func (builder *QueryBuilder) queryOperator(operator, field, value string) {
 	if operator == "IN" {
-		builder.query += field + " " + operator + " " + value
+		builder.query += field + " " + operator + " " + "(" + value + ")"
 	} else {
 		builder.query += field + " " + operator + " " + "'" + value + "'"
 	}
@@ -52,7 +52,6 @@ func (builder *QueryBuilder) In(field string, values []string) *QueryBuilder {
 			value += ","
 		}
 	}
-	value = "(" + value + ")"
 
 	builder.queryOperator("IN", field, value)
 	
