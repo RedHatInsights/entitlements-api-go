@@ -241,5 +241,5 @@ parameters:
   required: true
 - description: Application allows list for new bundles with skus to update the feature in the IT features API
   name: BUNDLES_SKUS_ALLOW_LIST
-  value: ansible,smart_management_rods,rhoam,rhosak,openshift,rhel
+  value: ansible,smart_management,rhods,rhoam,rhosak,openshift,acs
   required: false
