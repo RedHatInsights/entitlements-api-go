@@ -110,8 +110,6 @@ objects:
             value: ${SUBS_CACHE_MAX_SIZE}
           - name: ENT_SUBS_CACHE_ITEM_PRUNE
             value: ${SUBS_CACHE_ITEM_PRUNE}
-          - name: BUNDLES_SKUS_ALLOW_LIST
-            value: ${BUNDLES_SKUS_ALLOW_LIST}
           - name: ENT_CW_LOG_GROUP
             valueFrom:
               secretKeyRef:
@@ -255,9 +253,6 @@ parameters:
   name: RUN_BUNDLE_SYNC
   required: false
   value: 'false'
-- description: Application allow list for new bundles with skus to update the feature in the IT features API
-  name: BUNDLES_SKUS_ALLOW_LIST
-  value: ansible,smart_management,rhods,rhoam,rhosak,openshift,acs
 - description: Flag to determine whether or not to entitle all by default and mock calls to IT
   name: ENTITLE_ALL
   required: false
@@ -268,6 +263,7 @@ parameters:
   value: 'entitlements-secret'
 - description: List of feature bundles to onboard during bundle sync
   name: FEATURES
+  value: ansible,smart_management,rhods,rhoam,rhosak,openshift,acs
   required: false
 - description: Flag to disable seat manager by not exposing any of the apis related to the feature
   name: DISABLE_SEAT_MANAGER
