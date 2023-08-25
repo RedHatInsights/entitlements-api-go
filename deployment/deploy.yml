@@ -257,7 +257,7 @@ parameters:
   value: 'false'
 - description: Application allow list for new bundles with skus to update the feature in the IT features API
   name: BUNDLES_SKUS_ALLOW_LIST
-  value: ansible,smart_management_rods,rhoam,rhosak,openshift,rhel
+  value: ansible,smart_management,rhods,rhoam,rhosak,openshift,acs
 - description: Flag to determine whether or not to entitle all by default and mock calls to IT
   name: ENTITLE_ALL
   required: false
