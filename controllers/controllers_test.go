@@ -296,6 +296,69 @@ var _ = Describe("Identity Controller", func() {
 		})
 	})
 
+	Context("When the request contains query filters", func() {
+		fakeResponse := SubscriptionsResponse{
+			StatusCode: 200,
+			Data:       FeatureStatus{},
+			CacheHit:   false,
+		}
+		It("should only return bundles included in include_bundles", func() {
+			rr, body, _ := testRequest("GET", "/?include_bundles=TestBundle2,TestBundle3", "123456", DEFAULT_ORG_ID, false, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(len(body)).To(Equal(2))
+			_, found := body["TestBundle1"]
+			Expect(found).To((BeFalse()))
+			_, found = body["TestBundle2"]
+			Expect(found).To(BeTrue())
+			_, found = body["TestBundle3"]
+			Expect(found).To(BeTrue())
+		})
+		It("should not return bundles included in exclude_bundles", func() {
+			rr, body, _ := testRequest("GET", "/?exclude_bundles=TestBundle2,TestBundle3", "123456", DEFAULT_ORG_ID, false, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(len(body)).To(Equal(5))
+			_, found := body["TestBundle1"]
+			Expect(found).To((BeTrue()))
+			_, found = body["TestBundle2"]
+			Expect(found).To(BeFalse())
+			_, found = body["TestBundle3"]
+			Expect(found).To(BeFalse())
+		})
+		It("should handle single include_filter entries", func() {
+			rr, body, _ := testRequest("GET", "/?include_bundles=TestBundle2", "123456", DEFAULT_ORG_ID, false, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(len(body)).To(Equal(1))
+			_, found := body["TestBundle1"]
+			Expect(found).To((BeFalse()))
+			_, found = body["TestBundle2"]
+			Expect(found).To(BeTrue())
+			_, found = body["TestBundle3"]
+			Expect(found).To(BeFalse())
+		})
+		It("Should handle single exclude_filter entries", func() {
+			rr, body, _ := testRequest("GET", "/?exclude_bundles=TestBundle2", "123456", DEFAULT_ORG_ID, false, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(len(body)).To(Equal(6))
+			_, found := body["TestBundle1"]
+			Expect(found).To((BeTrue()))
+			_, found = body["TestBundle2"]
+			Expect(found).To(BeFalse())
+			_, found = body["TestBundle3"]
+			Expect(found).To(BeTrue())
+		})
+		It("should prioritize include_bundles", func() {
+			rr, body, _ := testRequest("GET", "/?include_bundles=TestBundle1,TestBundle2&exclude_bundles=TestBundle2,TestBundle3", "123456", DEFAULT_ORG_ID, false, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(len(body)).To(Equal(2))
+			_, found := body["TestBundle1"]
+			Expect(found).To((BeTrue()))
+			_, found = body["TestBundle2"]
+			Expect(found).To(BeTrue())
+			_, found = body["TestBundle3"]
+			Expect(found).To(BeFalse())
+		})
+	})
+
 	Context("When ENT_ENTITLE_ALL is set", func() {
 		AfterEach(func() {
 			os.Setenv("ENT_ENTITLE_ALL", "")
@@ -305,7 +368,6 @@ var _ = Describe("Identity Controller", func() {
 			Data:       FeatureStatus{},
 			CacheHit:   false,
 		}
-
 		It("should skip IT calls and entitle all bundles when true", func() {
 			os.Setenv("ENT_ENTITLE_ALL", "true")
 			rr, body, _ := testRequest("GET", "/", "-1", DEFAULT_ORG_ID, true, DEFAULT_EMAIL, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))

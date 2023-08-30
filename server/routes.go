@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+
 	chilogger "github.com/766b/chi-logger"
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
@@ -39,12 +41,12 @@ func DoRoutes() chi.Router {
 	amsClient, err := ams.NewClient(debug)
 
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Error constructing ams client: [%s]", err))
 	}
 
 	bopClient, err := bop.NewClient(debug)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Error constructing bop client: [%s]", err))
 	}
 
 	// This is odd, but the generated code will register handlers
@@ -53,7 +55,7 @@ func DoRoutes() chi.Router {
 	// a way to hack it in
 	if !configOptions.GetBool(config.Keys.DisableSeatManager) {
 		seatManagerApi := controllers.NewSeatManagerApi(amsClient, bopClient)
-		api.HandlerFromMuxWithBaseURL(seatManagerApi, r.With(identity.EnforceIdentity), "/api/entitlements/v1")	
+		api.HandlerFromMuxWithBaseURL(seatManagerApi, r.With(identity.EnforceIdentity), "/api/entitlements/v1")
 	}
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {

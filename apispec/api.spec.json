@@ -47,6 +47,36 @@
                     "services"
                 ],
                 "summary": "get a list of services a user is entitled to",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "include_bundles",
+                        "required": false,
+                        "description": "Filter response to only include listed bundles. Takes priority over exclude_bundles.",
+                        "schema":{
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "explode": false,
+                        "style": "form"
+                    },
+                    {
+                        "in": "query",
+                        "name": "exclude_bundles",
+                        "required": false,
+                        "description": "Filter response to not include listed bundles. Ignored if include_bundles is also specified.",
+                        "schema":{
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "explode": false,
+                        "style": "form"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -75,7 +105,6 @@
                         "$ref": "#/components/parameters/ExcludeStatus"
                     },
                     {
-
                         "$ref": "#/components/parameters/QueryLimit"
                     },
                     {

@@ -5,6 +5,8 @@ import (
 	"crypto/x509"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -128,7 +130,7 @@ func getRootCAs(localCertFile string) *x509.CertPool {
 }
 
 func loadCerts(options *viper.Viper) (tls.Certificate, error) {
-	if options.GetBool("CERTS_FROM_ENV") == true {
+	if options.GetBool(Keys.CertsFromEnv) {
 		return tls.X509KeyPair(
 			[]byte(options.GetString(Keys.Cert)),
 			[]byte(options.GetString(Keys.Key)),
@@ -157,20 +159,27 @@ func initialize() {
 		hostname = "entitlements"
 	}
 
+	wd := "."
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		fmt.Printf("Error getting runtime caller, some default config settings might not be set correctly. Working directory set to: [%s]\n", wd)
+	} else {
+		wd = filepath.Dir(filename)
+	}
+
 	options.SetDefault(Keys.CertsFromEnv, false)
 	options.SetDefault(Keys.Port, "3000")
 	options.SetDefault(Keys.LogLevel, "info")
 	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
 	options.SetDefault(Keys.ComplianceHost, "https://export-compliance.api.redhat.com")
-	options.SetDefault(Keys.CaPath, "../resources/ca.crt")
-	options.SetDefault(Keys.Cert, "../test_data/test.cert") // default values of Cert and Key are for testing purposes only
-	options.SetDefault(Keys.Key, "../test_data/test.key")
+	options.SetDefault(Keys.CaPath, fmt.Sprintf("%s/../resources/ca.crt", wd))
+	options.SetDefault(Keys.Cert, fmt.Sprintf("%s/../test_data/test.cert", wd)) // default values of Cert and Key are for testing purposes only
+	options.SetDefault(Keys.Key, fmt.Sprintf("%s/../test_data/test.key", wd))
 	options.SetDefault(Keys.OpenAPISpecPath, "./apispec/api.spec.json")
 	options.SetDefault(Keys.BundleInfoYaml, "./bundles/bundles.yml")
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
 	options.SetDefault(Keys.CwLogStream, hostname)
 	options.SetDefault(Keys.CwRegion, "us-east-1")
-	options.SetDefault(Keys.Features, "ansible,smart_management,rhods,rhoam,rhosak,openshift,acs")
 	options.SetDefault(Keys.SubAPIBasePath, "/svcrest/subscription/v5/")
 	options.SetDefault(Keys.CompAPIBasePath, "/v1/screening")
 	options.SetDefault(Keys.RunBundleSync, false)
