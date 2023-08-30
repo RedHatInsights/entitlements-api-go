@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
@@ -159,6 +160,9 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		validAccNum := !(accNum == "" || accNum == "-1")
 		validOrgId := !(orgId == "" || orgId == "-1")
 
+		include_filter := filtersFromParams(req, "include_bundles")
+		exclude_filter := filtersFromParams(req, "exclude_bundles")
+
 		if res.Error != nil {
 			errMsg := "Unexpected error while talking to Subs Service"
 			l.Log.WithFields(logrus.Fields{"error": res.Error}).Error(errMsg)
@@ -187,6 +191,16 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
 		for _, b := range bundleInfo {
+			if len(include_filter) > 0 {
+				if !contains(include_filter, b.Name) {
+					continue
+				}
+			} else if len(exclude_filter) > 0 {
+				if contains(exclude_filter, b.Name) {
+					continue
+				}
+			}
+
 			entitle := true
 			trial := false
 			entitleAll := configOptions.GetString(config.Keys.EntitleAll)
@@ -232,4 +246,22 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(obj))
 	}
+}
+
+func contains(s []string, t string) bool {
+	for _, val := range s {
+		if val == t {
+			return true
+		}
+	}
+	return false
+}
+
+func filtersFromParams(req *http.Request, filterName string) []string {
+	var filter []string
+	list := req.URL.Query().Get(filterName)
+	if list != "" {
+		filter = strings.Split(list, ",")
+	}
+	return filter
 }
