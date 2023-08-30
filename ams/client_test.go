@@ -90,7 +90,7 @@ var _ = Describe("AMS Client", func() {
 				
 				amsServer.AppendHandlers(
 					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", ContainSubstring("/api/accounts_mgmt/v1/subscriptions")),
+						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
 						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 							params, err := url.ParseQuery(r.URL.RawQuery)
 							
