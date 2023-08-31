@@ -239,6 +239,26 @@ var _ = Describe("AMS Client", func() {
 			})
 		})
 
+		When("invalid user org id used", func() {
+			It("returns an error", func() {
+				orgId 		:= "org-id"
+
+				amsOrgId, err := client.ConvertUserOrgId(orgId)
+
+				Expect(amsOrgId).To(BeEmpty())
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("invalid user org id"))
+				Expect(amsServer.ReceivedRequests()).To(HaveLen(0))
+				
+				var clientError *ClientError
+				Expect(err).To(BeAssignableToTypeOf(clientError))
+				errors.As(err, &clientError)
+				Expect(clientError.StatusCode).To(BeEquivalentTo(http.StatusInternalServerError))
+				Expect(clientError.OrgId).To(BeEquivalentTo(orgId))
+				Expect(clientError.AmsOrgId).To(BeEmpty())
+			})
+		})
+
 		When("invalid ams org id returned", func() {
 			It("returns an error", func() {
 				orgId 		:= "orgId"

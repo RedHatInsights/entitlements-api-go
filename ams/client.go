@@ -237,6 +237,15 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 		return converted, nil
 	}
 
+	if valid, _ := validateOrgIdPattern(userOrgId); !valid {
+		return "", &ClientError{
+			Message:    "invalid user org id - id contains non alpha numeric characters",
+			StatusCode: http.StatusInternalServerError,
+			OrgId:      userOrgId,
+			AmsOrgId:   "",
+		}
+	}
+
 	start := time.Now()
 	listResp, err := c.client.
 		AccountsMgmt().V1().
@@ -260,7 +269,7 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 		}
 	}
 
-	if valid, _ := regexp.MatchString("^[a-zA-Z0-9]+$", converted); !valid {
+	if valid, _ := validateOrgIdPattern(converted); !valid {
 		return "", &ClientError{
 			Message:    "invalid ams org id - id contains non alpha numeric characters",
 			StatusCode: http.StatusInternalServerError,
@@ -298,4 +307,8 @@ func areStatusesValid(statuses []string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func validateOrgIdPattern(orgId string) (match bool, err error) {
+	return regexp.MatchString("^[a-zA-Z0-9]+$", orgId)
 }
