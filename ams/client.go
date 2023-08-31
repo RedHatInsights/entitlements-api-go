@@ -93,7 +93,7 @@ var _ AMSInterface = &Client{}
 func NewClient(debug bool) (AMSInterface, error) {
 
 	if debug {
-		return &TestClient{}, nil
+		return &Mock{}, nil
 	}
 
 	logger, err := logging.NewGoLoggerBuilder().Debug(false).Build()

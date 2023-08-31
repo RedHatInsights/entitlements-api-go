@@ -79,7 +79,7 @@ var _ = Describe("using the seat managment api", func() {
 	var rr *httptest.ResponseRecorder
 
 	BeforeEach(func() {
-		client = &ams.TestClient{}
+		client = &ams.Mock{}
 		bopClient, _ = bop.NewClient(true)
 		seatApi = NewSeatManagerApi(client, bopClient)
 		rr = httptest.NewRecorder()
