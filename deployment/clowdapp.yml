@@ -152,27 +152,6 @@ objects:
         - configMap:
             name: ${CONFIG_MAP_NAME}
           name: default-entitlements-config
-- apiVersion: v1
-  kind: Service
-  metadata:
-    annotations:
-      prometheus.io/port: '8000'
-      prometheus.io/scrape: 'true'
-    labels:
-      app: entitlements-api-go
-    name: entitlements-api-go
-  spec:
-    ports:
-    - name: 3000-tcp
-      port: 3000
-      protocol: TCP
-      targetPort: 8000
-    selector:
-      app: entitlements-api-go
-    sessionAffinity: None
-    type: ClusterIP
-  status:
-    loadBalancer: {}
 
 parameters:
 - description: Log level for the application
