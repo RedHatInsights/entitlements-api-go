@@ -50,13 +50,13 @@ var _ = Describe("AMS Client", func() {
 			amsServer.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/organizations"),
-					ghttp.RespondWith(http.StatusOK, `{"items":[{"id": "org-id"}]}`, http.Header{"Content-Type": {"application/json"}}),
+					ghttp.RespondWith(http.StatusOK, `{"items":[{"id": "amsOrgId"}]}`, http.Header{"Content-Type": {"application/json"}}),
 				),
 			)
 		})
 
 		It("should construct the base query correctly", func() {
-			returnedSubs :=`{"items":[{"id": "org-id", "status": "active"}]}`
+			returnedSubs :=`{"items":[{"id": "subId", "status": "active"}]}`
 			
 			amsServer.AppendHandlers(
 				ghttp.CombineHandlers(
@@ -70,6 +70,9 @@ var _ = Describe("AMS Client", func() {
 						Expect(params.Has("fetchAccounts")).To(BeTrue(), "params should have fetchAccounts")
 						Expect(params.Has("size")).To(BeTrue(), "params should have size")
 						Expect(params.Has("page")).To(BeTrue(), "params should have page")
+
+						search := params.Get("search")
+						Expect(search).To(Equal("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId'"))
 					}),
 					ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
 				),
@@ -86,7 +89,7 @@ var _ = Describe("AMS Client", func() {
 
 		When("no statuses are included", func() {
 			It("queries for subscriptions without filtering status", func() {
-				returnedSubs :=`{"items":[{"id": "org-id", "status": "active"}]}`
+				returnedSubs :=`{"items":[{"id": "subId", "status": "active"}]}`
 				
 				amsServer.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -116,7 +119,7 @@ var _ = Describe("AMS Client", func() {
 
 		When("statuses are included", func() {
 			It("queries for subscriptions with the desired status", func() {
-				returnedSubs :=`{"items":[{"id": "org-id", "status": "active"}]}`
+				returnedSubs :=`{"items":[{"id": "subId", "status": "active"}]}`
 				
 				amsServer.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -128,7 +131,7 @@ var _ = Describe("AMS Client", func() {
 							Expect(params.Has("search")).To(BeTrue(), "params should have search")
 							
 							search := params.Get("search")
-							Expect(search).To(ContainSubstring("status IN ('Active')"))
+							Expect(search).To(Equal("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND status IN ('Active')"))
 						}),
 						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
 					),
