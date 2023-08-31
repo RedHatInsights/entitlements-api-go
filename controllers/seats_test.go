@@ -265,6 +265,29 @@ var _ = Describe("using the seat managment api", func() {
 				Expect(*result.Error).To(ContainSubstring("cannot use both 'excludeStatus' and 'status'"))
 			})
 		})
+
+		Context("and ams client returns a client error", func() {
+			It("should return the status code specified by the client error", func() {
+				ams.MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
+					return nil, &ams.ClientError{
+						StatusCode: http.StatusBadRequest,
+						Message: "some useful message",
+						OrgId: "orgId",
+						AmsOrgId: "amsOrgId",
+					}}
+
+				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
+				seatApi.GetSeats(rr, req, api.GetSeatsParams{})
+				
+				var result api.Error
+				json.NewDecoder(rr.Result().Body).Decode(&result)
+				
+				Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
+				Expect(*result.Error).To(ContainSubstring("some useful message"))
+				Expect(*result.Error).To(ContainSubstring("orgId"))
+				Expect(*result.Error).To(ContainSubstring("amsOrgId"))
+			})
+		})
 	})
 
 	When("adding a user to a seat", func() {

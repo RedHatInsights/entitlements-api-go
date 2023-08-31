@@ -138,6 +138,11 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 
 	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, *params.Status, limit, page)
 	if err != nil {
+		var clientError *ams.ClientError
+		if errors.As(err, &clientError) {
+			doError(w, clientError.StatusCode, clientError)
+		}
+		
 		do500(w, fmt.Errorf("AMS GetSubscriptions [%w]", err))
 		return
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -164,10 +165,15 @@ func (c *Client) GetSubscriptions(organizationId string, statuses []string, size
 		And().
 		Equals("organization_id", amsOrgId)
 
-	if valid, err := areStatusesValid(statuses); valid{
+	if valid, err := areStatusesValid(statuses); valid {
 		queryBuilder = queryBuilder.And().In("status", statuses)
-	} else if !valid && err != nil{
-		return nil, err
+	} else if !valid && err != nil {
+		return nil, &ClientError{
+			Message: err.Error(),
+			StatusCode: http.StatusBadRequest,
+			OrgId: organizationId,
+			AmsOrgId: amsOrgId,
+		}
 	}
 
 	query := queryBuilder.Build()
@@ -232,7 +238,12 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 	}
 
 	start := time.Now()
-	listResp, err := c.client.AccountsMgmt().V1().Organizations().List().Search(fmt.Sprintf("external_id = %s", userOrgId)).Send()
+	listResp, err := c.client.
+		AccountsMgmt().V1().
+		Organizations().List().
+		Search(NewQueryBuilder().Equals("external_id", userOrgId).Build()).
+		Send()
+
 	orgListTime.Observe(time.Since(start).Seconds())
 	if err != nil {
 		return "", err
@@ -246,6 +257,15 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 			StatusCode: http.StatusBadRequest,
 			OrgId:      userOrgId,
 			AmsOrgId:   "",
+		}
+	}
+
+	if valid, _ := regexp.MatchString("^[a-zA-Z0-9]+$", converted); !valid {
+		return "", &ClientError{
+			Message:    "invalid ams org id - id contains non alpha numeric characters",
+			StatusCode: http.StatusInternalServerError,
+			OrgId:      userOrgId,
+			AmsOrgId:   converted,
 		}
 	}
 
