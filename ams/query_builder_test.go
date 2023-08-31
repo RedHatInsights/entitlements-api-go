@@ -48,4 +48,17 @@ var _ = Describe("Query Builder Test", func () {
 			Expect(query).To(Equal("foo.bar IN ('Some Status') AND baz = 'thonk'"))
 		})
 	})
+
+	When("all operators are called", func () {
+		It("correctly construct the query", func () {
+			query := builder.
+				Like("field", "nothonk").
+				And().
+				In("foo.bar", []string{"some status"}).
+				And().
+				Equals("baz", "thonk").
+				Build()
+			Expect(query).To(Equal("field LIKE 'nothonk' AND foo.bar IN ('Some Status') AND baz = 'thonk'"))
+		})
+	})
 })
