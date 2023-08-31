@@ -7,8 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/RedHatInsights/entitlements-api-go/api"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/karlseguin/ccache"
@@ -161,8 +164,10 @@ func (c *Client) GetSubscriptions(organizationId string, statuses []string, size
 		And().
 		Equals("organization_id", amsOrgId)
 
-	if statuses != nil && len(statuses) > 0 {
+	if valid, err := areStatusesValid(statuses); valid{
 		queryBuilder = queryBuilder.And().In("status", statuses)
+	} else if !valid && err != nil{
+		return nil, err
 	}
 
 	query := queryBuilder.Build()
@@ -249,4 +254,28 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 	l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": userOrgId}).Debug("converted org id to ams org ig")
 
 	return converted, err
+}
+
+func areStatusesValid(statuses []string) (bool, error) {
+	if statuses == nil {
+		return false, nil
+	}
+
+	if len(statuses) == 0 {
+		return false, nil
+	}
+	
+	// ignore case when validating statuses
+	caser := cases.Title(language.Und)
+	for _, status := range statuses {
+		statusType := api.GetSeatsParamsStatus(caser.String(status))
+		switch statusType{
+		case api.GetSeatsParamsStatusActive, api.GetSeatsParamsStatusDeprovisioned:
+			continue
+		default:
+			return false, fmt.Errorf("provided status '%s' is an unsupported status to query seats for, check apispec for list of supported statuses", status)
+		}
+	}
+
+	return true, nil
 }

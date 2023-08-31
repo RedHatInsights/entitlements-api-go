@@ -145,6 +145,19 @@ var _ = Describe("AMS Client", func() {
 				Expect(err).To(BeNil())
 				Expect(subs).ToNot(BeNil())
 			})
+
+			Context("and status is unsupported", func() {
+				It("returns an error and does not query ams", func() {
+					client, err := NewClient(false)
+					Expect(err).To(BeNil())
+					
+					subs, err := client.GetSubscriptions("orgId", []string{"active", "inactive"}, 1, 0)
+	
+					Expect(subs).To(BeNil())
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(ContainSubstring("provided status 'inactive' is an unsupported status"))
+				})
+			})
 		})
 	})
 })
