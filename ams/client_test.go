@@ -156,6 +156,7 @@ var _ = Describe("AMS Client", func() {
 					Expect(subs).To(BeNil())
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring("provided status 'inactive' is an unsupported status"))
+					Expect(amsServer.ReceivedRequests()).To(HaveLen(1))
 				})
 			})
 		})
