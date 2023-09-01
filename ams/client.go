@@ -3,11 +3,16 @@ package ams
 import (
 	"context"
 	"fmt"
-	l "github.com/RedHatInsights/entitlements-api-go/logger"
-	"github.com/sirupsen/logrus"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
+
+	"github.com/RedHatInsights/entitlements-api-go/api"
+	l "github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/karlseguin/ccache"
@@ -52,7 +57,7 @@ var quotaAuthorizationTime = promauto.NewHistogram(prometheus.HistogramOpts{
 type AMSInterface interface {
 	GetQuotaCost(organizationId string) (*v1.QuotaCost, error)
 	GetSubscription(subscriptionId string) (*v1.Subscription, error)
-	GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error)
+	GetSubscriptions(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
 	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error)
 	ConvertUserOrgId(userOrgId string) (string, error)
@@ -89,7 +94,7 @@ var _ AMSInterface = &Client{}
 func NewClient(debug bool) (AMSInterface, error) {
 
 	if debug {
-		return &TestClient{}, nil
+		return &Mock{}, nil
 	}
 
 	logger, err := logging.NewGoLoggerBuilder().Debug(false).Build()
@@ -149,18 +154,33 @@ func (c *Client) GetSubscription(subscriptionId string) (*v1.Subscription, error
 	return resp.Body(), nil
 }
 
-func (c *Client) GetSubscriptions(organizationId string, size, page int) (*v1.SubscriptionList, error) {
+func (c *Client) GetSubscriptions(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
 	amsOrgId, err := c.ConvertUserOrgId(organizationId)
 	if err != nil {
 		return nil, err
 	}
-	q := "plan.id LIKE 'AnsibleWisdom'"
-	q += " AND "
-	q += fmt.Sprintf("organization_id = '%s'", amsOrgId)
+
+	queryBuilder := NewQueryBuilder().
+		Like("plan.id", "AnsibleWisdom").
+		And().
+		Equals("organization_id", amsOrgId)
+
+	if valid, err := areStatusesValid(statuses); valid {
+		queryBuilder = queryBuilder.And().In("status", statuses)
+	} else if !valid && err != nil {
+		return nil, &ClientError{
+			Message: err.Error(),
+			StatusCode: http.StatusBadRequest,
+			OrgId: organizationId,
+			AmsOrgId: amsOrgId,
+		}
+	}
+
+	query := queryBuilder.Build()
 
 	start := time.Now()
 	req := c.client.AccountsMgmt().V1().Subscriptions().List().
-		Search(q).
+		Search(query).
 		Parameter("fetchAccounts", true).
 		Size(size).
 		Page(page)
@@ -217,8 +237,22 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 		return converted, nil
 	}
 
+	if valid, _ := validateOrgIdPattern(userOrgId); !valid {
+		return "", &ClientError{
+			Message:    "invalid user org id - id contains non alpha numeric characters",
+			StatusCode: http.StatusInternalServerError,
+			OrgId:      userOrgId,
+			AmsOrgId:   "",
+		}
+	}
+
 	start := time.Now()
-	listResp, err := c.client.AccountsMgmt().V1().Organizations().List().Search(fmt.Sprintf("external_id = %s", userOrgId)).Send()
+	listResp, err := c.client.
+		AccountsMgmt().V1().
+		Organizations().List().
+		Search(NewQueryBuilder().Equals("external_id", userOrgId).Build()).
+		Send()
+
 	orgListTime.Observe(time.Since(start).Seconds())
 	if err != nil {
 		return "", err
@@ -235,9 +269,46 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 		}
 	}
 
+	if valid, _ := validateOrgIdPattern(converted); !valid {
+		return "", &ClientError{
+			Message:    "invalid ams org id - id contains non alpha numeric characters",
+			StatusCode: http.StatusInternalServerError,
+			OrgId:      userOrgId,
+			AmsOrgId:   converted,
+		}
+	}
+
 	c.cache.Set(userOrgId, converted, time.Minute*30)
 
 	l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": userOrgId}).Debug("converted org id to ams org ig")
 
 	return converted, err
+}
+
+func areStatusesValid(statuses []string) (bool, error) {
+	if statuses == nil {
+		return false, nil
+	}
+
+	if len(statuses) == 0 {
+		return false, nil
+	}
+	
+	// ignore case when validating statuses
+	caser := cases.Title(language.Und)
+	for _, status := range statuses {
+		statusType := api.GetSeatsParamsStatus(caser.String(status))
+		switch statusType{
+		case api.GetSeatsParamsStatusActive, api.GetSeatsParamsStatusDeprovisioned:
+			continue
+		default:
+			return false, fmt.Errorf("provided status '%s' is an unsupported status to query seats for, check apispec for list of supported statuses", status)
+		}
+	}
+
+	return true, nil
+}
+
+func validateOrgIdPattern(orgId string) (match bool, err error) {
+	return regexp.MatchString("^[a-zA-Z0-9]+$", orgId)
 }

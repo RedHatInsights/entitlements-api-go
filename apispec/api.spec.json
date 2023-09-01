@@ -102,6 +102,9 @@
                 ],
                 "parameters": [
                     {
+                        "$ref": "#/components/parameters/Status"
+                    },
+                    {
                         "$ref": "#/components/parameters/ExcludeStatus"
                     },
                     {
@@ -291,11 +294,26 @@
     },
     "components": {
         "parameters": {
+            "Status": {
+                "in": "query",
+                "name": "status",
+                "required": false,
+                "description": "List of statuses that will be added to query for subscriptions from ams result set.",
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": ["Active", "Deprovisioned"],
+                        "default": ""
+                    }
+                }
+            },
             "ExcludeStatus": {
                 "in": "query",
                 "name": "excludeStatus",
                 "required": false,
-                "description": "List of statuses to exclude subscriptions from result set if they have any of these statuses",
+                "description": "List of statuses to exclude subscriptions from result set if they have any of these statuses. Deprecated, use status instead.",
+                "deprecated": true,
                 "schema": {
                     "type": "array",
                     "items": {

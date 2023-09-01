@@ -79,7 +79,7 @@ var _ = Describe("using the seat managment api", func() {
 	var rr *httptest.ResponseRecorder
 
 	BeforeEach(func() {
-		client = &ams.TestClient{}
+		client = &ams.Mock{}
 		bopClient, _ = bop.NewClient(true)
 		seatApi = NewSeatManagerApi(client, bopClient)
 		rr = httptest.NewRecorder()
@@ -206,7 +206,7 @@ var _ = Describe("using the seat managment api", func() {
 		})
 		Context("and creator info is missing", func() {
 			It("should not fail and fill in missing data", func() {
-				ams.MockGetSubscriptions = func(organizationId string, size, page int) (*v1.SubscriptionList, error) {
+				ams.MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
 					lst, err := v1.NewSubscriptionList().
 						Items(
 							v1.NewSubscription().
@@ -229,6 +229,63 @@ var _ = Describe("using the seat managment api", func() {
 				Expect(*result.Data[0].AccountUsername).To(Equal("UNKNOWN"))
 				Expect(*result.Data[0].FirstName).To(Equal("UNKNOWN"))
 				Expect(*result.Data[0].LastName).To(Equal("UNKNOWN"))
+			})
+		})
+
+		Context("and status param is not empty", func() {
+			It("should pass the list of statuses to the ams client", func() {
+				actual := []string{}
+				ams.MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
+					actual = statuses
+					return v1.NewSubscriptionList().Build()
+				}
+
+				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
+				seatApi.GetSeats(rr, req, api.GetSeatsParams{
+					Status: &[]string{"active", "inactive", "a third one"},
+				})
+				
+				Expect(actual).To(HaveLen(3))
+				Expect(actual).To(HaveExactElements("active", "inactive", "a third one"))
+			})
+		})
+
+		Context("and both status / excludeStatus are used", func() {
+			It("should deny the request and return an error", func() {
+				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
+				seatApi.GetSeats(rr, req, api.GetSeatsParams{
+					Status: &api.Status{},
+					ExcludeStatus: &api.ExcludeStatus{},
+				})
+				
+				var result api.Error
+				json.NewDecoder(rr.Result().Body).Decode(&result)
+				
+				Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
+				Expect(*result.Error).To(ContainSubstring("cannot use both 'excludeStatus' and 'status'"))
+			})
+		})
+
+		Context("and ams client returns a client error", func() {
+			It("should return the status code specified by the client error", func() {
+				ams.MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
+					return nil, &ams.ClientError{
+						StatusCode: http.StatusBadRequest,
+						Message: "some useful message",
+						OrgId: "orgId",
+						AmsOrgId: "amsOrgId",
+					}}
+
+				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
+				seatApi.GetSeats(rr, req, api.GetSeatsParams{})
+				
+				var result api.Error
+				json.NewDecoder(rr.Result().Body).Decode(&result)
+				
+				Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
+				Expect(*result.Error).To(ContainSubstring("some useful message"))
+				Expect(*result.Error).To(ContainSubstring("orgId"))
+				Expect(*result.Error).To(ContainSubstring("amsOrgId"))
 			})
 		})
 	})

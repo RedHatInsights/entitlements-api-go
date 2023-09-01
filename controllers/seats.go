@@ -7,11 +7,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/RedHatInsights/entitlements-api-go/logger"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"strings"
 
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
@@ -46,6 +47,7 @@ func doError(w http.ResponseWriter, code int, err error) {
 }
 
 func do500(w http.ResponseWriter, err error) {
+	logger.Log.WithFields(logrus.Fields{"error": err}).Error("ams request error")
 	doError(w, http.StatusInternalServerError, err)
 }
 
@@ -101,9 +103,18 @@ func fillDefaults(params *api.GetSeatsParams) {
 	if params.Offset == nil {
 		params.Offset = toPtr(0)
 	}
+
+	if params.Status == nil {
+		params.Status = toPtr([]string{})
+	}
 }
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
+	// TODO: https://issues.redhat.com/browse/RHCLOUD-27871, delete ExcludeStatus param
+	if params.ExcludeStatus != nil && params.Status != nil {
+		doError(w, http.StatusBadRequest, fmt.Errorf("cannot use both 'excludeStatus' and 'status' in get seats query, use 'status' only"))
+		return
+	}
 
 	idObj := identity.Get(r.Context()).Identity
 
@@ -125,8 +136,13 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 
 	page := 1 + (offset / limit)
 
-	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, limit, page)
+	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, *params.Status, limit, page)
 	if err != nil {
+		var clientError *ams.ClientError
+		if errors.As(err, &clientError) {
+			doError(w, clientError.StatusCode, clientError)
+		}
+		
 		do500(w, fmt.Errorf("AMS GetSubscriptions [%w]", err))
 		return
 	}
