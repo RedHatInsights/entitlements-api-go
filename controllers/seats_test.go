@@ -134,56 +134,7 @@ var _ = Describe("using the seat managment api", func() {
 			Expect(*result.Data[0].Status).To(Equal("Active"))
 
 		})
-		Context("and seats with active status is excluded", func() {
-			It("should return an empty list since only one seat is created and its active", func() {
-				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
-				seatApi.GetSeats(rr, req, api.GetSeatsParams{
-					ExcludeStatus: &api.ExcludeStatus{"active"},
-				})
 
-				Expect(rr.Result().StatusCode).To(Equal(http.StatusOK))
-				Expect(rr.Result().Header.Get("Content-Type")).To(Equal("application/json"))
-
-				var result api.ListSeatsResponsePagination
-				json.NewDecoder(rr.Result().Body).Decode(&result)
-
-				Expect(*result.Meta.Count).To(Equal(int64(0)))
-			})
-		})
-		Context("and exclude status is nil", func() {
-			It("should return a list with all seats", func() {
-				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
-				seatApi.GetSeats(rr, req, api.GetSeatsParams{
-					ExcludeStatus: nil,
-				})
-
-				Expect(rr.Result().StatusCode).To(Equal(http.StatusOK))
-				Expect(rr.Result().Header.Get("Content-Type")).To(Equal("application/json"))
-
-				var result api.ListSeatsResponsePagination
-				json.NewDecoder(rr.Result().Body).Decode(&result)
-
-				Expect(*result.Meta.Count).To(Equal(int64(1)))
-				Expect(*result.Data[0].AccountUsername).To(Equal("testuser"))
-			})
-		})
-		Context("and exclude status is empty", func() {
-			It("should return a list with all seats", func() {
-				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
-				seatApi.GetSeats(rr, req, api.GetSeatsParams{
-					ExcludeStatus: &api.ExcludeStatus{},
-				})
-
-				Expect(rr.Result().StatusCode).To(Equal(http.StatusOK))
-				Expect(rr.Result().Header.Get("Content-Type")).To(Equal("application/json"))
-
-				var result api.ListSeatsResponsePagination
-				json.NewDecoder(rr.Result().Body).Decode(&result)
-
-				Expect(*result.Meta.Count).To(Equal(int64(1)))
-				Expect(*result.Data[0].AccountUsername).To(Equal("testuser"))
-			})
-		})
 		Context("and limit is too small", func() {
 			It("should return a bad request", func() {
 				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
@@ -247,22 +198,6 @@ var _ = Describe("using the seat managment api", func() {
 				
 				Expect(actual).To(HaveLen(3))
 				Expect(actual).To(HaveExactElements("active", "inactive", "a third one"))
-			})
-		})
-
-		Context("and both status / excludeStatus are used", func() {
-			It("should deny the request and return an error", func() {
-				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
-				seatApi.GetSeats(rr, req, api.GetSeatsParams{
-					Status: &api.Status{},
-					ExcludeStatus: &api.ExcludeStatus{},
-				})
-				
-				var result api.Error
-				json.NewDecoder(rr.Result().Body).Decode(&result)
-				
-				Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
-				Expect(*result.Error).To(ContainSubstring("cannot use both 'excludeStatus' and 'status'"))
 			})
 		})
 

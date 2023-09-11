@@ -320,7 +320,7 @@ func areStatusesValid(statuses []string) (bool, error) {
 	for _, status := range statuses {
 		statusType := api.GetSeatsParamsStatus(caser.String(status))
 		switch statusType{
-		case api.GetSeatsParamsStatusActive, api.GetSeatsParamsStatusDeprovisioned:
+		case api.Active, api.Deprovisioned:
 			continue
 		default:
 			return false, fmt.Errorf("provided status '%s' is an unsupported status to query seats for, check apispec for list of supported statuses", status)

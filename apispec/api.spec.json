@@ -117,9 +117,6 @@
                         "$ref": "#/components/parameters/Email"
                     },
                     {
-                        "$ref": "#/components/parameters/ExcludeStatus"
-                    },
-                    {
                         "$ref": "#/components/parameters/Sort"
                     },
                     {
@@ -388,21 +385,6 @@
                         "DESC"
                     ],
                     "default": "ASC"
-                }
-            },
-            "ExcludeStatus": {
-                "in": "query",
-                "name": "excludeStatus",
-                "required": false,
-                "description": "List of statuses to exclude subscriptions from result set if they have any of these statuses. Deprecated, use status instead.",
-                "deprecated": true,
-                "schema": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "enum": ["Active", "Deprovisioned"],
-                        "default": ""
-                    }
                 }
             },
             "QueryOffset": {
