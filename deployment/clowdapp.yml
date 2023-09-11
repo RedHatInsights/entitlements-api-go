@@ -68,11 +68,11 @@ objects:
           timeoutSeconds: 60
           resources:
             limits:
-              cpu: 500m
-              memory: 500Mi
+              cpu: ${CPU_LIMIT} 
+              memory: ${MEMORY_LIMIT}
             requests:
-              cpu: 100m
-              memory: 250Mi
+              cpu: ${CPU_REQUESTS}
+              memory: ${MEMORY_REQUESTS}
         volumeMounts:
         - mountPath: /bundles
           name: default-entitlements-config
@@ -158,6 +158,18 @@ parameters:
   name: LOG_LEVEL
   required: false
   value: info
+- description: cpu limit for service
+  name: CPU_LIMIT
+  value: 500m
+- description: cpu limit for service
+  name: MEMORY_LIMIT
+  value: 500Mi 
+- description: cpu limit for service
+  name: CPU_REQUESTS
+  value: 100m 
+- description: cpu limit for service
+  name: MEMORY_REQUESTS
+  value: 250Mi 
 - description: Port for listener
   name: PORT
   value: '8000'
