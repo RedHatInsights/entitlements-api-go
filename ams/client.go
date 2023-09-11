@@ -201,6 +201,11 @@ func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSea
 		Size(size).
 		Page(page)
 
+	if searchParams.Sort != nil {
+		orderBy := fmt.Sprintf("%s %s", *searchParams.Sort, *searchParams.SortOrder)
+		req = req.Order(orderBy)
+	}
+
 	resp, err := req.Send()
 	getSubscriptionsTime.Observe(time.Since(start).Seconds())
 	if err != nil {

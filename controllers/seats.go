@@ -123,6 +123,14 @@ func fillDefaults(params *api.GetSeatsParams) {
 	if params.Email == nil {
 		params.Email = toPtr("")
 	}
+
+	if params.Sort == nil {
+		params.Sort = toPtr("")
+	}
+
+	if params.SortOrder == nil {
+		params.SortOrder = toPtr(api.GetSeatsParamsSortOrderASC)
+	}
 }
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
