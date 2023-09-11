@@ -206,7 +206,7 @@ var _ = Describe("using the seat managment api", func() {
 		})
 		Context("and creator info is missing", func() {
 			It("should not fail and fill in missing data", func() {
-				ams.MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
+				ams.MockGetSubscriptions = func(organizationId string, searchParams api.GetSeatsParams, size, page int) (*v1.SubscriptionList, error) {
 					lst, err := v1.NewSubscriptionList().
 						Items(
 							v1.NewSubscription().
@@ -235,8 +235,8 @@ var _ = Describe("using the seat managment api", func() {
 		Context("and status param is not empty", func() {
 			It("should pass the list of statuses to the ams client", func() {
 				actual := []string{}
-				ams.MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
-					actual = statuses
+				ams.MockGetSubscriptions = func(organizationId string, searchParams api.GetSeatsParams, size, page int) (*v1.SubscriptionList, error) {
+					actual = *searchParams.Status
 					return v1.NewSubscriptionList().Build()
 				}
 
@@ -268,7 +268,7 @@ var _ = Describe("using the seat managment api", func() {
 
 		Context("and ams client returns a client error", func() {
 			It("should return the status code specified by the client error", func() {
-				ams.MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
+				ams.MockGetSubscriptions = func(organizationId string, searchParams api.GetSeatsParams, size, page int) (*v1.SubscriptionList, error) {
 					return nil, &ams.ClientError{
 						StatusCode: http.StatusBadRequest,
 						Message: "some useful message",

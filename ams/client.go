@@ -57,7 +57,7 @@ var quotaAuthorizationTime = promauto.NewHistogram(prometheus.HistogramOpts{
 type AMSInterface interface {
 	GetQuotaCost(organizationId string) (*v1.QuotaCost, error)
 	GetSubscription(subscriptionId string) (*v1.Subscription, error)
-	GetSubscriptions(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error)
+	GetSubscriptions(organizationId string, searchParams api.GetSeatsParams, size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
 	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error)
 	ConvertUserOrgId(userOrgId string) (string, error)
@@ -154,7 +154,7 @@ func (c *Client) GetSubscription(subscriptionId string) (*v1.Subscription, error
 	return resp.Body(), nil
 }
 
-func (c *Client) GetSubscriptions(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
+func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSeatsParams, size, page int) (*v1.SubscriptionList, error) {
 	amsOrgId, err := c.ConvertUserOrgId(organizationId)
 	if err != nil {
 		return nil, err
@@ -165,8 +165,8 @@ func (c *Client) GetSubscriptions(organizationId string, statuses []string, size
 		And().
 		Equals("organization_id", amsOrgId)
 
-	if valid, err := areStatusesValid(statuses); valid {
-		queryBuilder = queryBuilder.And().In("status", statuses)
+	if valid, err := areStatusesValid(*searchParams.Status); valid {
+		queryBuilder = queryBuilder.And().In("status", *searchParams.Status)
 	} else if !valid && err != nil {
 		return nil, &ClientError{
 			Message: err.Error(),
@@ -174,6 +174,22 @@ func (c *Client) GetSubscriptions(organizationId string, statuses []string, size
 			OrgId: organizationId,
 			AmsOrgId: amsOrgId,
 		}
+	}
+
+	if searchParams.AccountUsername != nil {
+		queryBuilder = queryBuilder.And().Equals("creator.username", *searchParams.AccountUsername)
+	}
+
+	if searchParams.Email != nil {
+		queryBuilder = queryBuilder.And().Equals("creator.email", *searchParams.Email)
+	}
+
+	if searchParams.FirstName != nil {
+		queryBuilder = queryBuilder.And().Equals("creator.first_name", *searchParams.FirstName)
+	}
+
+	if searchParams.LastName != nil {
+		queryBuilder = queryBuilder.And().Equals("creator.last_name", *searchParams.LastName)
 	}
 
 	query := queryBuilder.Build()

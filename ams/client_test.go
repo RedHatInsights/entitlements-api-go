@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/RedHatInsights/entitlements-api-go/api"
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -81,8 +82,12 @@ var _ = Describe("AMS Client", func() {
 
 			client, err := NewClient(false)
 			Expect(err).To(BeNil())
+
+			params := api.GetSeatsParams{
+				Status: &[]string{""},
+			}
 			
-			subs, err := client.GetSubscriptions("orgId", []string{}, 1, 0)
+			subs, err := client.GetSubscriptions("orgId", params, 1, 0)
 
 			Expect(err).To(BeNil())
 			Expect(subs).ToNot(BeNil())
@@ -110,8 +115,12 @@ var _ = Describe("AMS Client", func() {
 
 				client, err := NewClient(false)
 				Expect(err).To(BeNil())
+
+				params := api.GetSeatsParams{
+					Status: &[]string{""},
+				}
 				
-				subs, err := client.GetSubscriptions("orgId", []string{}, 1, 0)
+				subs, err := client.GetSubscriptions("orgId", params, 1, 0)
 
 				Expect(err).To(BeNil())
 				Expect(subs).ToNot(BeNil())
@@ -140,8 +149,12 @@ var _ = Describe("AMS Client", func() {
 
 				client, err := NewClient(false)
 				Expect(err).To(BeNil())
+
+				params := api.GetSeatsParams{
+					Status: &[]string{"active"},
+				}
 				
-				subs, err := client.GetSubscriptions("orgId", []string{"active"}, 1, 0)
+				subs, err := client.GetSubscriptions("orgId", params, 1, 0)
 
 				Expect(err).To(BeNil())
 				Expect(subs).ToNot(BeNil())
@@ -152,7 +165,11 @@ var _ = Describe("AMS Client", func() {
 					client, err := NewClient(false)
 					Expect(err).To(BeNil())
 					
-					subs, err := client.GetSubscriptions("orgId", []string{"active", "inactive"}, 1, 0)
+					params := api.GetSeatsParams{
+						Status: &[]string{"active", "inactive"},
+					}
+
+					subs, err := client.GetSubscriptions("orgId", params, 1, 0)
 	
 					Expect(subs).To(BeNil())
 					Expect(err).To(HaveOccurred())

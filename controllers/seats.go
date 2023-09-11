@@ -107,6 +107,22 @@ func fillDefaults(params *api.GetSeatsParams) {
 	if params.Status == nil {
 		params.Status = toPtr([]string{})
 	}
+
+	if params.AccountUsername == nil {
+		params.AccountUsername = toPtr("")
+	}
+	
+	if params.FirstName == nil {
+		params.FirstName = toPtr("")
+	}
+
+	if params.LastName == nil {
+		params.LastName = toPtr("")
+	}
+
+	if params.Email == nil {
+		params.Email = toPtr("")
+	}
 }
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
@@ -136,7 +152,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 
 	page := 1 + (offset / limit)
 
-	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, *params.Status, limit, page)
+	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, params, limit, page)
 	if err != nil {
 		var clientError *ams.ClientError
 		if errors.As(err, &clientError) {
