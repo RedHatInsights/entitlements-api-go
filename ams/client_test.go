@@ -94,36 +94,66 @@ var _ = Describe("AMS Client", func() {
 		})
 
 		When("no statuses are included", func() {
-			It("queries for subscriptions without filtering status", func() {
-				returnedSubs :=`{"items":[{"id": "subId", "status": "active"}]}`
+			handlerFunc := func(w http.ResponseWriter, r *http.Request) {
+				params, err := url.ParseQuery(r.URL.RawQuery)
 				
-				amsServer.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
-						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-							params, err := url.ParseQuery(r.URL.RawQuery)
-							
-							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
-							Expect(params.Has("search")).To(BeTrue(), "params should have search")
-							
-							search := params.Get("search")
-							Expect(search).ToNot(ContainSubstring("status"))
-						}),
-						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
-					),
-				)
-
-				client, err := NewClient(false)
-				Expect(err).To(BeNil())
-
-				params := api.GetSeatsParams{
-					Status: &[]string{""},
-				}
+				Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
+				Expect(params.Has("search")).To(BeTrue(), "params should have search")
 				
-				subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+				search := params.Get("search")
+				Expect(search).ToNot(ContainSubstring("status"))
+			}
 
-				Expect(err).To(BeNil())
-				Expect(subs).ToNot(BeNil())
+			Context("statuses is nil", func()  {
+				It("queries for subscriptions without filtering status", func() {
+					returnedSubs :=`{"items":[{"id": "subId"}]}`
+					
+					amsServer.AppendHandlers(
+						ghttp.CombineHandlers(
+							ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
+							http.HandlerFunc(handlerFunc),
+							ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
+						),
+					)
+	
+					client, err := NewClient(false)
+					Expect(err).To(BeNil())
+	
+					params := api.GetSeatsParams{
+						Status: nil,
+					}
+					
+					subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+	
+					Expect(err).To(BeNil())
+					Expect(subs).ToNot(BeNil())
+				})
+			})
+
+			Context("statuses is empty", func()  {
+				It("queries for subscriptions without filtering status", func() {
+					returnedSubs :=`{"items":[{"id": "subId"}]}`
+					
+					amsServer.AppendHandlers(
+						ghttp.CombineHandlers(
+							ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
+							http.HandlerFunc(handlerFunc),
+							ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
+						),
+					)
+	
+					client, err := NewClient(false)
+					Expect(err).To(BeNil())
+	
+					params := api.GetSeatsParams{
+						Status: &api.Status{},
+					}
+					
+					subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+	
+					Expect(err).To(BeNil())
+					Expect(subs).ToNot(BeNil())
+				})
 			})
 		})
 

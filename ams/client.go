@@ -165,9 +165,9 @@ func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSea
 		And().
 		Equals("organization_id", amsOrgId)
 
-	if valid, err := areStatusesValid(searchParams.Status); valid {
-		queryBuilder = queryBuilder.And().In("status", *searchParams.Status)
-	} else if !valid && err != nil {
+	if statuses, err := buildStatusSearch(searchParams.Status); statuses != nil && err != nil {
+		queryBuilder = queryBuilder.And().In("status", statuses)
+	} else if statuses == nil && err != nil {
 		return nil, &ClientError{
 			Message: err.Error(),
 			StatusCode: http.StatusBadRequest,
@@ -312,30 +312,25 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 	return converted, err
 }
 
-func areStatusesValid(statusesPtr *api.Status) (bool, error) {
-	if statusesPtr == nil {
-		return false, nil
-	}
-
-	statuses := *statusesPtr
-
-	if len(statuses) == 0 {
-		return false, nil
+func buildStatusSearch(statuses *api.Status) (api.Status, error) {
+	if statuses == nil || len(*statuses) == 0{
+		return nil, nil
 	}
 	
-	// ignore case when validating statuses
+	// ams is case sensitive when searching on status, so title case all input for the consumer
 	caser := cases.Title(language.Und)
-	for _, status := range statuses {
+	titleCased := api.Status{}
+	for _, status := range *statuses {
 		statusType := api.GetSeatsParamsStatus(caser.String(status))
 		switch statusType{
 		case api.Active, api.Deprovisioned:
-			continue
+			titleCased = append(titleCased, string(statusType))
 		default:
-			return false, fmt.Errorf("provided status '%s' is an unsupported status to query seats for, check apispec for list of supported statuses", status)
+			return nil, fmt.Errorf("provided status '%s' is an unsupported status to query seats for, check apispec for list of supported statuses", status)
 		}
 	}
 
-	return true, nil
+	return titleCased, nil
 }
 
 func isSearchStrValid(val *string) bool {
