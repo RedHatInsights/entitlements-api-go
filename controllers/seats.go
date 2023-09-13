@@ -1,5 +1,5 @@
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4 --config=types.cfg.yaml ../apispec/api.spec.json
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4 --config=server.cfg.yaml ../apispec/api.spec.json
+//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0 --config=types.cfg.yaml ../apispec/api.spec.json
+//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0 --config=server.cfg.yaml ../apispec/api.spec.json
 
 package controllers
 
@@ -128,7 +128,7 @@ func fillDefaults(params *api.GetSeatsParams) {
 	}
 
 	if params.SortOrder == nil {
-		params.SortOrder = toPtr("")
+		params.SortOrder = toPtr(api.SeatsSortOrderEMPTY)
 	}
 }
 

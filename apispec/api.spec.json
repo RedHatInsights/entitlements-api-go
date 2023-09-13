@@ -379,8 +379,7 @@
                 "required": false,
                 "description": "The order to sort seats in, ASC (ascending) or DESC (descending). Ignored if Sort is not provided.",
                 "schema": {
-                    "type": "string",
-                    "default": ""
+                    "$ref": "#/components/schemas/SeatsSortOrder"
                 }
             },
             "QueryOffset": {
@@ -408,6 +407,20 @@
             }
         },
         "schemas": {
+            "SeatsSortOrder": {
+                "type": "string",
+                "default": "",
+                "enum": [
+                    "asc",
+                    "desc", 
+                    ""
+                ],
+                "x-enum-varnames": [
+                    "SeatsSortOrderASC", 
+                    "SeatsSortOrderDESC", 
+                    "SeatsSortOrderEMPTY"
+                ]
+            },
             "ServiceDetails": {
                 "type": "object",
                 "properties": {
