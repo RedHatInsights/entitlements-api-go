@@ -367,17 +367,16 @@
                 "in": "query",
                 "name": "sort",
                 "required": false,
-                "description": "Name of the field you want to sort seats on. Can be any field from the Seat object.",
+                "description": "Name of the field you want to sort seats on. Can be most fields from the Seat object.",
                 "schema": {
-                    "type": "string",
-                    "default": ""
+                    "$ref": "#/components/schemas/SeatsSort"
                 }
             },
             "SortOrder": {
                 "in": "query",
                 "name": "sortOrder",
                 "required": false,
-                "description": "The order to sort seats in, ASC (ascending) or DESC (descending). Ignored if Sort is not provided.",
+                "description": "The order to sort seats in, asc (ascending) or desc (descending). Ignored if Sort is not provided.",
                 "schema": {
                     "$ref": "#/components/schemas/SeatsSortOrder"
                 }
@@ -407,18 +406,30 @@
             }
         },
         "schemas": {
-            "SeatsSortOrder": {
+            "SeatsSort": {
                 "type": "string",
-                "default": "",
                 "enum": [
-                    "asc",
-                    "desc", 
-                    ""
+                    "account_username",
+                    "first_name",
+                    "last_name",
+                    "email"
                 ],
                 "x-enum-varnames": [
-                    "SeatsSortOrderASC", 
-                    "SeatsSortOrderDESC", 
-                    "SeatsSortOrderEMPTY"
+                    "SeatsSortUSERNAME",
+                    "SeatsSortFIRSTNAME",
+                    "SeatsSortLASTNAME",
+                    "SeatsSortEMAIL"
+                ]
+            },
+            "SeatsSortOrder": {
+                "type": "string",
+                "enum": [
+                    "asc",
+                    "desc"
+                ],
+                "x-enum-varnames": [
+                    "SeatsSortOrderASC",
+                    "SeatsSortOrderDESC"
                 ]
             },
             "ServiceDetails": {

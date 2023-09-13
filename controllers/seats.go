@@ -102,34 +102,6 @@ func fillDefaults(params *api.GetSeatsParams) {
 	if params.Offset == nil {
 		params.Offset = toPtr(0)
 	}
-
-	if params.Status == nil {
-		params.Status = toPtr([]string{})
-	}
-
-	if params.AccountUsername == nil {
-		params.AccountUsername = toPtr("")
-	}
-	
-	if params.FirstName == nil {
-		params.FirstName = toPtr("")
-	}
-
-	if params.LastName == nil {
-		params.LastName = toPtr("")
-	}
-
-	if params.Email == nil {
-		params.Email = toPtr("")
-	}
-
-	if params.Sort == nil {
-		params.Sort = toPtr("")
-	}
-
-	if params.SortOrder == nil {
-		params.SortOrder = toPtr(api.SeatsSortOrderEMPTY)
-	}
 }
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {

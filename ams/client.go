@@ -165,7 +165,7 @@ func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSea
 		And().
 		Equals("organization_id", amsOrgId)
 
-	if valid, err := areStatusesValid(*searchParams.Status); valid {
+	if valid, err := areStatusesValid(searchParams.Status); valid {
 		queryBuilder = queryBuilder.And().In("status", *searchParams.Status)
 	} else if !valid && err != nil {
 		return nil, &ClientError{
@@ -176,19 +176,19 @@ func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSea
 		}
 	}
 
-	if searchParams.AccountUsername != nil {
+	if isSearchStrValid(searchParams.AccountUsername) {
 		queryBuilder = queryBuilder.And().Equals("creator.username", *searchParams.AccountUsername)
 	}
 
-	if searchParams.Email != nil {
+	if isSearchStrValid(searchParams.Email) {
 		queryBuilder = queryBuilder.And().Equals("creator.email", *searchParams.Email)
 	}
 
-	if searchParams.FirstName != nil {
+	if isSearchStrValid(searchParams.FirstName) {
 		queryBuilder = queryBuilder.And().Equals("creator.first_name", *searchParams.FirstName)
 	}
 
-	if searchParams.LastName != nil {
+	if isSearchStrValid(searchParams.LastName) {
 		queryBuilder = queryBuilder.And().Equals("creator.last_name", *searchParams.LastName)
 	}
 
@@ -200,11 +200,6 @@ func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSea
 		Parameter("fetchAccounts", true).
 		Size(size).
 		Page(page)
-
-	if searchParams.Sort != nil {
-		orderBy := fmt.Sprintf("%s %s", *searchParams.Sort, *searchParams.SortOrder)
-		req = req.Order(orderBy)
-	}
 
 	resp, err := req.Send()
 	getSubscriptionsTime.Observe(time.Since(start).Seconds())
@@ -306,10 +301,12 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 	return converted, err
 }
 
-func areStatusesValid(statuses []string) (bool, error) {
-	if statuses == nil {
+func areStatusesValid(statusesPtr *api.Status) (bool, error) {
+	if statusesPtr == nil {
 		return false, nil
 	}
+
+	statuses := *statusesPtr
 
 	if len(statuses) == 0 {
 		return false, nil
@@ -328,6 +325,10 @@ func areStatusesValid(statuses []string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func isSearchStrValid(val *string) bool {
+	return val != nil && *val != "" && strings.TrimSpace(*val) != ""
 }
 
 func validateOrgIdPattern(orgId string) (match bool, err error) {
