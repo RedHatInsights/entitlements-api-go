@@ -380,11 +380,7 @@
                 "description": "The order to sort seats in, ASC (ascending) or DESC (descending). Ignored if Sort is not provided.",
                 "schema": {
                     "type": "string",
-                    "enum": [
-                        "ASC",
-                        "DESC"
-                    ],
-                    "default": "ASC"
+                    "default": ""
                 }
             },
             "QueryOffset": {

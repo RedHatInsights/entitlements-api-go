@@ -128,7 +128,7 @@ func fillDefaults(params *api.GetSeatsParams) {
 	}
 
 	if params.SortOrder == nil {
-		params.SortOrder = toPtr(api.GetSeatsParamsSortOrderASC)
+		params.SortOrder = toPtr("")
 	}
 }
 
