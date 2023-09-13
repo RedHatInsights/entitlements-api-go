@@ -194,10 +194,21 @@ func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSea
 
 	query := queryBuilder.Build()
 
+	orderBy, err := buildOrderBy(searchParams.Sort, searchParams.SortOrder)
+	if err != nil {
+		return nil, &ClientError{
+			Message: err.Error(),
+			StatusCode: http.StatusBadRequest,
+			OrgId: organizationId,
+			AmsOrgId: amsOrgId,
+		}
+	}
+
 	start := time.Now()
 	req := c.client.AccountsMgmt().V1().Subscriptions().List().
 		Search(query).
 		Parameter("fetchAccounts", true).
+		Order(orderBy).
 		Size(size).
 		Page(page)
 
@@ -329,6 +340,38 @@ func areStatusesValid(statusesPtr *api.Status) (bool, error) {
 
 func isSearchStrValid(val *string) bool {
 	return val != nil && *val != "" && strings.TrimSpace(*val) != ""
+}
+
+func buildOrderBy(sort *api.Sort, sortOrder *api.SortOrder) (orderBy string, err error) {
+	// validate sort 
+	if sort == nil || *sort == "" {
+		return
+	}
+
+	sortType := api.Sort(*sort)
+	switch sortType{
+	case api.SeatsSortEMAIL, api.SeatsSortFIRSTNAME, api.SeatsSortLASTNAME, api.SeatsSortUSERNAME:
+		orderBy += string(sortType)
+	default:
+		return "", fmt.Errorf("provided sort value '%s' is an unsupported field to sort seats on, check apispec for list of supported sort values", *sort)
+	}
+
+	// validate sort order
+	if sortOrder == nil || *sortOrder == "" {
+		return
+	}
+
+	sortOrderType := api.SortOrder(*sortOrder)
+	switch sortOrderType{
+	case api.SeatsSortOrderASC, api.SeatsSortOrderDESC:
+		orderBy += " " + string(sortOrderType)
+	default:
+		return "", fmt.Errorf("provided sort order value '%s' is an unsupported field to order seats on, check apispec for list of supported sort order values", *sortOrder)
+	}
+
+	l.Log.WithFields(logrus.Fields{"ams_order_by":orderBy}).Debug("built ams order by")
+
+	return
 }
 
 func validateOrgIdPattern(orgId string) (match bool, err error) {

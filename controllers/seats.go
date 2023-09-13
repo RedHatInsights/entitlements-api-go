@@ -131,6 +131,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 		var clientError *ams.ClientError
 		if errors.As(err, &clientError) {
 			doError(w, clientError.StatusCode, clientError)
+			return
 		}
 		
 		do500(w, fmt.Errorf("AMS GetSubscriptions [%w]", err))
@@ -142,6 +143,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 		var clientError *ams.ClientError
 		if errors.As(err, &clientError) {
 			doError(w, clientError.StatusCode, clientError)
+			return
 		}
 
 		do500(w, fmt.Errorf("AMS GetQuotaCost [%w]", err))
