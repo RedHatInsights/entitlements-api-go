@@ -347,7 +347,7 @@ func buildOrderBy(sort *api.Sort, sortOrder *api.SortOrder) (orderBy string, err
 	sortType := api.Sort(*sort)
 	switch sortType{
 	case api.SeatsSortEMAIL, api.SeatsSortFIRSTNAME, api.SeatsSortLASTNAME, api.SeatsSortUSERNAME:
-		orderBy = string(sortType)
+		orderBy = fmt.Sprintf("creator.%s", sortType)
 	default:
 		return "", fmt.Errorf("provided sort value '%s' is an unsupported field to sort seats on, check apispec for list of supported sort values", *sort)
 	}

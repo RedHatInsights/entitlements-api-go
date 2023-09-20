@@ -373,7 +373,7 @@ var _ = Describe("AMS Client", func() {
 								Expect(params.Has("order")).To(BeTrue(), "params should have order")
 								
 								orderBy := params.Get("order")
-								Expect(orderBy).To(BeEquivalentTo("first_name"))
+								Expect(orderBy).To(BeEquivalentTo("creator.first_name"))
 							}),
 							ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
 						),
@@ -408,7 +408,7 @@ var _ = Describe("AMS Client", func() {
 								Expect(params.Has("order")).To(BeTrue(), "params should have order")
 								
 								orderBy := params.Get("order")
-								Expect(orderBy).To(BeEquivalentTo("first_name asc"))
+								Expect(orderBy).To(BeEquivalentTo("creator.first_name asc"))
 							}),
 							ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
 						),
@@ -510,6 +510,68 @@ var _ = Describe("AMS Client", func() {
 
 				subs, err := client.GetSubscriptions("orgId", params, 1, 0)
 
+				Expect(err).To(BeNil())
+				Expect(subs).ToNot(BeNil())
+			})
+		})
+
+		When("all search params are used", func() {
+			It("should construct the query correctly", func() {
+				returnedSubs :=`{"items":[{"id": "subId", "status": "active"}]}`
+				
+				amsServer.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", ContainSubstring("/api/accounts_mgmt/v1/subscriptions")),
+						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+							params, err := url.ParseQuery(r.URL.RawQuery)
+							
+							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
+							Expect(params).To(HaveLen(5))
+							Expect(params.Has("search")).To(BeTrue(), "params should have search")
+							Expect(params.Has("fetchAccounts")).To(BeTrue(), "params should have fetchAccounts")
+							Expect(params.Has("size")).To(BeTrue(), "params should have size")
+							Expect(params.Has("page")).To(BeTrue(), "params should have page")
+							Expect(params.Has("order")).To(BeTrue(), "params should have order by default")
+	
+							Expect(params.Get("search")).To(BeEquivalentTo(
+								"plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' " + 
+								"AND status IN ('Active','Deprovisioned') " +
+								"AND creator.username = 'foobar' " +
+								"AND creator.email = 'foobar@redhat.com' " + 
+								"AND creator.first_name = 'foo' " + 
+								"AND creator.last_name = 'bar'",
+							))
+							Expect(params.Get("order")).To(BeEquivalentTo("creator.first_name desc"))
+							Expect(params.Get("fetchAccounts")).To(BeEquivalentTo("true"))
+							Expect(params.Get("size")).To(BeEquivalentTo("2"))
+							Expect(params.Get("page")).To(BeEquivalentTo("1"))
+						}),
+						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
+					),
+				)
+	
+				client, err := NewClient(false)
+				Expect(err).To(BeNil())
+				
+				username 	:= "foobar"
+				email 		:= "foobar@redhat.com"
+				fname 		:= "foo"
+				lname 		:= "bar"
+				sort 		:= api.SeatsSortFIRSTNAME
+				sortOrder 	:= api.SeatsSortOrderDESC
+
+				params := api.GetSeatsParams{
+					Status: &api.Status{string(api.Active), string(api.Deprovisioned)},
+					AccountUsername: &username,
+					Email: &email,
+					FirstName: &fname,
+					LastName: &lname,
+					Sort: &sort,
+					SortOrder: &sortOrder,
+				}
+				
+				subs, err := client.GetSubscriptions("orgId", params, 2, 1)
+	
 				Expect(err).To(BeNil())
 				Expect(subs).ToNot(BeNil())
 			})
