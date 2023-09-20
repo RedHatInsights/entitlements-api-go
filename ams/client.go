@@ -165,7 +165,7 @@ func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSea
 		And().
 		Equals("organization_id", amsOrgId)
 
-	if statuses, err := buildStatusSearch(searchParams.Status); statuses != nil && err != nil {
+	if statuses, err := buildStatusSearch(searchParams.Status); statuses != nil && err == nil {
 		queryBuilder = queryBuilder.And().In("status", statuses)
 	} else if statuses == nil && err != nil {
 		return nil, &ClientError{
@@ -318,13 +318,14 @@ func buildStatusSearch(statuses *api.Status) (api.Status, error) {
 	}
 	
 	// ams is case sensitive when searching on status, so title case all input for the consumer
-	caser := cases.Title(language.Und)
+	caser := cases.Title(language.English)
 	titleCased := api.Status{}
 	for _, status := range *statuses {
 		statusType := api.GetSeatsParamsStatus(caser.String(status))
 		switch statusType{
 		case api.Active, api.Deprovisioned:
 			titleCased = append(titleCased, string(statusType))
+		case "":
 		default:
 			return nil, fmt.Errorf("provided status '%s' is an unsupported status to query seats for, check apispec for list of supported statuses", status)
 		}
@@ -346,7 +347,7 @@ func buildOrderBy(sort *api.Sort, sortOrder *api.SortOrder) (orderBy string, err
 	sortType := api.Sort(*sort)
 	switch sortType{
 	case api.SeatsSortEMAIL, api.SeatsSortFIRSTNAME, api.SeatsSortLASTNAME, api.SeatsSortUSERNAME:
-		orderBy += string(sortType)
+		orderBy = string(sortType)
 	default:
 		return "", fmt.Errorf("provided sort value '%s' is an unsupported field to sort seats on, check apispec for list of supported sort values", *sort)
 	}
@@ -359,7 +360,7 @@ func buildOrderBy(sort *api.Sort, sortOrder *api.SortOrder) (orderBy string, err
 	sortOrderType := api.SortOrder(*sortOrder)
 	switch sortOrderType{
 	case api.SeatsSortOrderASC, api.SeatsSortOrderDESC:
-		orderBy += " " + string(sortOrderType)
+		orderBy = fmt.Sprintf("%s %s", orderBy, sortOrderType)
 	default:
 		return "", fmt.Errorf("provided sort order value '%s' is an unsupported field to order seats on, check apispec for list of supported sort order values", *sortOrder)
 	}

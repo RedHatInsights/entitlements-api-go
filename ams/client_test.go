@@ -12,7 +12,7 @@ import (
 	"github.com/onsi/gomega/ghttp"
 )
 
-var _ = Describe("AMS Client - these tests are failing due to the jwt token hard coded below, they are not ready yet", Pending, func() {
+var _ = Describe("AMS Client", func() {
 
 	var amsServer 			*ghttp.Server
 	var tokenServer			*ghttp.Server
@@ -67,11 +67,12 @@ var _ = Describe("AMS Client - these tests are failing due to the jwt token hard
 						params, err := url.ParseQuery(r.URL.RawQuery)
 						
 						Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
-						Expect(params).To(HaveLen(4))
+						Expect(params).To(HaveLen(5))
 						Expect(params.Has("search")).To(BeTrue(), "params should have search")
 						Expect(params.Has("fetchAccounts")).To(BeTrue(), "params should have fetchAccounts")
 						Expect(params.Has("size")).To(BeTrue(), "params should have size")
 						Expect(params.Has("page")).To(BeTrue(), "params should have page")
+						Expect(params.Has("order")).To(BeTrue(), "params should have order by default")
 
 						search := params.Get("search")
 						Expect(search).To(Equal("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId'"))
@@ -84,7 +85,7 @@ var _ = Describe("AMS Client - these tests are failing due to the jwt token hard
 			Expect(err).To(BeNil())
 
 			params := api.GetSeatsParams{
-				Status: &[]string{""},
+				Status: &[]string{},
 			}
 			
 			subs, err := client.GetSubscriptions("orgId", params, 1, 0)
@@ -171,7 +172,7 @@ var _ = Describe("AMS Client - these tests are failing due to the jwt token hard
 							Expect(params.Has("search")).To(BeTrue(), "params should have search")
 							
 							search := params.Get("search")
-							Expect(search).To(Equal("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND status IN ('Active')"))
+							Expect(search).To(BeEquivalentTo("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND status IN ('Active')"))
 						}),
 						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
 					),
