@@ -214,6 +214,306 @@ var _ = Describe("AMS Client", func() {
 				})
 			})
 		})
+
+		When("only account username is included", func() {
+			It("appends account username to ams query", func() {
+				client, err := NewClient(false)
+				Expect(err).To(BeNil())
+
+				returnedSubs :=`{"items":[{"id": "subId"}]}`
+				
+				amsServer.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
+						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+							params, err := url.ParseQuery(r.URL.RawQuery)
+							
+							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
+							Expect(params.Has("search")).To(BeTrue(), "params should have search")
+							
+							search := params.Get("search")
+							Expect(search).To(BeEquivalentTo("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND creator.username = 'username'"))
+						}),
+						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
+					),
+				)
+
+				username := "username"
+				params := api.GetSeatsParams{
+					AccountUsername: &username,
+				}
+
+				subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+
+				Expect(err).To(BeNil())
+				Expect(subs).ToNot(BeNil())
+			})
+		})
+
+		When("only email is included", func() {
+			It("appends email to ams query", func() {
+				client, err := NewClient(false)
+				Expect(err).To(BeNil())
+
+				returnedSubs :=`{"items":[{"id": "subId"}]}`
+				
+				amsServer.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
+						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+							params, err := url.ParseQuery(r.URL.RawQuery)
+							
+							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
+							Expect(params.Has("search")).To(BeTrue(), "params should have search")
+							
+							search := params.Get("search")
+							Expect(search).To(BeEquivalentTo("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND creator.email = 'email'"))
+						}),
+						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
+					),
+				)
+
+				email := "email"
+				params := api.GetSeatsParams{
+					Email: &email,
+				}
+
+				subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+
+				Expect(err).To(BeNil())
+				Expect(subs).ToNot(BeNil())
+			})
+		})
+
+		When("only first name is included", func() {
+			It("appends first name to ams query", func() {
+				client, err := NewClient(false)
+				Expect(err).To(BeNil())
+
+				returnedSubs :=`{"items":[{"id": "subId"}]}`
+				
+				amsServer.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
+						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+							params, err := url.ParseQuery(r.URL.RawQuery)
+							
+							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
+							Expect(params.Has("search")).To(BeTrue(), "params should have search")
+							
+							search := params.Get("search")
+							Expect(search).To(BeEquivalentTo("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND creator.first_name = 'foo'"))
+						}),
+						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
+					),
+				)
+
+				fname := "foo"
+				params := api.GetSeatsParams{
+					FirstName: &fname,
+				}
+
+				subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+
+				Expect(err).To(BeNil())
+				Expect(subs).ToNot(BeNil())
+			})
+		})
+
+		When("only last name is included", func() {
+			It("appends last name to ams query", func() {
+				client, err := NewClient(false)
+				Expect(err).To(BeNil())
+
+				returnedSubs :=`{"items":[{"id": "subId"}]}`
+				
+				amsServer.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
+						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+							params, err := url.ParseQuery(r.URL.RawQuery)
+							
+							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
+							Expect(params.Has("search")).To(BeTrue(), "params should have search")
+							
+							search := params.Get("search")
+							Expect(search).To(BeEquivalentTo("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND creator.last_name = 'bar'"))
+						}),
+						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
+					),
+				)
+
+				lname := "bar"
+				params := api.GetSeatsParams{
+					LastName: &lname,
+				}
+
+				subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+
+				Expect(err).To(BeNil())
+				Expect(subs).ToNot(BeNil())
+			})
+		})
+
+		When("sort is included", func() {
+			Context("sort order is not included", func() {
+				It("constructs order by with only the sort field", func() {
+					client, err := NewClient(false)
+					Expect(err).To(BeNil())
+	
+					returnedSubs :=`{"items":[{"id": "subId"}]}`
+					
+					amsServer.AppendHandlers(
+						ghttp.CombineHandlers(
+							ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
+							http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+								params, err := url.ParseQuery(r.URL.RawQuery)
+								
+								Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
+								Expect(params.Has("order")).To(BeTrue(), "params should have order")
+								
+								orderBy := params.Get("order")
+								Expect(orderBy).To(BeEquivalentTo("first_name"))
+							}),
+							ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
+						),
+					)
+	
+					sort := api.SeatsSortFIRSTNAME
+					params := api.GetSeatsParams{
+						Sort: &sort,
+					}
+	
+					subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+	
+					Expect(err).To(BeNil())
+					Expect(subs).ToNot(BeNil())
+				})
+			})
+
+			Context("sort order is included", func() {
+				It("constructs order by with the sort and sort by field", func() {
+					client, err := NewClient(false)
+					Expect(err).To(BeNil())
+	
+					returnedSubs :=`{"items":[{"id": "subId"}]}`
+					
+					amsServer.AppendHandlers(
+						ghttp.CombineHandlers(
+							ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
+							http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+								params, err := url.ParseQuery(r.URL.RawQuery)
+								
+								Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
+								Expect(params.Has("order")).To(BeTrue(), "params should have order")
+								
+								orderBy := params.Get("order")
+								Expect(orderBy).To(BeEquivalentTo("first_name asc"))
+							}),
+							ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
+						),
+					)
+	
+					sort := api.SeatsSortFIRSTNAME
+					sortOrder := api.SeatsSortOrderASC
+					params := api.GetSeatsParams{
+						Sort: &sort,
+						SortOrder: &sortOrder,
+					}
+	
+					subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+	
+					Expect(err).To(BeNil())
+					Expect(subs).ToNot(BeNil())
+				})
+			})
+
+			Context("sort is an invalid option", func() {
+				It("returns an error and does not query ams", func() {
+					client, err := NewClient(false)
+					Expect(err).To(BeNil())
+	
+					sort := api.SeatsSort("names")
+					params := api.GetSeatsParams{
+						Sort: &sort,
+					}
+	
+					subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+	
+					Expect(subs).To(BeNil())
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(ContainSubstring("provided sort value 'names' is an unsupported field"))
+					Expect(amsServer.ReceivedRequests()).To(HaveLen(1))
+
+					var clientError *ClientError
+					Expect(err).To(BeAssignableToTypeOf(clientError))
+					errors.As(err, &clientError)
+					Expect(clientError.StatusCode).To(BeEquivalentTo(http.StatusBadRequest))
+				})
+			})
+
+			Context("sort order is an invalid option", func() {
+				It("returns an error and does not query ams", func() {
+					client, err := NewClient(false)
+					Expect(err).To(BeNil())
+	
+					sort := api.SeatsSortEMAIL
+					sortOrder := api.SeatsSortOrder("undefined")
+					params := api.GetSeatsParams{
+						Sort: &sort,
+						SortOrder: &sortOrder,
+					}
+	
+					subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+	
+					Expect(subs).To(BeNil())
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(ContainSubstring("provided sort order value 'undefined' is an unsupported field"))
+					Expect(amsServer.ReceivedRequests()).To(HaveLen(1))
+
+					var clientError *ClientError
+					Expect(err).To(BeAssignableToTypeOf(clientError))
+					errors.As(err, &clientError)
+					Expect(clientError.StatusCode).To(BeEquivalentTo(http.StatusBadRequest))
+				})
+			})
+		})
+
+		When("sort is not included and sort order is included", func() {
+			It("ignores sort order when building the order by param", func() {
+				client, err := NewClient(false)
+				Expect(err).To(BeNil())
+
+				returnedSubs :=`{"items":[{"id": "subId"}]}`
+				
+				amsServer.AppendHandlers(
+					ghttp.CombineHandlers(
+						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
+						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+							params, err := url.ParseQuery(r.URL.RawQuery)
+							
+							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
+							Expect(params.Has("order")).To(BeTrue(), "params should have order")
+							
+							orderBy := params.Get("order")
+							Expect(orderBy).To(BeEquivalentTo(""))
+						}),
+						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
+					),
+				)
+
+				sortOrder := api.SeatsSortOrderASC
+				params := api.GetSeatsParams{
+					Sort: nil,
+					SortOrder: &sortOrder,
+				}
+
+				subs, err := client.GetSubscriptions("orgId", params, 1, 0)
+
+				Expect(err).To(BeNil())
+				Expect(subs).ToNot(BeNil())
+			})
+		})
 	})
 
 	Context("ConvertUserOrgId", func() {
