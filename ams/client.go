@@ -208,7 +208,7 @@ func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSea
 	req := c.client.AccountsMgmt().V1().Subscriptions().List().
 		Search(query).
 		Parameter("fetchAccounts", true).
-		Order(orderBy).
+		Parameter("orderBy", orderBy).
 		Size(size).
 		Page(page)
 

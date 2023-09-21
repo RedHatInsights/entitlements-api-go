@@ -72,7 +72,7 @@ var _ = Describe("AMS Client", func() {
 						Expect(params.Has("fetchAccounts")).To(BeTrue(), "params should have fetchAccounts")
 						Expect(params.Has("size")).To(BeTrue(), "params should have size")
 						Expect(params.Has("page")).To(BeTrue(), "params should have page")
-						Expect(params.Has("order")).To(BeTrue(), "params should have order by default")
+						Expect(params.Has("orderBy")).To(BeTrue(), "params should have orderBy by default")
 
 						search := params.Get("search")
 						Expect(search).To(Equal("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId'"))
@@ -357,7 +357,7 @@ var _ = Describe("AMS Client", func() {
 
 		When("sort is included", func() {
 			Context("sort order is not included", func() {
-				It("constructs order by with only the sort field", func() {
+				It("constructs orderBy by with only the sort field", func() {
 					client, err := NewClient(false)
 					Expect(err).To(BeNil())
 	
@@ -370,9 +370,9 @@ var _ = Describe("AMS Client", func() {
 								params, err := url.ParseQuery(r.URL.RawQuery)
 								
 								Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
-								Expect(params.Has("order")).To(BeTrue(), "params should have order")
+								Expect(params.Has("orderBy")).To(BeTrue(), "params should have orderBy")
 								
-								orderBy := params.Get("order")
+								orderBy := params.Get("orderBy")
 								Expect(orderBy).To(BeEquivalentTo("creator.first_name"))
 							}),
 							ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
@@ -392,7 +392,7 @@ var _ = Describe("AMS Client", func() {
 			})
 
 			Context("sort order is included", func() {
-				It("constructs order by with the sort and sort by field", func() {
+				It("constructs orderBy with the sort and sort by field", func() {
 					client, err := NewClient(false)
 					Expect(err).To(BeNil())
 	
@@ -405,9 +405,9 @@ var _ = Describe("AMS Client", func() {
 								params, err := url.ParseQuery(r.URL.RawQuery)
 								
 								Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
-								Expect(params.Has("order")).To(BeTrue(), "params should have order")
+								Expect(params.Has("orderBy")).To(BeTrue(), "params should have orderBy")
 								
-								orderBy := params.Get("order")
+								orderBy := params.Get("orderBy")
 								Expect(orderBy).To(BeEquivalentTo("creator.first_name asc"))
 							}),
 							ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
@@ -480,7 +480,7 @@ var _ = Describe("AMS Client", func() {
 		})
 
 		When("sort is not included and sort order is included", func() {
-			It("ignores sort order when building the order by param", func() {
+			It("ignores sort order when building the orderBy param", func() {
 				client, err := NewClient(false)
 				Expect(err).To(BeNil())
 
@@ -493,9 +493,9 @@ var _ = Describe("AMS Client", func() {
 							params, err := url.ParseQuery(r.URL.RawQuery)
 							
 							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
-							Expect(params.Has("order")).To(BeTrue(), "params should have order")
+							Expect(params.Has("orderBy")).To(BeTrue(), "params should have orderBy")
 							
-							orderBy := params.Get("order")
+							orderBy := params.Get("orderBy")
 							Expect(orderBy).To(BeEquivalentTo(""))
 						}),
 						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
@@ -531,7 +531,7 @@ var _ = Describe("AMS Client", func() {
 							Expect(params.Has("fetchAccounts")).To(BeTrue(), "params should have fetchAccounts")
 							Expect(params.Has("size")).To(BeTrue(), "params should have size")
 							Expect(params.Has("page")).To(BeTrue(), "params should have page")
-							Expect(params.Has("order")).To(BeTrue(), "params should have order by default")
+							Expect(params.Has("orderBy")).To(BeTrue(), "params should have orderBy by default")
 	
 							Expect(params.Get("search")).To(BeEquivalentTo(
 								"plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' " + 
@@ -541,7 +541,7 @@ var _ = Describe("AMS Client", func() {
 								"AND creator.first_name = 'foo' " + 
 								"AND creator.last_name = 'bar'",
 							))
-							Expect(params.Get("order")).To(BeEquivalentTo("creator.first_name desc"))
+							Expect(params.Get("orderBy")).To(BeEquivalentTo("creator.first_name desc"))
 							Expect(params.Get("fetchAccounts")).To(BeEquivalentTo("true"))
 							Expect(params.Get("size")).To(BeEquivalentTo("2"))
 							Expect(params.Get("page")).To(BeEquivalentTo("1"))
