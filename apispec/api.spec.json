@@ -105,7 +105,16 @@
                         "$ref": "#/components/parameters/Status"
                     },
                     {
-                        "$ref": "#/components/parameters/ExcludeStatus"
+                        "$ref": "#/components/parameters/AccountUsername"
+                    },
+                    {
+                        "$ref": "#/components/parameters/FirstName"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LastName"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Email"
                     },
                     {
                         "$ref": "#/components/parameters/QueryLimit"
@@ -308,19 +317,44 @@
                     }
                 }
             },
-            "ExcludeStatus": {
+            "AccountUsername": {
                 "in": "query",
-                "name": "excludeStatus",
+                "name": "accountUsername",
                 "required": false,
-                "description": "List of statuses to exclude subscriptions from result set if they have any of these statuses. Deprecated, use status instead.",
-                "deprecated": true,
+                "description": "Username of user in seat that will be added to query for subscriptions from ams result set.",
                 "schema": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "enum": ["Active", "Deprovisioned"],
-                        "default": ""
-                    }
+                    "type": "string",
+                    "default": ""
+                }
+            },
+            "FirstName": {
+                "in": "query",
+                "name": "firstName",
+                "required": false,
+                "description": "First name of user in seat that will be added to query for subscriptions from ams result set.",
+                "schema": {
+                    "type": "string",
+                    "default": ""
+                }
+            },
+            "LastName": {
+                "in": "query",
+                "name": "lastName",
+                "required": false,
+                "description": "Last name of user in seat that will be added to query for subscriptions from ams result set.",
+                "schema": {
+                    "type": "string",
+                    "default": ""
+                }
+            },
+            "Email": {
+                "in": "query",
+                "name": "email",
+                "required": false,
+                "description": "Email of user in seat that will be added to query for subscriptions from ams result set.",
+                "schema": {
+                    "type": "string",
+                    "default": ""
                 }
             },
             "QueryOffset": {
@@ -348,6 +382,32 @@
             }
         },
         "schemas": {
+            "SeatsSort": {
+                "type": "string",
+                "enum": [
+                    "account_username",
+                    "first_name",
+                    "last_name",
+                    "email"
+                ],
+                "x-enum-varnames": [
+                    "SeatsSortUSERNAME",
+                    "SeatsSortFIRSTNAME",
+                    "SeatsSortLASTNAME",
+                    "SeatsSortEMAIL"
+                ]
+            },
+            "SeatsSortOrder": {
+                "type": "string",
+                "enum": [
+                    "asc",
+                    "desc"
+                ],
+                "x-enum-varnames": [
+                    "SeatsSortOrderASC",
+                    "SeatsSortOrderDESC"
+                ]
+            },
             "ServiceDetails": {
                 "type": "object",
                 "properties": {
@@ -501,6 +561,9 @@
                         "type": "string"
                     },
                     "last_name": {
+                        "type": "string"
+                    },
+                    "email": {
                         "type": "string"
                     }
                 }

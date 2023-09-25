@@ -32,9 +32,9 @@ var _ = Describe("Query Builder Test", func () {
 	})
 
 	When("In is called", func () {
-		It("should add an IN clause to the query and standardize casing", func () {
-			query := builder.In("foo.bar", []string{"ALLCAPS", "ChIcKeN", "allLower"}).Build()
-			Expect(query).To(Equal("foo.bar IN ('Allcaps','Chicken','Alllower')"))
+		It("should add an IN clause to the query", func () {
+			query := builder.In("foo.bar", []string{"Cow", "Chicken"}).Build()
+			Expect(query).To(Equal("foo.bar IN ('Cow','Chicken')"))
 		})
 	})
 
@@ -45,7 +45,7 @@ var _ = Describe("Query Builder Test", func () {
 				And().
 				Equals("baz", "thonk").
 				Build()
-			Expect(query).To(Equal("foo.bar IN ('Some Status') AND baz = 'thonk'"))
+			Expect(query).To(Equal("foo.bar IN ('some status') AND baz = 'thonk'"))
 		})
 	})
 
@@ -58,7 +58,7 @@ var _ = Describe("Query Builder Test", func () {
 				And().
 				Equals("baz", "thonk").
 				Build()
-			Expect(query).To(Equal("field LIKE 'nothonk' AND foo.bar IN ('Some Status') AND baz = 'thonk'"))
+			Expect(query).To(Equal("field LIKE 'nothonk' AND foo.bar IN ('some status') AND baz = 'thonk'"))
 		})
 	})
 })

@@ -1,5 +1,5 @@
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4 --config=types.cfg.yaml ../apispec/api.spec.json
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4 --config=server.cfg.yaml ../apispec/api.spec.json
+//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0 --config=types.cfg.yaml ../apispec/api.spec.json
+//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0 --config=server.cfg.yaml ../apispec/api.spec.json
 
 package controllers
 
@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/RedHatInsights/entitlements-api-go/logger"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
@@ -103,18 +102,9 @@ func fillDefaults(params *api.GetSeatsParams) {
 	if params.Offset == nil {
 		params.Offset = toPtr(0)
 	}
-
-	if params.Status == nil {
-		params.Status = toPtr([]string{})
-	}
 }
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
-	// TODO: https://issues.redhat.com/browse/RHCLOUD-27871, delete ExcludeStatus param
-	if params.ExcludeStatus != nil && params.Status != nil {
-		doError(w, http.StatusBadRequest, fmt.Errorf("cannot use both 'excludeStatus' and 'status' in get seats query, use 'status' only"))
-		return
-	}
 
 	idObj := identity.Get(r.Context()).Identity
 
@@ -136,11 +126,12 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 
 	page := 1 + (offset / limit)
 
-	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, *params.Status, limit, page)
+	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, params, limit, page)
 	if err != nil {
 		var clientError *ams.ClientError
 		if errors.As(err, &clientError) {
 			doError(w, clientError.StatusCode, clientError)
+			return
 		}
 		
 		do500(w, fmt.Errorf("AMS GetSubscriptions [%w]", err))
@@ -152,6 +143,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 		var clientError *ams.ClientError
 		if errors.As(err, &clientError) {
 			doError(w, clientError.StatusCode, clientError)
+			return
 		}
 
 		do500(w, fmt.Errorf("AMS GetQuotaCost [%w]", err))
@@ -159,28 +151,21 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 	}
 
 	var seats = make([]api.Seat, 0)
-	excludeStatus := make(map[string]int)
-	if params.ExcludeStatus != nil && len(*params.ExcludeStatus) > 0 {
-		for index, element := range *params.ExcludeStatus { // convert to a map so we only have to iterate once
-			excludeStatus[strings.ToLower(element)] = index
-		}
-	}
 	subs.Each(func(sub *v1.Subscription) bool {
-		if _, exclude := excludeStatus[strings.ToLower(sub.Status())]; !exclude {
-			creator, ok := sub.GetCreator()
-			if !ok {
-				logger.Log.WithFields(logrus.Fields{"warning": fmt.Sprintf("Missing creator data for subscription [%s]", sub.ID())}).Warn("missing ams creator data")
-				creator, _ = v1.NewAccount().FirstName("UNKNOWN").LastName("UNKNOWN").Username("UNKNOWN").Build()
-			}
-
-			seats = append(seats, api.Seat{
-				AccountUsername: toPtr(creator.Username()),
-				SubscriptionId:  toPtr(sub.ID()),
-				Status:          toPtr(sub.Status()),
-				FirstName: 		 toPtr(creator.FirstName()),
-				LastName: 		 toPtr(creator.LastName()),
-			})
+		creator, ok := sub.GetCreator()
+		if !ok {
+			logger.Log.WithFields(logrus.Fields{"warning": fmt.Sprintf("Missing creator data for subscription [%s]", sub.ID())}).Warn("missing ams creator data")
+			creator, _ = v1.NewAccount().FirstName("UNKNOWN").LastName("UNKNOWN").Username("UNKNOWN").Build()
 		}
+
+		seats = append(seats, api.Seat{
+			AccountUsername: 	toPtr(creator.Username()),
+			SubscriptionId:  	toPtr(sub.ID()),
+			Status:          	toPtr(sub.Status()),
+			FirstName: 		 	toPtr(creator.FirstName()),
+			LastName: 		 	toPtr(creator.LastName()),
+			Email:				toPtr(creator.Email()),
+		})
 		return true
 	})
 

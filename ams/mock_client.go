@@ -3,6 +3,7 @@ package ams
 import (
 	"fmt"
 
+	"github.com/RedHatInsights/entitlements-api-go/api"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 )
 
@@ -53,7 +54,7 @@ func (c *Mock) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.Quo
     return MockQuotaAuthorization(accountUsername, quotaVersion)
 }
 
-var MockGetSubscriptions = func(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
+var MockGetSubscriptions = func(organizationId string, searchParams api.GetSeatsParams, size, page int) (*v1.SubscriptionList, error) {
     lst, err := v1.NewSubscriptionList().
         Items(
             v1.NewSubscription().
@@ -66,8 +67,8 @@ var MockGetSubscriptions = func(organizationId string, statuses []string, size, 
     }
     return lst, nil
 }
-func (c *Mock) GetSubscriptions(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
-    return MockGetSubscriptions(organizationId, statuses, size, page)
+func (c *Mock) GetSubscriptions(organizationId string, searchParams api.GetSeatsParams, size, page int) (*v1.SubscriptionList, error) {
+    return MockGetSubscriptions(organizationId, searchParams, size, page)
 }
 
 var MockConvertUserOrgId = func(userOrgId string) (string, error) {

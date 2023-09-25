@@ -5,8 +5,6 @@ import (
 
 	"github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 // QueryBuilder is a struct that contains methods to build a query to send to AMS.
@@ -15,13 +13,11 @@ import (
 // These methods construct a query string by operator, accepting a field and value to use.
 type QueryBuilder struct {
 	query	string
-	caser	cases.Caser
 }
 
 func NewQueryBuilder() *QueryBuilder {
 	return &QueryBuilder{
 		query: "",
-		caser: cases.Title(language.Und),
 	}
 }
 
@@ -61,9 +57,8 @@ func (builder *QueryBuilder) Equals(field, value string) *QueryBuilder {
 func (builder *QueryBuilder) In(field string, values []string) *QueryBuilder {
 	var value strings.Builder
 	for index,element := range values {
-		// AMS is case sensitive, so standardize the input here by using Title Case
 		value.WriteString("'")
-		value.WriteString(builder.caser.String(element))
+		value.WriteString(element)
 		value.WriteString("'")
 		if index < len(values)-1 {
 			value.WriteString(",")

@@ -57,7 +57,7 @@ var quotaAuthorizationTime = promauto.NewHistogram(prometheus.HistogramOpts{
 type AMSInterface interface {
 	GetQuotaCost(organizationId string) (*v1.QuotaCost, error)
 	GetSubscription(subscriptionId string) (*v1.Subscription, error)
-	GetSubscriptions(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error)
+	GetSubscriptions(organizationId string, searchParams api.GetSeatsParams, size, page int) (*v1.SubscriptionList, error)
 	DeleteSubscription(subscriptionId string) error
 	QuotaAuthorization(accountUsername, quotaVersion string) (*v1.QuotaAuthorizationResponse, error)
 	ConvertUserOrgId(userOrgId string) (string, error)
@@ -154,7 +154,7 @@ func (c *Client) GetSubscription(subscriptionId string) (*v1.Subscription, error
 	return resp.Body(), nil
 }
 
-func (c *Client) GetSubscriptions(organizationId string, statuses []string, size, page int) (*v1.SubscriptionList, error) {
+func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSeatsParams, size, page int) (*v1.SubscriptionList, error) {
 	amsOrgId, err := c.ConvertUserOrgId(organizationId)
 	if err != nil {
 		return nil, err
@@ -165,15 +165,31 @@ func (c *Client) GetSubscriptions(organizationId string, statuses []string, size
 		And().
 		Equals("organization_id", amsOrgId)
 
-	if valid, err := areStatusesValid(statuses); valid {
+	if statuses, err := buildStatusSearch(searchParams.Status); statuses != nil && err == nil {
 		queryBuilder = queryBuilder.And().In("status", statuses)
-	} else if !valid && err != nil {
+	} else if statuses == nil && err != nil {
 		return nil, &ClientError{
 			Message: err.Error(),
 			StatusCode: http.StatusBadRequest,
 			OrgId: organizationId,
 			AmsOrgId: amsOrgId,
 		}
+	}
+
+	if isSearchStrValid(searchParams.AccountUsername) {
+		queryBuilder = queryBuilder.And().Equals("creator.username", *searchParams.AccountUsername)
+	}
+
+	if isSearchStrValid(searchParams.Email) {
+		queryBuilder = queryBuilder.And().Equals("creator.email", *searchParams.Email)
+	}
+
+	if isSearchStrValid(searchParams.FirstName) {
+		queryBuilder = queryBuilder.And().Equals("creator.first_name", *searchParams.FirstName)
+	}
+
+	if isSearchStrValid(searchParams.LastName) {
+		queryBuilder = queryBuilder.And().Equals("creator.last_name", *searchParams.LastName)
 	}
 
 	query := queryBuilder.Build()
@@ -285,28 +301,30 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 	return converted, err
 }
 
-func areStatusesValid(statuses []string) (bool, error) {
-	if statuses == nil {
-		return false, nil
-	}
-
-	if len(statuses) == 0 {
-		return false, nil
+func buildStatusSearch(statuses *api.Status) (api.Status, error) {
+	if statuses == nil || len(*statuses) == 0{
+		return nil, nil
 	}
 	
-	// ignore case when validating statuses
-	caser := cases.Title(language.Und)
-	for _, status := range statuses {
+	// ams is case sensitive when searching on status, so title case all input for the consumer
+	caser := cases.Title(language.English)
+	titleCased := api.Status{}
+	for _, status := range *statuses {
 		statusType := api.GetSeatsParamsStatus(caser.String(status))
 		switch statusType{
-		case api.GetSeatsParamsStatusActive, api.GetSeatsParamsStatusDeprovisioned:
-			continue
+		case api.Active, api.Deprovisioned:
+			titleCased = append(titleCased, string(statusType))
+		case "":
 		default:
-			return false, fmt.Errorf("provided status '%s' is an unsupported status to query seats for, check apispec for list of supported statuses", status)
+			return nil, fmt.Errorf("provided status '%s' is an unsupported status to query seats for, check apispec for list of supported statuses", status)
 		}
 	}
 
-	return true, nil
+	return titleCased, nil
+}
+
+func isSearchStrValid(val *string) bool {
+	return val != nil && *val != "" && strings.TrimSpace(*val) != ""
 }
 
 func validateOrgIdPattern(orgId string) (match bool, err error) {
