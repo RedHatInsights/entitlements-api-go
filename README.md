@@ -103,7 +103,7 @@ docker run -p 3000:3000 entitlements-api-go
 ## Testing Entitlements API with curl
 
 The Entitlements API requires that you pass in a valid `x-redhat-identity` header or it rejects requests.
-For an example see `cat ./scripts/xrhid_helper.sh`
+For an example see `cat ./scripts/xrhid.sh`
 
 ## Testing the bundle-sync
 
