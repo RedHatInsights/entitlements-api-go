@@ -117,12 +117,6 @@
                         "$ref": "#/components/parameters/Email"
                     },
                     {
-                        "$ref": "#/components/parameters/Sort"
-                    },
-                    {
-                        "$ref": "#/components/parameters/SortOrder"
-                    },
-                    {
                         "$ref": "#/components/parameters/QueryLimit"
                     },
                     {
@@ -361,24 +355,6 @@
                 "schema": {
                     "type": "string",
                     "default": ""
-                }
-            },
-            "Sort": {
-                "in": "query",
-                "name": "sort",
-                "required": false,
-                "description": "Name of the field you want to sort seats on. Can be most fields from the Seat object.",
-                "schema": {
-                    "$ref": "#/components/schemas/SeatsSort"
-                }
-            },
-            "SortOrder": {
-                "in": "query",
-                "name": "sortOrder",
-                "required": false,
-                "description": "The order to sort seats in, asc (ascending) or desc (descending). Ignored if Sort is not provided.",
-                "schema": {
-                    "$ref": "#/components/schemas/SeatsSortOrder"
                 }
             },
             "QueryOffset": {
