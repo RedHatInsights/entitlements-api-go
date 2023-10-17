@@ -11,6 +11,7 @@ import (
 
 	"github.com/RedHatInsights/entitlements-api-go/logger"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
+	ocmErrors "github.com/openshift-online/ocm-sdk-go/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/RedHatInsights/entitlements-api-go/ams"
@@ -35,19 +36,58 @@ func NewSeatManagerApi(cl ams.AMSInterface, bopClient bop.Bop) *SeatManagerApi {
 	}
 }
 
-func doError(w http.ResponseWriter, code int, err error) {
-	logger.Log.WithFields(logrus.Fields{"error": err, "status": code}).Debug("ams request error")
-	response := api.Error{
-		Error: toPtr(err.Error()),
-	}
+func writeError(w http.ResponseWriter, response api.Error){
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
+	w.WriteHeader(*response.Status)
 	json.NewEncoder(w).Encode(response)
 }
 
+func doError(w http.ResponseWriter, code int, err error) {
+	log := logger.Log.WithFields(logrus.Fields{"error": err, "status": code})
+	if code == http.StatusInternalServerError {
+		log.Error("ams internal server error")
+	} else {
+		log.Debug("ams request error")
+	}
+
+	response := api.Error{
+		Error: 	toPtr(err.Error()),
+		Status: toPtr(code),
+	}
+	writeError(w, response)
+}
+
 func do500(w http.ResponseWriter, err error) {
-	logger.Log.WithFields(logrus.Fields{"error": err}).Error("ams request error")
 	doError(w, http.StatusInternalServerError, err)
+}
+
+func mapError(w http.ResponseWriter, err error, fallbackMsg string) {
+	var amsError *ocmErrors.Error
+	if errors.As(err, &amsError) {
+		response := api.Error{
+			Error: 			toPtr(amsError.Error()),
+			Code:  			toPtr(amsError.Code()),
+			Identifier: 	toPtr(amsError.ID()),
+			OperationId: 	toPtr(amsError.OperationID()),
+			Status: 		toPtr(amsError.Status()),
+		}
+		writeError(w, response)
+		return
+	}
+	
+	var clientError *ams.ClientError
+	if errors.As(err, &clientError) {
+		doError(w, clientError.StatusCode, clientError)
+		return
+	}
+
+	var userDetailErr *bop.UserDetailError
+	if errors.As(err, &userDetailErr) {
+		doError(w, userDetailErr.StatusCode, userDetailErr)
+		return
+	}
+	
+	do500(w, fmt.Errorf("%s [%w]", fallbackMsg, err))
 }
 
 func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, id string) {
@@ -60,7 +100,7 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 
 	subscription, err := s.client.GetSubscription(id)
 	if err != nil {
-		do500(w, fmt.Errorf("AMS GetSubscription [%w]", err))
+		mapError(w, err, "AMS GetSubscription")
 		return
 	}
 
@@ -71,7 +111,7 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 
 	amsUserOrgId, err := s.client.ConvertUserOrgId(idObj.Internal.OrgID)
 	if err != nil {
-		do500(w, fmt.Errorf("AMS ConvertUserOrgId [%w]", err))
+		mapError(w, err, "AMS ConvertUserOrgId")
 		return
 	}
 
@@ -83,7 +123,7 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 	}
 
 	if err = s.client.DeleteSubscription(id); err != nil {
-		do500(w, fmt.Errorf("AMS DeleteSubscription [%w]", err))
+		mapError(w, err, "AMS DeleteSubscription")
 		return
 	}
 
@@ -128,25 +168,13 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 
 	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, params, limit, page)
 	if err != nil {
-		var clientError *ams.ClientError
-		if errors.As(err, &clientError) {
-			doError(w, clientError.StatusCode, clientError)
-			return
-		}
-		
-		do500(w, fmt.Errorf("AMS GetSubscriptions [%w]", err))
+		mapError(w, err, "AMS GetSubscriptions")
 		return
 	}
 
 	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
-		var clientError *ams.ClientError
-		if errors.As(err, &clientError) {
-			doError(w, clientError.StatusCode, clientError)
-			return
-		}
-
-		do500(w, fmt.Errorf("AMS GetQuotaCost [%w]", err))
+		mapError(w, err, "AMS GetQuotaCost")
 		return
 	}
 
@@ -217,12 +245,7 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 
 	user, err := s.bop.GetUser(seat.AccountUsername)
 	if err != nil {
-		var userDetailErr *bop.UserDetailError
-		if errors.As(err, &userDetailErr) {
-			doError(w, userDetailErr.StatusCode, userDetailErr)
-			return
-		}
-		do500(w, fmt.Errorf("BOP GetUser [%w]", err))
+		mapError(w, err, "BOP GetUser")
 		return
 	}
 
@@ -233,13 +256,13 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 
 	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
-		do500(w, fmt.Errorf("GetQuotaCost [%w]", err))
+		mapError(w, err, "AMS GetQuotaCost")
 		return
 	}
 
 	resp, err := s.client.QuotaAuthorization(seat.AccountUsername, quotaCost.Version())
 	if err != nil {
-		do500(w, fmt.Errorf("QuotaAuthorization: [%w]", err))
+		mapError(w, err, "AMS QuotaAuthorization")
 		return
 	}
 
