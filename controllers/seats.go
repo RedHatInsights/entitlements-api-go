@@ -65,7 +65,7 @@ func mapError(w http.ResponseWriter, err error, fallbackMsg string) {
 	var amsError *ocmErrors.Error
 	if errors.As(err, &amsError) {
 		response := api.Error{
-			Error: 			toPtr(amsError.Error()),
+			Error: 			toPtr(amsError.Reason()),
 			Code:  			toPtr(amsError.Code()),
 			Identifier: 	toPtr(amsError.ID()),
 			OperationId: 	toPtr(amsError.OperationID()),
