@@ -28,7 +28,7 @@ const BASE_LINK_URL = "/api/entitlements/v1/seats"
 
 var _ api.ServerInterface = &SeatManagerApi{}
 
-func NewSeatManagerApi(amsClient ams.AMSInterface, bopClient bop.Bop, amsErrMapper ams.AMSErrorMapper) *SeatManagerApi {
+func NewSeatManagerApi(amsClient ams.AMSInterface, bopClient bop.Bop) *SeatManagerApi {
 	return &SeatManagerApi{
 		ams: amsClient,
 		bop: bopClient,
