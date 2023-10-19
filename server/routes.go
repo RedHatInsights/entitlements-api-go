@@ -39,6 +39,7 @@ func DoRoutes() chi.Router {
 	configOptions := config.GetConfig().Options
 	debug := configOptions.GetBool(config.Keys.Debug)
 	amsClient, err := ams.NewClient(debug)
+	amsErrMap := ams.NewErrorMapper(config.GetConfig())
 
 	if err != nil {
 		panic(fmt.Sprintf("Error constructing ams client: [%s]", err))
@@ -54,7 +55,7 @@ func DoRoutes() chi.Router {
 	// but since only part of the server is using code gen this is
 	// a way to hack it in
 	if !configOptions.GetBool(config.Keys.DisableSeatManager) {
-		seatManagerApi := controllers.NewSeatManagerApi(amsClient, bopClient)
+		seatManagerApi := controllers.NewSeatManagerApi(amsClient, bopClient, amsErrMap)
 		api.HandlerFromMuxWithBaseURL(seatManagerApi, r.With(identity.EnforceIdentity), "/api/entitlements/v1")
 	}
 

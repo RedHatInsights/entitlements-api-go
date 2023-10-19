@@ -61,6 +61,7 @@ type EntitlementsConfigKeysType struct {
 	SubsCacheDuration  string
 	SubsCacheMaxSize   string
 	SubsCacheItemPrune string
+	AMSAcctMgmt11Msg   string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -99,6 +100,7 @@ var Keys = EntitlementsConfigKeysType{
 	SubsCacheDuration:  "SUBS_CACHE_DURATION_SECONDS",
 	SubsCacheMaxSize:   "SUBS_CACHE_MAX_SIZE",
 	SubsCacheItemPrune: "SUBS_CACHE_ITEM_PRUNE",
+	AMSAcctMgmt11Msg:	"AMS_ACCT_MGMT_11_ERR_MSG",
 }
 
 func getBaseFeaturesPath(options *viper.Viper) string {
@@ -194,6 +196,7 @@ func initialize() {
 	options.SetDefault(Keys.SubsCacheDuration, 1800) // seconds
 	options.SetDefault(Keys.SubsCacheMaxSize, 500)
 	options.SetDefault(Keys.SubsCacheItemPrune, 50)
+	options.SetDefault(Keys.AMSAcctMgmt11Msg, "Please have this user log into \"https://console.redhat.com/openshift\" to grant their account the required permissions, or try again later.")
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()

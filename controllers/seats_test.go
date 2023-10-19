@@ -14,6 +14,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
+	ocmErrors "github.com/openshift-online/ocm-sdk-go/errors"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
 
@@ -81,7 +82,8 @@ var _ = Describe("using the seat managment api", func() {
 	BeforeEach(func() {
 		client = &ams.Mock{}
 		bopClient, _ = bop.NewClient(true)
-		seatApi = NewSeatManagerApi(client, bopClient)
+		amsErrMapper := &ams.MockMapper{Mock: func(err *ocmErrors.Error) string {return ""}}
+		seatApi = NewSeatManagerApi(client, bopClient, amsErrMapper)
 		rr = httptest.NewRecorder()
 	})
 
@@ -258,7 +260,7 @@ var _ = Describe("using the seat managment api", func() {
 			It("should not assign the user a seat", func() {
 				mismatchApi := NewSeatManagerApi(client, &bop.Mock{
 					OrgId: "12345",
-				})
+				}, &ams.MockMapper{Mock: func(err *ocmErrors.Error) string {return ""}})
 				b, err := json.Marshal(api.SeatRequest{
 					AccountUsername: "test-user",
 				})
