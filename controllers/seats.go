@@ -21,8 +21,8 @@ import (
 )
 
 type SeatManagerApi struct {
-	ams 			ams.AMSInterface
-	bop    			bop.Bop
+	ams 		ams.AMSInterface
+	bop    		bop.Bop
 	amsErrMapper	ams.AMSErrorMapper
 }
 
