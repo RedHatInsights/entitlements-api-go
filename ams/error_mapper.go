@@ -25,7 +25,7 @@ type DefaultMapper struct {
 
 func(m *DefaultMapper) MapErrorMessage(err *ocmErrors.Error) string {
 	if isError(err, acctMgmt11, acctMgmt11Status) {
-		return fmt.Sprintf("%s. %s.", err.Reason(), m.config.Options.GetString(config.Keys.AMSAcctMgmt11Msg))
+		return fmt.Sprintf("%s. %s", err.Reason(), m.config.Options.GetString(config.Keys.AMSAcctMgmt11Msg))
 	}
 
 	return err.Reason()
