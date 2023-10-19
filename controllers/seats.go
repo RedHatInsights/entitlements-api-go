@@ -5,10 +5,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/logger"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/sirupsen/logrus"
@@ -20,70 +20,75 @@ import (
 )
 
 type SeatManagerApi struct {
-	client ams.AMSInterface
-	bop    bop.Bop
+	ams 		ams.AMSInterface
+	bop    		bop.Bop
 }
 
 const BASE_LINK_URL = "/api/entitlements/v1/seats"
 
 var _ api.ServerInterface = &SeatManagerApi{}
 
-func NewSeatManagerApi(cl ams.AMSInterface, bopClient bop.Bop) *SeatManagerApi {
+func NewSeatManagerApi(amsClient ams.AMSInterface, bopClient bop.Bop) *SeatManagerApi {
 	return &SeatManagerApi{
-		client: cl,
-		bop:    bopClient,
+		ams: amsClient,
+		bop: bopClient,
 	}
 }
 
-func doError(w http.ResponseWriter, code int, err error) {
-	logger.Log.WithFields(logrus.Fields{"error": err, "status": code}).Debug("ams request error")
-	response := api.Error{
-		Error: toPtr(err.Error()),
+var errorMapper SeatsErrorMapper = NewErrorMapper(config.GetConfig())
+
+// doError will construct an api.Error reponse and write it to the response writer
+func doError(w http.ResponseWriter, httpStatusCode int, err error, source string) {
+	response := errorMapper.MapResponse(err, httpStatusCode)
+
+	log := logger.Log.WithFields(logrus.Fields{"error": err, "status": httpStatusCode, "source": source})
+	if *response.Status == http.StatusInternalServerError {
+		log.Error("ams internal server error")
+	} else {
+		log.Debug("ams request error")
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
+	w.WriteHeader(*response.Status)
 	json.NewEncoder(w).Encode(response)
-}
-
-func do500(w http.ResponseWriter, err error) {
-	logger.Log.WithFields(logrus.Fields{"error": err}).Error("ams request error")
-	doError(w, http.StatusInternalServerError, err)
 }
 
 func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, id string) {
 	idObj := identity.Get(r.Context()).Identity
 
 	if !idObj.User.OrgAdmin {
-		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s. User must be org admin", id))
+		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s. User must be org admin", id), "")
 		return
 	}
 
-	subscription, err := s.client.GetSubscription(id)
+	subscription, err := s.ams.GetSubscription(id)
 	if err != nil {
-		do500(w, fmt.Errorf("AMS GetSubscription [%w]", err))
+		doError(w, http.StatusInternalServerError, err, "AMS GetSubscription")
 		return
 	}
 
 	subOrgId, ok := subscription.GetOrganizationID()
 	if !ok {
-		do500(w, fmt.Errorf("Subscription with id [%s] does not have a corresponding ams org id, cannot verify subscription org", id))
+		doError(w, http.StatusInternalServerError, 
+			fmt.Errorf("Subscription with id [%s] does not have a corresponding ams org id, cannot verify subscription org", id), "")
+		return
 	}
 
-	amsUserOrgId, err := s.client.ConvertUserOrgId(idObj.Internal.OrgID)
+	amsUserOrgId, err := s.ams.ConvertUserOrgId(idObj.Internal.OrgID)
 	if err != nil {
-		do500(w, fmt.Errorf("AMS ConvertUserOrgId [%w]", err))
+		doError(w, http.StatusInternalServerError, err, "AMS ConvertUserOrgId")
 		return
 	}
 
 	if subOrgId != amsUserOrgId {
 		doError(w, http.StatusForbidden,
 			fmt.Errorf("Not allowed to delete subscription %s. Subscription org [%s] must match user ams org id [%s]}. User org [%s]",
-				id, subOrgId, amsUserOrgId, idObj.Internal.OrgID))
+				id, subOrgId, amsUserOrgId, idObj.Internal.OrgID), "")
 		return
 	}
 
-	if err = s.client.DeleteSubscription(id); err != nil {
-		do500(w, fmt.Errorf("AMS DeleteSubscription [%w]", err))
+	if err = s.ams.DeleteSubscription(id); err != nil {
+		doError(w, http.StatusInternalServerError, err, "AMS DeleteSubscription")
 		return
 	}
 
@@ -115,38 +120,26 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 	offset := int(*params.Offset)
 
 	if limit < 1 {
-		doError(w, http.StatusBadRequest, fmt.Errorf("limit must be > 0"))
+		doError(w, http.StatusBadRequest, fmt.Errorf("limit must be > 0"), "")
 		return
 	}
 
 	if offset < 0 {
-		doError(w, http.StatusBadRequest, fmt.Errorf("offset must be >= 0"))
+		doError(w, http.StatusBadRequest, fmt.Errorf("offset must be >= 0"), "")
 		return
 	}
 
 	page := 1 + (offset / limit)
 
-	subs, err := s.client.GetSubscriptions(idObj.Internal.OrgID, params, limit, page)
+	subs, err := s.ams.GetSubscriptions(idObj.Internal.OrgID, params, limit, page)
 	if err != nil {
-		var clientError *ams.ClientError
-		if errors.As(err, &clientError) {
-			doError(w, clientError.StatusCode, clientError)
-			return
-		}
-		
-		do500(w, fmt.Errorf("AMS GetSubscriptions [%w]", err))
+		doError(w, http.StatusInternalServerError, err, "AMS GetSubscriptions")
 		return
 	}
 
-	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
+	quotaCost, err := s.ams.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
-		var clientError *ams.ClientError
-		if errors.As(err, &clientError) {
-			doError(w, clientError.StatusCode, clientError)
-			return
-		}
-
-		do500(w, fmt.Errorf("AMS GetQuotaCost [%w]", err))
+		doError(w, http.StatusInternalServerError, err, "AMS GetQuotaCost")
 		return
 	}
 
@@ -194,7 +187,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err = json.NewEncoder(w).Encode(resp); err != nil {
-		do500(w, fmt.Errorf("Unexpected error encoding response [%w]", err))
+		doError(w, http.StatusInternalServerError, fmt.Errorf("Unexpected error encoding response [%w]", err), "")
 		return
 	}
 
@@ -204,51 +197,46 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 	idObj := identity.Get(r.Context()).Identity
 
 	if !idObj.User.OrgAdmin {
-		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats"))
+		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats, must be an org admin."), "")
 		return
 	}
 
 	seat := new(api.SeatRequest)
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(seat); err != nil {
-		doError(w, http.StatusBadRequest, fmt.Errorf("PostSeats [%w]", err))
+		doError(w, http.StatusBadRequest, fmt.Errorf("PostSeats [%w]", err), "")
 		return
 	}
 
 	user, err := s.bop.GetUser(seat.AccountUsername)
 	if err != nil {
-		var userDetailErr *bop.UserDetailError
-		if errors.As(err, &userDetailErr) {
-			doError(w, userDetailErr.StatusCode, userDetailErr)
-			return
-		}
-		do500(w, fmt.Errorf("BOP GetUser [%w]", err))
+		doError(w, http.StatusInternalServerError, err, "BOP GetUser")
 		return
 	}
 
 	if user.OrgId != idObj.Internal.OrgID {
-		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats to users outside of Organization %s", idObj.Internal.OrgID))
+		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats to users outside of Organization %s", idObj.Internal.OrgID), "")
 		return
 	}
 
-	quotaCost, err := s.client.GetQuotaCost(idObj.Internal.OrgID)
+	quotaCost, err := s.ams.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
-		do500(w, fmt.Errorf("GetQuotaCost [%w]", err))
+		doError(w, http.StatusInternalServerError, err, "AMS GetQuotaCost")
 		return
 	}
 
-	resp, err := s.client.QuotaAuthorization(seat.AccountUsername, quotaCost.Version())
+	resp, err := s.ams.QuotaAuthorization(seat.AccountUsername, quotaCost.Version())
 	if err != nil {
-		do500(w, fmt.Errorf("QuotaAuthorization: [%w]", err))
+		doError(w, http.StatusInternalServerError, err, "AMS QuotaAuthorization")
 		return
 	}
 
 	if !resp.Allowed() {
 		if len(resp.ExcessResources()) > 0 {
-			doError(w, http.StatusConflict, fmt.Errorf("Assignment request was denied due to excessive resource requests"))
+			doError(w, http.StatusConflict, fmt.Errorf("Assignment request was denied due to excessive resource requests"), "")
 			return
 		}
-		doError(w, http.StatusForbidden, fmt.Errorf("Assignment request was denied"))
+		doError(w, http.StatusForbidden, fmt.Errorf("Assignment request was denied"), "")
 		return
 	}
 
@@ -262,7 +250,7 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 		SubscriptionId:  &subId,
 		AccountUsername: &userName,
 	}); err != nil {
-		do500(w, fmt.Errorf("Unexpected error encoding response [%w]", err))
+		doError(w, http.StatusInternalServerError, fmt.Errorf("Unexpected error encoding response [%w]", err), "")
 		return
 	}
 }

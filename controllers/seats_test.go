@@ -258,7 +258,7 @@ var _ = Describe("using the seat managment api", func() {
 			It("should not assign the user a seat", func() {
 				mismatchApi := NewSeatManagerApi(client, &bop.Mock{
 					OrgId: "12345",
-				})
+				},)
 				b, err := json.Marshal(api.SeatRequest{
 					AccountUsername: "test-user",
 				})

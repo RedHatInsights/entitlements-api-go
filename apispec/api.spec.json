@@ -523,6 +523,18 @@
                 "properties": {
                     "error": {
                         "type": "string"
+                    },
+                    "status": {
+                        "type": "integer"
+                    },
+                    "identifier": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "operation_id": {
+                        "type": "string"
                     }
                 }
             },

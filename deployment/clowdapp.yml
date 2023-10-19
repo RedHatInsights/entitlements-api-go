@@ -111,6 +111,8 @@ objects:
             value: ${SUBS_CACHE_MAX_SIZE}
           - name: ENT_SUBS_CACHE_ITEM_PRUNE
             value: ${SUBS_CACHE_ITEM_PRUNE}
+          - name: ENT_AMS_ACCT_MGMT_11_ERR_MSG
+            value: ${AMS_ACCT_MGMT_11_ERR_MSG}
           - name: GLITCHTIP_DSN
             valueFrom:
               secretKeyRef:
@@ -229,3 +231,6 @@ parameters:
 - description: ClowdEnv Name
   name: ENV_NAME
   required: true
+- description: Error message to display for the ACCT-MGMT-11 error message
+  name: AMS_ACCT_MGMT_11_ERR_MSG
+  required: false
