@@ -12,7 +12,7 @@ import (
 // This mapper provides a way to record known AMS error codes, and map error messages to them via env variables.
 
 // AMS Error Codes
-const acctMgmt11 		= "ACCT-MGMT-11"
+const acctMgmt11 	= "ACCT-MGMT-11"
 const acctMgmt11Status 	= http.StatusForbidden
 
 type AMSErrorMapper interface {
