@@ -1,5 +1,7 @@
+# lazy set if absent - if GO is set in env or as parameter it will override this default
+# https://www.gnu.org/software/make/manual/html_node/Conditional-Assignment.html
+GO ?= go
 gen_files = api/server.gen.go api/types.gen.go
-GO = go
 
 all: generate build
 build:
