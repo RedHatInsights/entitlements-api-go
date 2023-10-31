@@ -1,16 +1,19 @@
+# lazy set if absent - if GO is set in env or as parameter it will override this default
+# https://www.gnu.org/software/make/manual/html_node/Conditional-Assignment.html
+GO ?= go
 gen_files = api/server.gen.go api/types.gen.go
 
 all: generate build
 build:
-	go build -o entitlements-api-go main.go
-	go build -o ./bundle-sync bundle_sync/main.go
+	$(GO) build -o entitlements-api-go main.go
+	$(GO) build -o ./bundle-sync bundle_sync/main.go
 clean:
 	find . -name "*.gen.go" | xargs rm
-	go clean -cache
+	$(GO) clean -cache
 	rm entitlements-api-go
 
 $(gen_files): apispec/api.spec.json
-	go generate ./...
+	$(GO) generate ./...
 
 generate: $(gen_files)
 
@@ -20,12 +23,12 @@ exe: all
 	./entitlements-api-go
 debug-run: generate
 	ENT_DEBUG=1 \
-	go run main.go
+	$(GO) run main.go
 run: generate
-	go run main.go
+	$(GO) run main.go
 test: generate
-	go test -v ./...
+	$(GO) test -v ./...
 test-all: generate
-	go test -v --race --coverprofile=coverage.txt --covermode=atomic ./...
+	$(GO) test -v --race --coverprofile=coverage.txt --covermode=atomic ./...
 bench: generate
-	go test -bench=. ./...
+	$(GO) test -bench=. ./...
