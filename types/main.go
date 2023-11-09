@@ -16,12 +16,6 @@ type SubscriptionsResponse struct {
 	CacheHit   bool
 }
 
-// Entries is a struct that is used to unmarshal the entries field that comes back from the
-// response of the Subscription Service
-type Entries struct {
-	Value string
-}
-
 type Feature struct {
 	Name     string `json:"name"`
 	IsEval   bool   `json:"isEval"`
@@ -30,12 +24,6 @@ type Feature struct {
 
 type FeatureStatus struct {
 	Features []Feature `json:"features"`
-}
-
-// SubscriptionDetails is a struct that is used to unmarshal the data that comes back in the Body
-// of the response of Subscriptions Service
-type SubscriptionDetails struct {
-	Entries []Entries
 }
 
 // Bundle is a struct that is used to unmarshal the bundle info from bundles.yml
