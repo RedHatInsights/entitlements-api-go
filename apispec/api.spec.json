@@ -75,6 +75,18 @@
                         },
                         "explode": false,
                         "style": "form"
+                    },
+                    {
+                        "in": "query",
+                        "name": "trial_activated",
+                        "required": false,
+                        "description": "Flag to indicate if a subscription trial has been activated. If true it forces a user's subscriptions to be served live.",
+                        "schema":{
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "explode": false,
+                        "style": "form"
                     }
                 ],
                 "responses": {

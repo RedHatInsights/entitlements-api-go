@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -21,7 +21,7 @@ const DEFAULT_ACCOUNT_NUMBER string = "540155"
 const DEFAULT_IS_INTERNAL bool = false
 const DEFAULT_EMAIL = "test+qa@redhat.com"
 
-func testRequest(method string, path string, accnum string, orgid string, isinternal bool, email string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func testRequest(method string, path string, accnum string, orgid string, isinternal bool, email string, fakeCaller func(GetFeatureStatusParams) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
@@ -46,8 +46,8 @@ func testRequest(method string, path string, accnum string, orgid string, isinte
 
 	Index()(rr, req)
 
-	out, err := ioutil.ReadAll(rr.Result().Body)
-	Expect(err).To(BeNil(), "ioutil.ReadAll error was not nil")
+	out, err := io.ReadAll(rr.Result().Body)
+	Expect(err).To(BeNil(), "io.ReadAll error was not nil")
 
 	rr.Result().Body.Close()
 
@@ -57,13 +57,13 @@ func testRequest(method string, path string, accnum string, orgid string, isinte
 	return rr, ret, string(out)
 }
 
-func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(GetFeatureStatusParams) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeCaller)
 }
 
-func fakeGetFeatureStatus(expectedOrgID string, response SubscriptionsResponse) func(string) SubscriptionsResponse {
-	return func(orgID string) SubscriptionsResponse {
-		Expect(expectedOrgID).To(Equal(orgID))
+func fakeGetFeatureStatus(expectedOrgID string, response SubscriptionsResponse) func(GetFeatureStatusParams) SubscriptionsResponse {
+	return func(params GetFeatureStatusParams) SubscriptionsResponse {
+		Expect(expectedOrgID).To(Equal(params.OrgId))
 		return response
 	}
 }
@@ -94,7 +94,7 @@ var _ = Describe("Identity Controller", func() {
 
 	Context("When the Subs API sends back a non-200", func() {
 		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string) SubscriptionsResponse {
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) SubscriptionsResponse {
 				return SubscriptionsResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false}
 			})
 
@@ -112,7 +112,7 @@ var _ = Describe("Identity Controller", func() {
 
 	Context("When the Subs API sends back an error", func() {
 		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string) SubscriptionsResponse {
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) SubscriptionsResponse {
 				return SubscriptionsResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false, Error: errors.New("Sub Failure")}
 			})
 
