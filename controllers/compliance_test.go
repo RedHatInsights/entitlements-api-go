@@ -3,22 +3,22 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/types"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
 )
 
 var defaultEmail = "test@redhat.com"
 
 func readResponse(respBody io.ReadCloser) []byte {
-	out, err := ioutil.ReadAll(respBody)
-	Expect(err).To(BeNil(), "ioutil.ReadAll error was not nil")
+	out, err := io.ReadAll(respBody)
+	Expect(err).To(BeNil(), "io.ReadAll error was not nil")
 	respBody.Close()
 
 	return out
@@ -38,7 +38,7 @@ func getContextWithIdentity(username string) context.Context {
 	return ctx
 }
 
-var _ = Describe("", func() {
+var _ = Describe("Compliance Controller", func() {
 	Context("When username is empty", func() {
 		It("should return an error and status 400", func() {
 			// given

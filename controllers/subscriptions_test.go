@@ -73,7 +73,7 @@ func expectPass(res *http.Response) {
 	Expect(res.Header.Get("Content-Type")).To(Equal("application/json"))
 }
 
-var _ = Describe("Identity Controller", func() {
+var _ = Describe("Services Controller", func() {
 
 	BeforeEach(func() {
 		bundleInfo = []Bundle{}
