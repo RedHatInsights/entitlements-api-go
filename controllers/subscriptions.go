@@ -87,7 +87,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 	item := cache.Get(orgID)
 	entitleAll := configOptions.GetString(config.Keys.EntitleAll)
 
-	if item != nil && !item.Expired() {
+	if item != nil && !item.Expired() && !params.ForceFreshData{
 		return types.SubscriptionsResponse{
 			StatusCode: 200,
 			Data:       item.Value().(types.FeatureStatus),
@@ -299,11 +299,16 @@ func filtersFromParams(req *http.Request, filterName string) []string {
 
 func boolFromParams(req *http.Request, paramName string) bool {
 	strParam := req.URL.Query().Get(paramName)
-	b, err := strconv.ParseBool(strParam)
+
+	if strParam == "" {
+		return false
+	}
+
+	param, err := strconv.ParseBool(strParam)
 
 	if err != nil {
 		return false
 	}
 
-	return b
+	return param
 }
