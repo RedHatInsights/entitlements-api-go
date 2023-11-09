@@ -60,7 +60,7 @@ const (
 
 type GetFeatureStatusParams struct {
 	OrgId 			string
-	ForceLiveStatus	bool
+	ForceFreshData	bool
 }
 
 // SetBundleInfo sets the bundle information fetched from the YAML
@@ -165,8 +165,8 @@ func setBundlePayload(entitle bool, trial bool) types.EntitlementsSection {
 	return types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
 }
 
-// Index the handler for GETs to /api/entitlements/v1/services/
-func Index() func(http.ResponseWriter, *http.Request) {
+// Services the handler for GETs to /api/entitlements/v1/services/
+func Services() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		start := time.Now()
 		idObj := identity.Get(req.Context()).Identity
@@ -180,7 +180,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		subscriptions := GetFeatureStatus(
 			GetFeatureStatusParams{
 				OrgId: orgId, 
-				ForceLiveStatus: queryParams.TrialActivated,
+				ForceFreshData: queryParams.TrialActivated,
 			},
 		)
 		

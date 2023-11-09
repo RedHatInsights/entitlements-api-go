@@ -44,7 +44,7 @@ func testRequest(method string, path string, accnum string, orgid string, isinte
 
 	GetFeatureStatus = fakeCaller
 
-	Index()(rr, req)
+	Services()(rr, req)
 
 	out, err := io.ReadAll(rr.Result().Body)
 	Expect(err).To(BeNil(), "io.ReadAll error was not nil")
