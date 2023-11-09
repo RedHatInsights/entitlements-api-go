@@ -3,8 +3,9 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -64,7 +65,7 @@ type GetFeatureStatusParams struct {
 
 // SetBundleInfo sets the bundle information fetched from the YAML
 func SetBundleInfo(yamlFilePath string) error {
-	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
+	bundlesYaml, err := os.ReadFile(yamlFilePath)
 
 	if err != nil {
 		sentry.CaptureException(err)
@@ -118,7 +119,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		return types.SubscriptionsResponse{
 			StatusCode: resp.StatusCode,
 			Body:       string(body),
@@ -131,7 +132,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 	defer resp.Body.Close()
 
 	// Unmarshaling response from Feature service
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 	var FeatureStatus types.FeatureStatus
 	json.Unmarshal(body, &FeatureStatus)
 
