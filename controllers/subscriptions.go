@@ -59,7 +59,7 @@ const (
 )
 
 type GetFeatureStatusParams struct {
-	OrgId 			string
+	OrgId 		string
 	ForceFreshData	bool
 }
 
