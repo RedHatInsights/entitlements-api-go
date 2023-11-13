@@ -4,15 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/RedHatInsights/entitlements-api-go/config"
 	. "github.com/RedHatInsights/entitlements-api-go/types"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/ghttp"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 )
 
@@ -20,8 +22,9 @@ const DEFAULT_ORG_ID string = "4384938490324"
 const DEFAULT_ACCOUNT_NUMBER string = "540155"
 const DEFAULT_IS_INTERNAL bool = false
 const DEFAULT_EMAIL = "test+qa@redhat.com"
+var realGetFeatureStatus = GetFeatureStatus
 
-func testRequest(method string, path string, accnum string, orgid string, isinternal bool, email string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func testRequest(method string, path string, accnum string, orgid string, isinternal bool, email string, fakeCaller func(GetFeatureStatusParams) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
@@ -44,10 +47,10 @@ func testRequest(method string, path string, accnum string, orgid string, isinte
 
 	GetFeatureStatus = fakeCaller
 
-	Index()(rr, req)
+	Services()(rr, req)
 
-	out, err := ioutil.ReadAll(rr.Result().Body)
-	Expect(err).To(BeNil(), "ioutil.ReadAll error was not nil")
+	out, err := io.ReadAll(rr.Result().Body)
+	Expect(err).To(BeNil(), "io.ReadAll error was not nil")
 
 	rr.Result().Body.Close()
 
@@ -57,13 +60,13 @@ func testRequest(method string, path string, accnum string, orgid string, isinte
 	return rr, ret, string(out)
 }
 
-func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(string) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(GetFeatureStatusParams) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeCaller)
 }
 
-func fakeGetFeatureStatus(expectedOrgID string, response SubscriptionsResponse) func(string) SubscriptionsResponse {
-	return func(orgID string) SubscriptionsResponse {
-		Expect(expectedOrgID).To(Equal(orgID))
+func fakeGetFeatureStatus(expectedOrgID string, response SubscriptionsResponse) func(GetFeatureStatusParams) SubscriptionsResponse {
+	return func(params GetFeatureStatusParams) SubscriptionsResponse {
+		Expect(expectedOrgID).To(Equal(params.OrgId))
 		return response
 	}
 }
@@ -73,7 +76,7 @@ func expectPass(res *http.Response) {
 	Expect(res.Header.Get("Content-Type")).To(Equal("application/json"))
 }
 
-var _ = Describe("Identity Controller", func() {
+var _ = Describe("Services Controller", func() {
 
 	BeforeEach(func() {
 		bundleInfo = []Bundle{}
@@ -94,7 +97,7 @@ var _ = Describe("Identity Controller", func() {
 
 	Context("When the Subs API sends back a non-200", func() {
 		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string) SubscriptionsResponse {
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) SubscriptionsResponse {
 				return SubscriptionsResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false}
 			})
 
@@ -112,7 +115,7 @@ var _ = Describe("Identity Controller", func() {
 
 	Context("When the Subs API sends back an error", func() {
 		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(string) SubscriptionsResponse {
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) SubscriptionsResponse {
 				return SubscriptionsResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false, Error: errors.New("Sub Failure")}
 			})
 
@@ -398,6 +401,150 @@ var _ = Describe("Identity Controller", func() {
 			Expect(body["TestBundle3"].IsEntitled).To(Equal(true))
 			Expect(body["TestBundle4"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle5"].IsEntitled).To(Equal(false))
+		})
+	})
+
+	Context("The request contains trial_activated", func() {
+		When("trial_activated is correctly parsed from the query", func() {
+			dummyResponse := SubscriptionsResponse{
+				StatusCode: 200,
+				Data:       FeatureStatus{},
+				CacheHit:   false,
+			}
+
+			It("defaults the param to false when its absent", func() {
+				// given
+				var actualForceFreshData *bool
+				mockGetFeatureStatus := func(params GetFeatureStatusParams) SubscriptionsResponse {
+					actualForceFreshData = &params.ForceFreshData
+
+					return dummyResponse
+				}
+				path := "/"
+				
+				// when
+				testRequestWithDefaultOrgId("GET", path, mockGetFeatureStatus)
+
+				// then
+				Expect(actualForceFreshData).ToNot(BeNil())
+				Expect(*actualForceFreshData).To(BeFalse())
+			})
+
+			It("defaults the param to false when its not a valid bool", func() {
+				// given
+				var actualForceFreshData *bool
+				mockGetFeatureStatus := func(params GetFeatureStatusParams) SubscriptionsResponse {
+					actualForceFreshData = &params.ForceFreshData
+
+					return dummyResponse
+				}
+				path := "/?trial_activated=notABool"
+				
+				// when
+				testRequestWithDefaultOrgId("GET", path, mockGetFeatureStatus)
+
+				// then
+				Expect(actualForceFreshData).ToNot(BeNil())
+				Expect(*actualForceFreshData).To(BeFalse())
+			})
+
+			It("set the param to true when its a valid bool", func() {
+				// given
+				var actualForceFreshData *bool
+				mockGetFeatureStatus := func(params GetFeatureStatusParams) SubscriptionsResponse {
+					actualForceFreshData = &params.ForceFreshData
+
+					return dummyResponse
+				}
+				path := "/?trial_activated=true"
+				
+				// when
+				testRequestWithDefaultOrgId("GET", path, mockGetFeatureStatus)
+
+				// then
+				Expect(actualForceFreshData).ToNot(BeNil())
+				Expect(*actualForceFreshData).To(BeTrue())
+			})
+		})
+
+		When("trial_activated param is valid", func() {
+			var subsServer *ghttp.Server
+
+			BeforeEach(func() {
+				GetFeatureStatus = realGetFeatureStatus
+
+				// setup mock server
+				subsServer = ghttp.NewServer()
+				subsServer.Writer = GinkgoWriter
+				
+				// this will setup our mock server to respond with the following to the first request made to it,
+				// aka the following request to fill cache
+				subsServer.AppendHandlers(ghttp.RespondWith(http.StatusOK, `{"features": [
+					{
+						"name":"dummy feature",
+						"isEval":false,
+						"entitled":true
+					}
+				]}`, http.Header{"Content-Type": {"application/json"}}))
+		
+				// this points our http client to our mock server setup above
+				cfg := config.GetConfig().Options
+				cfg.SetDefault(config.Keys.SubsHost, subsServer.URL())
+
+				// fill cache
+				params := GetFeatureStatusParams{
+					OrgId: DEFAULT_ORG_ID,
+					ForceFreshData: true,
+				}
+				GetFeatureStatus(params)
+			})
+
+			AfterEach(func() {
+				subsServer.Close()
+			})
+
+			It("serves cached data when req param is false", func() {
+				// given
+				params := GetFeatureStatusParams{
+					OrgId: DEFAULT_ORG_ID,
+					ForceFreshData: false,
+				}
+
+				// when
+				response := GetFeatureStatus(params)
+
+				// then
+				Expect(response).ToNot(BeNil())
+				Expect(response.CacheHit).To(BeTrue())
+				Expect(subsServer.ReceivedRequests()).To(HaveLen(1))
+			})
+	
+			It("serves fresh data when req param is true", func() {
+				// given
+				params := GetFeatureStatusParams{
+					OrgId: DEFAULT_ORG_ID,
+					ForceFreshData: true,
+				}
+
+				subsServer.AppendHandlers(ghttp.RespondWith(http.StatusOK, `{"features": [
+					{
+						"name":"dummy feature 2!",
+						"isEval":false,
+						"entitled":true
+					}
+				]}`, http.Header{"Content-Type": {"application/json"}}))
+
+				// when
+				response := GetFeatureStatus(params)
+
+				// then
+				Expect(response).ToNot(BeNil())
+				Expect(response.CacheHit).To(BeFalse())
+				Expect(response.Data.Features).ToNot(BeNil())
+				Expect(response.Data.Features).To(HaveLen(1))
+				Expect(response.Data.Features[0].Name).To(BeEquivalentTo("dummy feature 2!"))
+				Expect(subsServer.ReceivedRequests()).To(HaveLen(2))
+			})
 		})
 	})
 })

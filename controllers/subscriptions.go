@@ -3,8 +3,9 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -45,9 +46,26 @@ var subsTimeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
 	Buckets: prometheus.LinearBuckets(0.25, 0.25, 20),
 })
 
+type GetServicesParams struct {
+	IncludeBundles	[]string
+	ExcludeBundles	[]string
+	TrialActivated	bool
+}
+
+const (
+	IncludeBundlesParamKey 	string = "include_bundles"
+	ExcludeBundlesParamKey 	string = "exclude_bundles"
+	TrialActivatedParamKey	string = "trial_activated"
+)
+
+type GetFeatureStatusParams struct {
+	OrgId 		string
+	ForceFreshData	bool
+}
+
 // SetBundleInfo sets the bundle information fetched from the YAML
 func SetBundleInfo(yamlFilePath string) error {
-	bundlesYaml, err := ioutil.ReadFile(yamlFilePath)
+	bundlesYaml, err := os.ReadFile(yamlFilePath)
 
 	if err != nil {
 		sentry.CaptureException(err)
@@ -64,11 +82,12 @@ func SetBundleInfo(yamlFilePath string) error {
 }
 
 // GetFeatureStatus calls the IT subs service features endpoint and returns the entitlements for specified features/bundles
-var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
+var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsResponse {
+	orgID := params.OrgId
 	item := cache.Get(orgID)
 	entitleAll := configOptions.GetString(config.Keys.EntitleAll)
 
-	if item != nil && !item.Expired() {
+	if item != nil && !item.Expired() && !params.ForceFreshData{
 		return types.SubscriptionsResponse{
 			StatusCode: 200,
 			Data:       item.Value().(types.FeatureStatus),
@@ -100,7 +119,7 @@ var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		return types.SubscriptionsResponse{
 			StatusCode: resp.StatusCode,
 			Body:       string(body),
@@ -113,7 +132,7 @@ var GetFeatureStatus = func(orgID string) types.SubscriptionsResponse {
 	defer resp.Body.Close()
 
 	// Unmarshaling response from Feature service
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 	var FeatureStatus types.FeatureStatus
 	json.Unmarshal(body, &FeatureStatus)
 
@@ -146,13 +165,25 @@ func setBundlePayload(entitle bool, trial bool) types.EntitlementsSection {
 	return types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
 }
 
-// Index the handler for GETs to /api/entitlements/v1/services/
-func Index() func(http.ResponseWriter, *http.Request) {
+// Services the handler for GETs to /api/entitlements/v1/services/
+func Services() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		start := time.Now()
 		idObj := identity.Get(req.Context()).Identity
 		orgId := idObj.Internal.OrgID
-		res := GetFeatureStatus(orgId)
+
+		queryParams := GetServicesParams{
+			IncludeBundles: filtersFromParams(req, IncludeBundlesParamKey),
+			ExcludeBundles: filtersFromParams(req, ExcludeBundlesParamKey),
+			TrialActivated: boolFromParams(req, TrialActivatedParamKey),
+		}
+		subscriptions := GetFeatureStatus(
+			GetFeatureStatusParams{
+				OrgId: orgId, 
+				ForceFreshData: queryParams.TrialActivated,
+			},
+		)
+		
 		accNum := idObj.AccountNumber
 		isInternal := idObj.User.Internal
 		validEmailMatch, _ := regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)
@@ -160,32 +191,32 @@ func Index() func(http.ResponseWriter, *http.Request) {
 		validAccNum := !(accNum == "" || accNum == "-1")
 		validOrgId := !(orgId == "" || orgId == "-1")
 
-		include_filter := filtersFromParams(req, "include_bundles")
-		exclude_filter := filtersFromParams(req, "exclude_bundles")
+		include_filter := queryParams.IncludeBundles
+		exclude_filter := queryParams.ExcludeBundles
 
-		if res.Error != nil {
+		if subscriptions.Error != nil {
 			errMsg := "Unexpected error while talking to Subs Service"
-			l.Log.WithFields(logrus.Fields{"error": res.Error}).Error(errMsg)
-			sentry.CaptureException(res.Error)
-			failOnDependencyError(errMsg, res, w)
+			l.Log.WithFields(logrus.Fields{"error": subscriptions.Error}).Error(errMsg)
+			sentry.CaptureException(subscriptions.Error)
+			failOnDependencyError(errMsg, subscriptions, w)
 			return
 		}
 
 		subsTimeTaken := time.Since(start).Seconds()
-		l.Log.WithFields(logrus.Fields{"subs_call_duration": subsTimeTaken, "cache_hit": res.CacheHit}).Info("subs call complete")
+		l.Log.WithFields(logrus.Fields{"subs_call_duration": subsTimeTaken, "cache_hit": subscriptions.CacheHit}).Info("subs call complete")
 		subsTimeHistogram.Observe(subsTimeTaken)
 
-		if res.StatusCode != 200 {
+		if subscriptions.StatusCode != 200 {
 			errMsg := "Got back a non 200 status code from Subscriptions Service"
-			l.Log.WithFields(logrus.Fields{"code": res.StatusCode, "body": res.Body}).Error(errMsg)
+			l.Log.WithFields(logrus.Fields{"code": subscriptions.StatusCode, "body": subscriptions.Body}).Error(errMsg)
 
 			sentry.WithScope(func(scope *sentry.Scope) {
-				scope.SetExtra("response_body", res.Body)
-				scope.SetExtra("response_status", res.StatusCode)
+				scope.SetExtra("response_body", subscriptions.Body)
+				scope.SetExtra("response_status", subscriptions.StatusCode)
 				sentry.CaptureException(errors.New(errMsg))
 			})
 
-			failOnDependencyError(errMsg, res, w)
+			failOnDependencyError(errMsg, subscriptions, w)
 			return
 		}
 
@@ -212,7 +243,7 @@ func Index() func(http.ResponseWriter, *http.Request) {
 
 			if len(b.Skus) > 0 {
 				entitle = false
-				for _, f := range res.Data.Features {
+				for _, f := range subscriptions.Data.Features {
 					if f.Name == b.Name {
 						entitle = f.Entitled
 						trial = f.IsEval
@@ -264,4 +295,20 @@ func filtersFromParams(req *http.Request, filterName string) []string {
 		filter = strings.Split(list, ",")
 	}
 	return filter
+}
+
+func boolFromParams(req *http.Request, paramName string) bool {
+	strParam := req.URL.Query().Get(paramName)
+
+	if strParam == "" {
+		return false
+	}
+
+	param, err := strconv.ParseBool(strParam)
+
+	if err != nil {
+		return false
+	}
+
+	return param
 }

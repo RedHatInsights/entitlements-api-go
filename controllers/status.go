@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -25,7 +24,7 @@ type statusInfo struct {
 
 func buildStatus() statusInfo {
 	specFilePath := config.GetConfig().Options.GetString(config.Keys.OpenAPISpecPath)
-	specFile, err := ioutil.ReadFile(specFilePath)
+	specFile, err := os.ReadFile(specFilePath)
 
 	apiVersion := ""
 

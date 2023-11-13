@@ -61,7 +61,7 @@ func DoRoutes() chi.Router {
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
 		r.With(identity.EnforceIdentity).Route("/", controllers.LubDub)
 		r.Route("/openapi.json", apispec.OpenAPISpec)
-		r.With(identity.EnforceIdentity).Get("/services", controllers.Index())
+		r.With(identity.EnforceIdentity).Get("/services", controllers.Services())
 		r.With(identity.EnforceIdentity).Get("/compliance", controllers.Compliance())
 	})
 
