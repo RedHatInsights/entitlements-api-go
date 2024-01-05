@@ -275,7 +275,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(increase(entitlements_api_response_status{namespace=\"$namespace\", service=\"entitlements-api-go\", path=\"/api/entitlements/v1/services\"}[1m])) by (code)",
+              "expr": "sum(increase(entitlements_api_response_status{path=\"/api/entitlements/v1/services\"}[1m])) by (code)",
               "format": "time_series",
               "instant": false,
               "interval": "1m",
