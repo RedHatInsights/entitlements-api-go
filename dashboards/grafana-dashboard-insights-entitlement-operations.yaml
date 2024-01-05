@@ -275,7 +275,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(increase(entitlements_api_response_status{namespace=\"$namespace\", service=\"entitlements-api-go\", path=\"/api/entitlements/v1/services\"}[1m])) by (code)",
+              "expr": "sum(increase(entitlements_api_response_status{namespace=\"$namespace\", service=\"entitlements-api-go-service\", path=\"/api/entitlements/v1/services\"}[1m])) by (code)",
               "format": "time_series",
               "instant": false,
               "interval": "1m",
@@ -357,7 +357,7 @@ data:
           "reverseYBuckets": false,
           "targets": [
             {
-              "expr": "sum(increase(entitlements_api_duration_seconds_bucket{namespace=\"$namespace\", service=\"entitlements-api-go\", path=\"/api/entitlements/v1/services\"}[$__interval])) by (le)",
+              "expr": "sum(increase(entitlements_api_duration_seconds_bucket{namespace=\"$namespace\", service=\"entitlements-api-go-service\", path=\"/api/entitlements/v1/services\"}[$__interval])) by (le)",
               "format": "heatmap",
               "instant": false,
               "interval": "1m",
@@ -439,7 +439,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "(sum(rate(entitlements_api_response_status{namespace=\"$namespace\", service=\"entitlements-api-go\", path=\"/api/entitlements/v1/services\"}[2m])) - sum(rate(api_3scale_gateway_api_time_count{exported_service=\"entitlements\"}[2m])))*60",
+              "expr": "(sum(rate(entitlements_api_response_status{namespace=\"$namespace\", service=\"entitlements-api-go-service\", path=\"/api/entitlements/v1/services\"}[2m])) - sum(rate(api_3scale_gateway_api_time_count{exported_service=\"entitlements\"}[2m])))*60",
               "interval": "1m",
               "legendFormat": "",
               "refId": "A"
@@ -807,7 +807,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(increase(it_subscriptions_service_failure{namespace=\"$namespace\", service=\"entitlements-api-go\", pod=~\".*entitlements.*\"}[1m])) by (code)",
+              "expr": "sum(increase(it_subscriptions_service_failure{namespace=\"$namespace\", service=\"entitlements-api-go-service\", pod=~\".*entitlements.*\"}[1m])) by (code)",
               "interval": "",
               "legendFormat": "{{code}}",
               "refId": "A"
@@ -887,7 +887,7 @@ data:
           "reverseYBuckets": false,
           "targets": [
             {
-              "expr": "sum(increase(it_subscriptions_service_time_taken_bucket{service=\"entitlements-api-go\"}[1m])) by (le)",
+              "expr": "sum(increase(it_subscriptions_service_time_taken_bucket{service=\"entitlements-api-go-service\"}[1m])) by (le)",
               "format": "heatmap",
               "interval": "1m",
               "legendFormat": "{{le}} s",
@@ -1084,7 +1084,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go\"}) / sum(kube_pod_container_resource_limits{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go\",resource=\"memory\", unit=\"byte\"})",
+              "expr": "sum(container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go-service\"}) / sum(kube_pod_container_resource_limits{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go-service\",resource=\"memory\", unit=\"byte\"})",
               "interval": "15s",
               "legendFormat": "",
               "refId": "A"
@@ -1181,7 +1181,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go\"}[5m])",
+              "expr": "rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\".*entitlements.*\",container=\"entitlements-api-go-service\"}[5m])",
               "interval": "15s",
               "legendFormat": "{{pod}}:{{container_name}}",
               "refId": "A"
@@ -1279,7 +1279,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*entitlements.*\", container=\"entitlements-api-go\"}",
+              "expr": "container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*entitlements.*\", container=\"entitlements-api-go-service\"}",
               "interval": "15s",
               "legendFormat": "{{pod}}:{{container_name}}",
               "refId": "A"
