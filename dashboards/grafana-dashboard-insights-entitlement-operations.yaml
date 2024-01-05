@@ -887,7 +887,7 @@ data:
           "reverseYBuckets": false,
           "targets": [
             {
-              "expr": "sum(increase(it_subscriptions_service_time_taken_bucket{service=\"entitlements-api-go\"}[1m])) by (le)",
+              "expr": "sum(increase(it_subscriptions_service_time_taken_bucket{}[1m])) by (le)",
               "format": "heatmap",
               "interval": "1m",
               "legendFormat": "{{le}} s",
