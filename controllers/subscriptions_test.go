@@ -95,6 +95,13 @@ var _ = Describe("Services Controller", func() {
 		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeGetFeatureStatus("deadbeef12", fakeResponse))
 	})
 
+	It("should build the subscriptions query with only sku based features", func ()  {
+		cfg := config.GetConfig()
+		cfg.Options.Set(config.Keys.Features, "TestBundle1,TestBundle3,TestBundle4,TestBundle5,TestBundle6,TestBundle7")
+		setSubscriptionsQueryFeatures()
+		Expect(subsQueryFeatures).To(BeEquivalentTo("?features=TestBundle1&features=TestBundle6"))
+	})
+
 	Context("When the Subs API sends back a non-200", func() {
 		It("should fail the response", func() {
 			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) SubscriptionsResponse {
