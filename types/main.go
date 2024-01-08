@@ -14,6 +14,7 @@ type SubscriptionsResponse struct {
 	Error      error
 	Data       FeatureStatus
 	CacheHit   bool
+	Url        string
 }
 
 type Feature struct {

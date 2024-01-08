@@ -131,6 +131,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 		sentry.CaptureException(err)
 		return types.SubscriptionsResponse{
 			Error: err,
+			Url: req,
 		}
 	}
 
@@ -143,6 +144,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 			Error:      nil,
 			Data:       types.FeatureStatus{},
 			CacheHit:   false,
+			Url: req,
 		}
 	}
 
@@ -159,6 +161,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 		StatusCode: resp.StatusCode,
 		Data:       FeatureStatus,
 		CacheHit:   false,
+		Url: req,
 	}
 }
 
@@ -220,7 +223,7 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		}
 
 		subsTimeTaken := time.Since(start).Seconds()
-		l.Log.WithFields(logrus.Fields{"subs_call_duration": subsTimeTaken, "cache_hit": subscriptions.CacheHit}).Info("subs call complete")
+		l.Log.WithFields(logrus.Fields{"subs_call_duration": subsTimeTaken, "cache_hit": subscriptions.CacheHit, "url": subscriptions.Url}).Info("subs call complete")
 		subsTimeHistogram.Observe(subsTimeTaken)
 
 		if subscriptions.StatusCode != 200 {
