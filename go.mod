@@ -18,7 +18,6 @@ require (
 	github.com/redhatinsights/platform-go-middlewares v0.20.1-0.20230119152702-e3779317d1aa
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.15.0
-	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 	golang.org/x/text v0.14.0
 	gopkg.in/yaml.v2 v2.4.0
 )
