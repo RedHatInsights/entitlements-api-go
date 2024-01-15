@@ -21,6 +21,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v2"
 )
 
@@ -33,6 +34,7 @@ var cache = ccache.New(
 var cacheDurationSeconds = time.Second * time.Duration(configOptions.GetInt64(config.Keys.SubsCacheDuration))
 
 var bundleInfo []types.Bundle
+var subsQueryFeatures string
 var subsFailure = promauto.NewCounterVec(
 	prometheus.CounterOpts{
 		Name: "it_subscriptions_service_failure",
@@ -81,6 +83,19 @@ func SetBundleInfo(yamlFilePath string) error {
 	return nil
 }
 
+func setSubscriptionsQueryFeatures() {
+	features := strings.Split(configOptions.GetString(config.Keys.Features), ",")
+
+	var skuBasedFeatures []string
+	for _, bundle := range bundleInfo {
+		if slices.Contains(features, bundle.Name) && bundle.Skus != nil && len(bundle.Skus) > 0 {
+			skuBasedFeatures = append(skuBasedFeatures, bundle.Name)
+		}
+	}
+
+	subsQueryFeatures = "?features=" + strings.Join(skuBasedFeatures, "&features=")
+}
+
 // GetFeatureStatus calls the IT subs service features endpoint and returns the entitlements for specified features/bundles
 var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsResponse {
 	orgID := params.OrgId
@@ -103,10 +118,12 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 		}
 	}
 
-	q := configOptions.GetString(config.Keys.FeaturesPath)
+	if subsQueryFeatures == "" { // build the static part of our query only once
+		setSubscriptionsQueryFeatures()
+	}
 	req := configOptions.GetString(config.Keys.SubsHost) +
 		"/svcrest/subscription/v5/featureStatus" +
-		q + "&accountId=" + orgID
+		subsQueryFeatures + "&accountId=" + orgID
 
 	resp, err := getClient().Get(req)
 
@@ -114,6 +131,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 		sentry.CaptureException(err)
 		return types.SubscriptionsResponse{
 			Error: err,
+			Url: req,
 		}
 	}
 
@@ -126,6 +144,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 			Error:      nil,
 			Data:       types.FeatureStatus{},
 			CacheHit:   false,
+			Url: req,
 		}
 	}
 
@@ -142,6 +161,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 		StatusCode: resp.StatusCode,
 		Data:       FeatureStatus,
 		CacheHit:   false,
+		Url: req,
 	}
 }
 
@@ -203,7 +223,7 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		}
 
 		subsTimeTaken := time.Since(start).Seconds()
-		l.Log.WithFields(logrus.Fields{"subs_call_duration": subsTimeTaken, "cache_hit": subscriptions.CacheHit}).Info("subs call complete")
+		l.Log.WithFields(logrus.Fields{"subs_call_duration": subsTimeTaken, "cache_hit": subscriptions.CacheHit, "url": subscriptions.Url}).Info("subs call complete")
 		subsTimeHistogram.Observe(subsTimeTaken)
 
 		if subscriptions.StatusCode != 200 {
