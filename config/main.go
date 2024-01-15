@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"github.com/spf13/viper"
 
@@ -42,7 +41,6 @@ type EntitlementsConfigKeysType struct {
 	CwKey              string
 	CwSecret           string
 	Features           string
-	FeaturesPath       string
 	SubAPIBasePath     string
 	CompAPIBasePath    string
 	RunBundleSync      string
@@ -101,11 +99,6 @@ var Keys = EntitlementsConfigKeysType{
 	SubsCacheMaxSize:   "SUBS_CACHE_MAX_SIZE",
 	SubsCacheItemPrune: "SUBS_CACHE_ITEM_PRUNE",
 	AMSAcctMgmt11Msg:	"AMS_ACCT_MGMT_11_ERR_MSG",
-}
-
-func getBaseFeaturesPath(options *viper.Viper) string {
-	featureList := strings.Split(options.GetString(Keys.Features), ",")
-	return "?features=" + strings.Join(featureList, "&features=")
 }
 
 func getRootCAs(localCertFile string) *x509.CertPool {
@@ -200,9 +193,6 @@ func initialize() {
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
-
-	// Must be set after AutomaticEnv() in order to pickup FEATURES env variable
-	options.SetDefault(Keys.FeaturesPath, getBaseFeaturesPath(options))
 
 	config = &EntitlementsConfig{
 		Certs:   getCerts(options),
