@@ -7,6 +7,9 @@ export APP_NAME="entitlements"  # name of app-sre "application" folder this comp
 export COMPONENT_NAME="entitlements-api-go"  # name of app-sre "resourceTemplate" in deploy.yaml for this component
 export IMAGE="quay.io/cloudservices/entitlements-api-go"  # the image location on quay
 
+echo "GO VERSION\n"
+go version
+
 # Install bonfire repo/initialize
 CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd
 curl -s $CICD_URL/bootstrap.sh > .cicd_bootstrap.sh && source .cicd_bootstrap.sh
