@@ -2,7 +2,7 @@
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
 # FROM registry.redhat.io/ubi8/go-toolset as builder
-FROM quay.io/projectquay/golang:1.19 as builder
+FROM quay.io/projectquay/golang:1.20 as builder
 
 WORKDIR /go/src/app
 
