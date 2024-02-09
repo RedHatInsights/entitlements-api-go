@@ -113,6 +113,8 @@ objects:
             value: ${SUBS_CACHE_ITEM_PRUNE}
           - name: ENT_AMS_ACCT_MGMT_11_ERR_MSG
             value: ${AMS_ACCT_MGMT_11_ERR_MSG}
+          - name: ENT_IT_SERVICES_TIMEOUT_SECONDS
+            value: ${IT_SERVICES_TIMEOUT_SECONDS}
           - name: GLITCHTIP_DSN
             valueFrom:
               secretKeyRef:
@@ -233,4 +235,7 @@ parameters:
   required: true
 - description: Error message to display for the ACCT-MGMT-11 error message
   name: AMS_ACCT_MGMT_11_ERR_MSG
+  required: false
+- description: Timeout for outbound requests to IT services, in seconds
+  name: IT_SERVICES_TIMEOUT_SECONDS
   required: false

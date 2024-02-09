@@ -2,16 +2,22 @@ package controllers
 
 import (
 	"crypto/tls"
-	"github.com/RedHatInsights/entitlements-api-go/config"
 	"net/http"
+	"time"
+
+	"github.com/RedHatInsights/entitlements-api-go/config"
 )
 
 func getClient() *http.Client {
+	cfg := config.GetConfig()
+	timeout := cfg.Options.GetInt(config.Keys.ITServicesTimeoutSeconds)
+
 	// Create a HTTPS client that uses the supplied pub/priv mutual TLS certs
 	return &http.Client{
+		Timeout: time.Duration(timeout) * time.Second,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs:      config.GetConfig().RootCAs,
+				RootCAs:      cfg.RootCAs,
 				Certificates: []tls.Certificate{*config.GetConfig().Certs},
 			},
 		},
