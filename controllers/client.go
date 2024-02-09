@@ -10,8 +10,7 @@ import (
 
 func getClient() *http.Client {
 	cfg := config.GetConfig()
-	options := cfg.Options
-	timeout := options.GetInt(config.Keys.ITServicesTimeoutSeconds)
+	timeout := cfg.Options.GetInt(config.Keys.ITServicesTimeoutSeconds)
 
 	// Create a HTTPS client that uses the supplied pub/priv mutual TLS certs
 	return &http.Client{
