@@ -25,82 +25,82 @@ type EntitlementsConfig struct {
 
 // EntitlementsConfigKeysType is the definition of the struct hat houses all the env variables key names
 type EntitlementsConfigKeysType struct {
-	Key                string
-	Cert               string
-	Port               string
-	LogLevel           string
-	CertsFromEnv       string
-	SubsHost           string
-	ComplianceHost     string
-	CaPath             string
-	OpenAPISpecPath    string
-	BundleInfoYaml     string
-	CwLogGroup         string
-	CwLogStream        string
-	CwRegion           string
-	CwKey              string
-	CwSecret           string
-	Features           string
-	SubAPIBasePath     string
-	CompAPIBasePath    string
-	RunBundleSync      string
-	EntitleAll         string
-	AMSHost            string
-	ClientID           string
-	ClientSecret       string
-	TokenURL           string
-	Debug              string
-	BOPClientID        string
-	BOPToken           string
-	BOPURL             string
-	BOPEnv             string
-	BOPMockOrgId       string
-	DisableSeatManager string
-	SubsCacheDuration  string
-	SubsCacheMaxSize   string
-	SubsCacheItemPrune string
-	AMSAcctMgmt11Msg   string
-	ITServicesTimeoutSeconds  string
+	Key                      string
+	Cert                     string
+	Port                     string
+	LogLevel                 string
+	CertsFromEnv             string
+	SubsHost                 string
+	ComplianceHost           string
+	CaPath                   string
+	OpenAPISpecPath          string
+	BundleInfoYaml           string
+	CwLogGroup               string
+	CwLogStream              string
+	CwRegion                 string
+	CwKey                    string
+	CwSecret                 string
+	Features                 string
+	SubAPIBasePath           string
+	CompAPIBasePath          string
+	RunBundleSync            string
+	EntitleAll               string
+	AMSHost                  string
+	ClientID                 string
+	ClientSecret             string
+	TokenURL                 string
+	Debug                    string
+	BOPClientID              string
+	BOPToken                 string
+	BOPURL                   string
+	BOPEnv                   string
+	BOPMockOrgId             string
+	DisableSeatManager       string
+	SubsCacheDuration        string
+	SubsCacheMaxSize         string
+	SubsCacheItemPrune       string
+	AMSAcctMgmt11Msg         string
+	ITServicesTimeoutSeconds string
 }
 
 // Keys is a struct that houses all the env variables key names
 var Keys = EntitlementsConfigKeysType{
-	Key:                "KEY",
-	Cert:               "CERT",
-	Port:               "PORT",
-	LogLevel:           "LOG_LEVEL",
-	CertsFromEnv:       "CERTS_FROM_ENV",
-	SubsHost:           "SUBS_HOST",
-	ComplianceHost:     "COMPLIANCE_HOST",
-	CaPath:             "CA_PATH",
-	OpenAPISpecPath:    "OPENAPI_SPEC_PATH",
-	BundleInfoYaml:     "BUNDLE_INFO_YAML",
-	CwLogGroup:         "CW_LOG_GROUP",
-	CwLogStream:        "CW_LOG_STEAM",
-	CwRegion:           "CW_REGION",
-	CwKey:              "CW_KEY",
-	CwSecret:           "CW_SECRET",
-	Features:           "FEATURES",
-	SubAPIBasePath:     "SUB_API_BASE_PATH",
-	CompAPIBasePath:    "COMP_API_BASE_PATH",
-	RunBundleSync:      "RUN_BUNDLE_SYNC",
-	EntitleAll:         "ENTITLE_ALL",
-	AMSHost:            "AMS_HOST",
-	ClientID:           "OIDC_CLIENT_ID",
-	ClientSecret:       "OIDC_CLIENT_SECRET",
-	TokenURL:           "OAUTH_TOKEN_URL",
-	BOPClientID:        "BOP_CLIENT_ID",
-	BOPToken:           "BOP_TOKEN",
-	BOPURL:             "BOP_URL",
-	BOPMockOrgId:       "BOP_MOCK_ORG_ID",
-	BOPEnv:             "BOP_ENV",
-	Debug:              "DEBUG",
-	DisableSeatManager: "DISABLE_SEAT_MANAGER",
-	SubsCacheDuration:  "SUBS_CACHE_DURATION_SECONDS",
-	SubsCacheMaxSize:   "SUBS_CACHE_MAX_SIZE",
-	SubsCacheItemPrune: "SUBS_CACHE_ITEM_PRUNE",
-	AMSAcctMgmt11Msg:	"AMS_ACCT_MGMT_11_ERR_MSG",
-	ITServicesTimeoutSeconds:  "IT_SERVICES_TIMEOUT_SECONDS",
+	Key:                      "KEY",
+	Cert:                     "CERT",
+	Port:                     "PORT",
+	LogLevel:                 "LOG_LEVEL",
+	CertsFromEnv:             "CERTS_FROM_ENV",
+	SubsHost:                 "SUBS_HOST",
+	ComplianceHost:           "COMPLIANCE_HOST",
+	CaPath:                   "CA_PATH",
+	OpenAPISpecPath:          "OPENAPI_SPEC_PATH",
+	BundleInfoYaml:           "BUNDLE_INFO_YAML",
+	CwLogGroup:               "CW_LOG_GROUP",
+	CwLogStream:              "CW_LOG_STEAM",
+	CwRegion:                 "CW_REGION",
+	CwKey:                    "CW_KEY",
+	CwSecret:                 "CW_SECRET",
+	Features:                 "FEATURES",
+	SubAPIBasePath:           "SUB_API_BASE_PATH",
+	CompAPIBasePath:          "COMP_API_BASE_PATH",
+	RunBundleSync:            "RUN_BUNDLE_SYNC",
+	EntitleAll:               "ENTITLE_ALL",
+	AMSHost:                  "AMS_HOST",
+	ClientID:                 "OIDC_CLIENT_ID",
+	ClientSecret:             "OIDC_CLIENT_SECRET",
+	TokenURL:                 "OAUTH_TOKEN_URL",
+	BOPClientID:              "BOP_CLIENT_ID",
+	BOPToken:                 "BOP_TOKEN",
+	BOPURL:                   "BOP_URL",
+	BOPMockOrgId:             "BOP_MOCK_ORG_ID",
+	BOPEnv:                   "BOP_ENV",
+	Debug:                    "DEBUG",
+	DisableSeatManager:       "DISABLE_SEAT_MANAGER",
+	SubsCacheDuration:        "SUBS_CACHE_DURATION_SECONDS",
+	SubsCacheMaxSize:         "SUBS_CACHE_MAX_SIZE",
+	SubsCacheItemPrune:       "SUBS_CACHE_ITEM_PRUNE",
+	AMSAcctMgmt11Msg:         "AMS_ACCT_MGMT_11_ERR_MSG",
+	ITServicesTimeoutSeconds: "IT_SERVICES_TIMEOUT_SECONDS",
 }
 
 func getRootCAs(localCertFile string) *x509.CertPool {
@@ -192,7 +192,7 @@ func initialize() {
 	options.SetDefault(Keys.SubsCacheMaxSize, 500)
 	options.SetDefault(Keys.SubsCacheItemPrune, 50)
 	options.SetDefault(Keys.AMSAcctMgmt11Msg, "Please have this user log into \"https://console.redhat.com/openshift\" to grant their account the required permissions, or try again later.")
-	options.SetDefault(Keys.ITServicesTimeoutSeconds, 10)
+	options.SetDefault(Keys.ITServicesTimeoutSeconds, 60)
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
