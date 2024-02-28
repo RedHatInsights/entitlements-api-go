@@ -11,6 +11,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
 	"github.com/RedHatInsights/entitlements-api-go/bop"
+	"github.com/RedHatInsights/entitlements-api-go/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
@@ -73,6 +74,11 @@ func MakeRequest(method, path string, body io.Reader, options ...opt) *http.Requ
 }
 
 var _ = Describe("using the seat managment api", func() {
+	if config.GetConfig().Options.GetBool(config.Keys.DisableSeatManager) {
+		GinkgoWriter.Println("Seats apis are disabled... skipping seats controller tests")
+		return
+	}
+
 	var client ams.AMSInterface
 	var bopClient bop.Bop
 	var seatApi *SeatManagerApi
