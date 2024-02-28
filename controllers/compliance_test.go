@@ -153,13 +153,14 @@ var _ = Describe("Compliance Controller", func() {
 
 			cfg := config.GetConfig().Options
 			cfg.Set(config.Keys.ITServicesTimeoutSeconds, 2)
+			wait := cfg.GetInt(config.Keys.ITServicesTimeoutSeconds) + 1
 
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				if req.URL.Path == cfg.GetString(config.Keys.CompAPIBasePath) {
-					wait := cfg.GetInt(config.Keys.ITServicesTimeoutSeconds) + 1
 					time.Sleep(time.Duration(wait) * time.Second)
 				}
 			}))
+			defer server.Close()
 			cfg.Set(config.Keys.ComplianceHost, server.URL)
 
 			// when
@@ -198,6 +199,7 @@ var _ = Describe("Compliance Controller", func() {
 					w.Write(resp)
 				}
 			}))
+			defer server.Close()
 			config.GetConfig().Options.Set(config.Keys.ComplianceHost, server.URL)
 
 			// when
@@ -238,6 +240,7 @@ var _ = Describe("Compliance Controller", func() {
 					w.Write(resp)
 				}
 			}))
+			defer server.Close()
 			config.GetConfig().Options.Set(config.Keys.ComplianceHost, server.URL)
 
 			// when
