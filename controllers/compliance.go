@@ -4,6 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
+	u "net/url"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
@@ -12,11 +19,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var complianceServiceName = "Export Compliance Service"
@@ -68,7 +70,13 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 
 		resp, err := httpClient.Do(complianceReq)
 		if err != nil {
-			failOnComplianceError(w, "Unexpected error returned on request to Export Compliance Service", err, url)
+			var urlError *u.Error
+			if errors.As(err, &urlError) && urlError.Timeout() {
+				failOnComplianceError(w, "Request to Export Compliance Service timed out", err, url)
+			} else {
+				failOnComplianceError(w, "Unexpected error returned on request to Export Compliance Service", err, url)
+			}
+			
 			return
 		}
 
@@ -77,7 +85,7 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		complianceTimeHistogram.Observe(complianceTimeTaken)
 
 		defer resp.Body.Close()
-		respBody, err := ioutil.ReadAll(resp.Body)
+		respBody, _ := io.ReadAll(resp.Body)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(resp.StatusCode)
