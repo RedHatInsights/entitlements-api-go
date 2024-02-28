@@ -37,23 +37,24 @@ func DoRoutes() chi.Router {
 	r.Use(sentryMiddleware.Handle)
 
 	configOptions := config.GetConfig().Options
-	debug := configOptions.GetBool(config.Keys.Debug)
-	amsClient, err := ams.NewClient(debug)
-
-	if err != nil {
-		panic(fmt.Sprintf("Error constructing ams client: [%s]", err))
-	}
-
-	bopClient, err := bop.NewClient(debug)
-	if err != nil {
-		panic(fmt.Sprintf("Error constructing bop client: [%s]", err))
-	}
 
 	// This is odd, but the generated code will register handlers
 	// and return a http.Handler.  This is normally used with .Mount,
 	// but since only part of the server is using code gen this is
 	// a way to hack it in
 	if !configOptions.GetBool(config.Keys.DisableSeatManager) {
+		debug := configOptions.GetBool(config.Keys.Debug)
+
+		amsClient, err := ams.NewClient(debug)
+		if err != nil {
+			panic(fmt.Sprintf("Error constructing ams client: [%s]", err))
+		}
+	
+		bopClient, err := bop.NewClient(debug)
+		if err != nil {
+			panic(fmt.Sprintf("Error constructing bop client: [%s]", err))
+		}
+		
 		seatManagerApi := controllers.NewSeatManagerApi(amsClient, bopClient)
 		api.HandlerFromMuxWithBaseURL(seatManagerApi, r.With(identity.EnforceIdentity), "/api/entitlements/v1")
 	}
