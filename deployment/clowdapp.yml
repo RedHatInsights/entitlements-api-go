@@ -50,6 +50,13 @@ objects:
             - mountPath: /bundles
               name: default-entitlements-config
             inheritEnv: true
+            resources:
+              limits:
+                cpu: ${CPU_LIMIT} 
+                memory: ${MEMORY_LIMIT}
+              requests:
+                cpu: ${CPU_REQUESTS}
+                memory: ${MEMORY_REQUESTS}
         minReadySeconds: 15
         progressDeadlineSeconds: 600
         image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
@@ -66,13 +73,13 @@ objects:
             port: 8000
           initialDelaySeconds: 30
           timeoutSeconds: 60
-          resources:
-            limits:
-              cpu: ${CPU_LIMIT} 
-              memory: ${MEMORY_LIMIT}
-            requests:
-              cpu: ${CPU_REQUESTS}
-              memory: ${MEMORY_REQUESTS}
+        resources:
+          limits:
+            cpu: ${CPU_LIMIT} 
+            memory: ${MEMORY_LIMIT}
+          requests:
+            cpu: ${CPU_REQUESTS}
+            memory: ${MEMORY_REQUESTS}
         volumeMounts:
         - mountPath: /bundles
           name: default-entitlements-config
@@ -164,16 +171,16 @@ parameters:
   value: info
 - description: cpu limit for service
   name: CPU_LIMIT
-  value: 500m
-- description: cpu limit for service
+  value: 1000m
+- description: memory limit for service
   name: MEMORY_LIMIT
-  value: 500Mi 
-- description: cpu limit for service
+  value: 1024Mi
+- description: requested cpu for service
   name: CPU_REQUESTS
-  value: 100m 
-- description: cpu limit for service
+  value: 250m
+- description: requested memory for service
   name: MEMORY_REQUESTS
-  value: 250Mi 
+  value: 512Mi
 - description: Port for listener
   name: PORT
   value: '8000'
