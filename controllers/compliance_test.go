@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/types"
@@ -143,6 +144,44 @@ var _ = Describe("Compliance Controller", func() {
 		})
 	})
 
+	Context("When the request to compliance service fails due to timeout", func() {
+		It("should return a specific error and status 500", func() {
+			// given
+			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
+			req = req.WithContext(getContextWithIdentity(defaultEmail))
+			rr := httptest.NewRecorder()
+
+			cfg := config.GetConfig().Options
+			cfg.Set(config.Keys.ITServicesTimeoutSeconds, 2)
+			wait := cfg.GetInt(config.Keys.ITServicesTimeoutSeconds) + 1
+
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				if req.URL.Path == cfg.GetString(config.Keys.CompAPIBasePath) {
+					time.Sleep(time.Duration(wait) * time.Second)
+				}
+			}))
+			defer server.Close()
+			cfg.Set(config.Keys.ComplianceHost, server.URL)
+
+			// when
+			Compliance()(rr, req)
+
+			// then
+			Expect(rr.Result().StatusCode).To(Equal(http.StatusInternalServerError))
+			resp := readResponse(rr.Result().Body)
+
+			var errorResp types.DependencyErrorResponse
+			err := json.Unmarshal(resp, &errorResp)
+			Expect(err).To(BeNil(), "Error unmarshalling server response")
+
+			Expect(errorResp.Error).ToNot(BeNil())
+			Expect(errorResp.Error.Message).ToNot(BeNil())
+			Expect(errorResp.Error.Message).To(ContainSubstring("Request to Export Compliance Service timed out"))
+			Expect(errorResp.Error.Status).To(Equal(http.StatusInternalServerError))
+			Expect(errorResp.Error.Service).To(Equal(complianceServiceName))
+		})
+	})
+
 	Context("When the request to compliance service is successful", func() {
 		It("should return a body and successful status code", func() {
 			// given
@@ -160,6 +199,7 @@ var _ = Describe("Compliance Controller", func() {
 					w.Write(resp)
 				}
 			}))
+			defer server.Close()
 			config.GetConfig().Options.Set(config.Keys.ComplianceHost, server.URL)
 
 			// when
@@ -178,7 +218,7 @@ var _ = Describe("Compliance Controller", func() {
 		})
 	})
 
-	Context("When the request to compliance service is fails on error from compliance", func() {
+	Context("When the request to compliance service is successful and error from compliance", func() {
 		It("should return a body and appropriate status code", func() {
 			// given
 			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
@@ -200,6 +240,7 @@ var _ = Describe("Compliance Controller", func() {
 					w.Write(resp)
 				}
 			}))
+			defer server.Close()
 			config.GetConfig().Options.Set(config.Keys.ComplianceHost, server.URL)
 
 			// when
