@@ -8,12 +8,18 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 )
 
+var client *http.Client
+
 func getClient() *http.Client {
+	if client != nil {
+		return client
+	}
+
 	cfg := config.GetConfig()
 	timeout := cfg.Options.GetInt(config.Keys.ITServicesTimeoutSeconds)
 
 	// Create a HTTPS client that uses the supplied pub/priv mutual TLS certs
-	return &http.Client{
+	client = &http.Client{
 		Timeout: time.Duration(timeout) * time.Second,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
@@ -22,4 +28,6 @@ func getClient() *http.Client {
 			},
 		},
 	}
+	
+	return client
 }
