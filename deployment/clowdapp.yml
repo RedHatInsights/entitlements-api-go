@@ -164,14 +164,14 @@ parameters:
   value: info
 - description: cpu limit for service
   name: CPU_LIMIT
-  value: 500m
-- description: cpu limit for service
+  value: 1000m
+- description: memory limit for service
   name: MEMORY_LIMIT
   value: 500Mi 
-- description: cpu limit for service
+- description: requested cpu for service
   name: CPU_REQUESTS
-  value: 100m 
-- description: cpu limit for service
+  value: 200m
+- description: requested memory for service
   name: MEMORY_REQUESTS
   value: 250Mi 
 - description: Port for listener
