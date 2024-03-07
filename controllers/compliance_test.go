@@ -152,7 +152,6 @@ var _ = Describe("Compliance Controller", func() {
 			rr := httptest.NewRecorder()
 
 			cfg := config.GetConfig().Options
-			cfg.Set(config.Keys.ITServicesTimeoutSeconds, 2)
 			wait := cfg.GetInt(config.Keys.ITServicesTimeoutSeconds) + 1
 
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
