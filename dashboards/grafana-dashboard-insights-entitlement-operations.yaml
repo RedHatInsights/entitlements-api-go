@@ -414,7 +414,7 @@ data:
                   "showLineNumbers": false,
                   "showMiniMap": false
                 },
-                "content": "### SLO details\n\n* [app-interface SLO dokument](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/entitlements/SLO.md)\n\n* **Availability:**  99% of requests result in successful (non-5xx) response\n\n* **Latency:**  99% of requests services in < 1000ms\n\n### Prometheus rules\n\n* [app-interface prometheus rules](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/insights-prod/entitlements-prod/entitlements.prometheusrules.yml?ref_type=heads)\n",
+                "content": "### SLO details\n\n* [app-interface SLO document](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/entitlements/SLO.md)\n\n* **Availability:**  99% of requests result in successful (non-5xx) response\n\n* **Latency:**  99% of requests services in < 1000ms\n\n### Prometheus rules\n\n* [app-interface prometheus rules](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/insights-prod/entitlements-prod/entitlements.prometheusrules.yml?ref_type=heads)\n",
                 "mode": "markdown"
               },
               "pluginVersion": "9.3.8",
