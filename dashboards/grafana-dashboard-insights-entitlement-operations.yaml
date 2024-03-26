@@ -113,7 +113,7 @@ data:
               "decimals": 4,
               "mappings": [],
               "thresholds": {
-                "mode": "percentage",
+                "mode": "absolute",
                 "steps": [
                   {
                     "color": "red",
@@ -174,14 +174,14 @@ data:
               "decimals": 4,
               "mappings": [],
               "thresholds": {
-                "mode": "percentage",
+                "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red",
+                    "color": "green",
                     "value": null
                   },
                   {
-                    "color": "green",
+                    "color": "red",
                     "value": 1
                   }
                 ]
@@ -237,14 +237,14 @@ data:
               "mappings": [],
               "noValue": "0",
               "thresholds": {
-                "mode": "percentage",
+                "mode": "absolute",
                 "steps": [
                   {
-                    "color": "red",
+                    "color": "green",
                     "value": null
                   },
                   {
-                    "color": "green",
+                    "color": "red",
                     "value": 1
                   }
                 ]
@@ -405,7 +405,7 @@ data:
                 "h": 6,
                 "w": 24,
                 "x": 0,
-                "y": 18
+                "y": 2
               },
               "id": 69,
               "options": {
@@ -456,7 +456,7 @@ data:
                 "h": 7,
                 "w": 7,
                 "x": 0,
-                "y": 24
+                "y": 8
               },
               "id": 71,
               "options": {
@@ -554,7 +554,7 @@ data:
                 "h": 7,
                 "w": 17,
                 "x": 7,
-                "y": 24
+                "y": 8
               },
               "id": 73,
               "options": {
@@ -775,7 +775,7 @@ data:
                 "h": 9,
                 "w": 24,
                 "x": 0,
-                "y": 31
+                "y": 15
               },
               "id": 75,
               "options": {
@@ -878,7 +878,7 @@ data:
                 "h": 7,
                 "w": 7,
                 "x": 0,
-                "y": 40
+                "y": 24
               },
               "id": 77,
               "options": {
@@ -976,7 +976,7 @@ data:
                 "h": 7,
                 "w": 17,
                 "x": 7,
-                "y": 40
+                "y": 24
               },
               "id": 79,
               "options": {
@@ -1043,7 +1043,7 @@ data:
                 "h": 10,
                 "w": 24,
                 "x": 0,
-                "y": 47
+                "y": 31
               },
               "hiddenSeries": false,
               "id": 81,
@@ -1188,7 +1188,7 @@ data:
                 "h": 6,
                 "w": 24,
                 "x": 0,
-                "y": 57
+                "y": 41
               },
               "id": 83,
               "options": {
@@ -1288,7 +1288,7 @@ data:
                 "h": 6,
                 "w": 7,
                 "x": 0,
-                "y": 63
+                "y": 47
               },
               "id": 85,
               "options": {
@@ -1383,7 +1383,7 @@ data:
                 "h": 6,
                 "w": 17,
                 "x": 7,
-                "y": 63
+                "y": 47
               },
               "id": 87,
               "options": {
@@ -1745,6 +1745,7 @@ data:
               },
               "dataFormat": "tsbuckets",
               "datasource": {
+                "type": "prometheus",
                 "uid": "$datasource"
               },
               "fieldConfig": {
@@ -1822,10 +1823,12 @@ data:
                   "datasource": {
                     "uid": "$datasource"
                   },
+                  "editorMode": "code",
                   "expr": "sum(increase(api_3scale_gateway_api_time_bucket{exported_service=\"entitlements\"}[1m])) by (le)",
                   "format": "heatmap",
                   "interval": "1m",
-                  "legendFormat": "{{le}} s",
+                  "legendFormat": "{{le}} ms",
+                  "range": true,
                   "refId": "A"
                 }
               ],
@@ -1994,7 +1997,7 @@ data:
                       }
                     ]
                   },
-                  "unit": "percentunit"
+                  "unit": "percent"
                 },
                 "overrides": []
               },
@@ -2455,7 +2458,7 @@ data:
                   "expr": "sum(increase(api_3scale_gateway_api_time_bucket{exported_service=\"compliance\"}[1m])) by (le)",
                   "format": "heatmap",
                   "interval": "1m",
-                  "legendFormat": "{{le}} s",
+                  "legendFormat": "{{le}} ms",
                   "range": true,
                   "refId": "A"
                 }
@@ -2629,7 +2632,7 @@ data:
                       }
                     ]
                   },
-                  "unit": "percentunit"
+                  "unit": "percent"
                 },
                 "overrides": []
               },
@@ -3656,7 +3659,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-30d",
+        "from": "now-7d",
         "to": "now"
       },
       "timepicker": {
