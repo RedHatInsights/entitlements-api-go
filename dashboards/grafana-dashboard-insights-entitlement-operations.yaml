@@ -3690,7 +3690,7 @@ data:
       "timezone": "",
       "title": "Operations - Entitlements",
       "uid": "TjP_nMWMkd",
-      "version": 4,
+      "version": 4
     }
 kind: ConfigMap
 metadata:
