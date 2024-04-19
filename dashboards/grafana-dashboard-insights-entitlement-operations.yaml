@@ -73,7 +73,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 688032,
+      "id": 692805,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -136,6 +136,8 @@ data:
           },
           "id": 61,
           "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
@@ -146,9 +148,10 @@ data:
             },
             "showThresholdLabels": false,
             "showThresholdMarkers": true,
+            "sizing": "auto",
             "text": {}
           },
-          "pluginVersion": "9.3.8",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -197,6 +200,8 @@ data:
           },
           "id": 63,
           "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
@@ -207,9 +212,10 @@ data:
             },
             "showThresholdLabels": false,
             "showThresholdMarkers": true,
+            "sizing": "auto",
             "text": {}
           },
-          "pluginVersion": "9.3.8",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -260,6 +266,8 @@ data:
           },
           "id": 65,
           "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
@@ -270,9 +278,10 @@ data:
             },
             "showThresholdLabels": false,
             "showThresholdMarkers": true,
+            "sizing": "auto",
             "text": {}
           },
-          "pluginVersion": "9.3.8",
+          "pluginVersion": "10.4.1",
           "targets": [
             {
               "datasource": {
@@ -298,6 +307,7 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
@@ -311,6 +321,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -353,7 +364,6 @@ data:
             "y": 7
           },
           "id": 59,
-          "links": [],
           "options": {
             "legend": {
               "calcs": [
@@ -417,7 +427,7 @@ data:
                 "content": "### SLO details\n\n* [app-interface SLO document](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/entitlements/SLO.md)\n\n* **Availability:**  99% of requests result in successful (non-5xx) response\n\n* **Latency:**  99% of requests services in < 1000ms\n\n### Prometheus rules\n\n* [app-interface prometheus rules](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/insights-prod/entitlements-prod/entitlements.prometheusrules.yml?ref_type=heads)\n",
                 "mode": "markdown"
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "title": "SLO details",
               "type": "text"
             },
@@ -460,6 +470,8 @@ data:
               },
               "id": 71,
               "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
                 "orientation": "auto",
                 "reduceOptions": {
                   "calcs": [
@@ -469,9 +481,10 @@ data:
                   "values": false
                 },
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true
+                "showThresholdMarkers": true,
+                "sizing": "auto"
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -501,6 +514,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -514,6 +528,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -602,6 +617,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -615,6 +631,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -882,6 +899,8 @@ data:
               },
               "id": 77,
               "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
                 "orientation": "auto",
                 "reduceOptions": {
                   "calcs": [
@@ -891,9 +910,10 @@ data:
                   "values": false
                 },
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true
+                "showThresholdMarkers": true,
+                "sizing": "auto"
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -923,6 +943,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -936,6 +957,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -1014,63 +1036,82 @@ data:
               "type": "timeseries"
             },
             {
-              "aliasColors": {
-                "1000 - 1500ms": "dark-yellow",
-                "1500 - 2000ms": "light-yellow",
-                "2000 - 2500ms": "light-orange",
-                "2500 - 3000ms": "dark-orange",
-                "3000 - 3500ms": "light-red",
-                "3500 - 4000ms": "semi-dark-red",
-                "500 - 1000ms": "light-green",
-                "> 4000ms": "dark-red"
-              },
-              "bars": false,
-              "dashLength": 10,
-              "dashes": false,
               "datasource": {
                 "type": "prometheus",
                 "uid": "$datasource"
               },
               "fieldConfig": {
                 "defaults": {
-                  "links": []
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 60,
+                    "gradientMode": "opacity",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "percent"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "line"
+                    }
+                  },
+                  "links": [],
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "unit": "short"
                 },
                 "overrides": []
               },
-              "fill": 1,
-              "fillGradient": 6,
               "gridPos": {
-                "h": 10,
+                "h": 13,
                 "w": 24,
                 "x": 0,
                 "y": 31
               },
-              "hiddenSeries": false,
               "id": 81,
-              "legend": {
-                "avg": false,
-                "current": false,
-                "max": false,
-                "min": false,
-                "show": true,
-                "total": false,
-                "values": false
-              },
-              "lines": true,
-              "linewidth": 1,
-              "nullPointMode": "null",
               "options": {
-                "alertThreshold": true
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "none"
+                }
               },
-              "percentage": true,
-              "pluginVersion": "9.3.8",
-              "pointradius": 2,
-              "points": false,
-              "renderer": "flot",
-              "seriesOverrides": [],
-              "spaceLength": 10,
-              "stack": true,
-              "steppedLine": false,
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -1120,38 +1161,8 @@ data:
                   "refId": "C"
                 }
               ],
-              "thresholds": [],
-              "timeRegions": [],
               "title": "Latency Distribution",
-              "tooltip": {
-                "shared": true,
-                "sort": 0,
-                "value_type": "individual"
-              },
-              "type": "graph",
-              "xaxis": {
-                "mode": "time",
-                "show": true,
-                "values": []
-              },
-              "yaxes": [
-                {
-                  "$$hashKey": "object:177",
-                  "format": "short",
-                  "logBase": 1,
-                  "max": "100",
-                  "show": true
-                },
-                {
-                  "$$hashKey": "object:178",
-                  "format": "short",
-                  "logBase": 1,
-                  "show": false
-                }
-              ],
-              "yaxis": {
-                "align": false
-              }
+              "type": "timeseries"
             },
             {
               "datasource": {
@@ -1188,10 +1199,12 @@ data:
                 "h": 6,
                 "w": 24,
                 "x": 0,
-                "y": 41
+                "y": 44
               },
               "id": 83,
               "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
                 "orientation": "auto",
                 "reduceOptions": {
                   "calcs": [
@@ -1201,9 +1214,10 @@ data:
                   "values": false
                 },
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true
+                "showThresholdMarkers": true,
+                "sizing": "auto"
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -1288,10 +1302,12 @@ data:
                 "h": 6,
                 "w": 7,
                 "x": 0,
-                "y": 47
+                "y": 50
               },
               "id": 85,
               "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
                 "orientation": "auto",
                 "reduceOptions": {
                   "calcs": [
@@ -1301,9 +1317,10 @@ data:
                   "values": false
                 },
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true
+                "showThresholdMarkers": true,
+                "sizing": "auto"
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "targets": [
                 {
                   "datasource": {
@@ -1331,6 +1348,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -1344,6 +1362,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -1383,7 +1402,7 @@ data:
                 "h": 6,
                 "w": 17,
                 "x": 7,
-                "y": 47
+                "y": 50
               },
               "id": 87,
               "options": {
@@ -1443,6 +1462,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -1456,6 +1476,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -1494,10 +1515,9 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 19
+                "y": 3
               },
               "id": 34,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [
@@ -1561,7 +1581,7 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 19
+                "y": 3
               },
               "heatmap": {},
               "hideZeroBuckets": false,
@@ -1570,7 +1590,6 @@ data:
               "legend": {
                 "show": true
               },
-              "links": [],
               "maxDataPoints": 100,
               "options": {
                 "calculate": false,
@@ -1600,7 +1619,8 @@ data:
                 },
                 "showValue": "never",
                 "tooltip": {
-                  "show": true,
+                  "mode": "single",
+                  "showColorScale": false,
                   "yHistogram": false
                 },
                 "yAxis": {
@@ -1609,7 +1629,7 @@ data:
                   "unit": "dtdurations"
                 }
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "reverseYBuckets": false,
               "targets": [
                 {
@@ -1650,6 +1670,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -1663,6 +1684,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -1703,10 +1725,9 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 27
+                "y": 11
               },
               "id": 35,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -1767,7 +1788,7 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 27
+                "y": 11
               },
               "heatmap": {},
               "hideZeroBuckets": false,
@@ -1777,7 +1798,6 @@ data:
               "legend": {
                 "show": true
               },
-              "links": [],
               "maxDataPoints": 100,
               "options": {
                 "calculate": false,
@@ -1807,7 +1827,8 @@ data:
                 },
                 "showValue": "never",
                 "tooltip": {
-                  "show": true,
+                  "mode": "single",
+                  "showColorScale": false,
                   "yHistogram": false
                 },
                 "yAxis": {
@@ -1816,7 +1837,7 @@ data:
                   "unit": "dtdurations"
                 }
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "reverseYBuckets": false,
               "targets": [
                 {
@@ -1858,6 +1879,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -1871,6 +1893,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -1910,10 +1933,9 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 35
+                "y": 19
               },
               "id": 5,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -1952,6 +1974,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -1965,6 +1988,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -2005,10 +2029,9 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 35
+                "y": 19
               },
               "id": 13,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -2070,6 +2093,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -2083,6 +2107,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -2120,7 +2145,7 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 20
+                "y": 4
               },
               "id": 46,
               "options": {
@@ -2186,7 +2211,7 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 20
+                "y": 4
               },
               "heatmap": {},
               "hideZeroBuckets": false,
@@ -2195,7 +2220,6 @@ data:
               "legend": {
                 "show": true
               },
-              "links": [],
               "maxDataPoints": 100,
               "options": {
                 "calculate": false,
@@ -2225,7 +2249,8 @@ data:
                 },
                 "showValue": "never",
                 "tooltip": {
-                  "show": true,
+                  "mode": "single",
+                  "showColorScale": false,
                   "yHistogram": false
                 },
                 "yAxis": {
@@ -2234,7 +2259,7 @@ data:
                   "unit": "dtdurations"
                 }
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "reverseYBuckets": false,
               "targets": [
                 {
@@ -2277,6 +2302,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -2290,6 +2316,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -2330,10 +2357,9 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 28
+                "y": 12
               },
               "id": 53,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -2398,7 +2424,7 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 28
+                "y": 12
               },
               "heatmap": {},
               "hideZeroBuckets": false,
@@ -2408,7 +2434,6 @@ data:
               "legend": {
                 "show": true
               },
-              "links": [],
               "maxDataPoints": 100,
               "options": {
                 "calculate": false,
@@ -2438,7 +2463,8 @@ data:
                 },
                 "showValue": "never",
                 "tooltip": {
-                  "show": true,
+                  "mode": "single",
+                  "showColorScale": false,
                   "yHistogram": false
                 },
                 "yAxis": {
@@ -2447,7 +2473,7 @@ data:
                   "unit": "dtdurations"
                 }
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "reverseYBuckets": false,
               "targets": [
                 {
@@ -2490,6 +2516,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -2503,6 +2530,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -2542,10 +2570,9 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 36
+                "y": 20
               },
               "id": 55,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -2587,6 +2614,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -2600,6 +2628,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -2640,10 +2669,9 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 36
+                "y": 20
               },
               "id": 56,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -2701,6 +2729,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -2714,6 +2743,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -2735,7 +2765,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       },
                       {
                         "color": "red",
@@ -2822,7 +2853,6 @@ data:
               "legend": {
                 "show": true
               },
-              "links": [],
               "maxDataPoints": 100,
               "options": {
                 "calculate": false,
@@ -2852,7 +2882,8 @@ data:
                 },
                 "showValue": "never",
                 "tooltip": {
-                  "show": true,
+                  "mode": "single",
+                  "showColorScale": false,
                   "yHistogram": false
                 },
                 "yAxis": {
@@ -2861,7 +2892,7 @@ data:
                   "unit": "dtdurations"
                 }
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "reverseYBuckets": false,
               "targets": [
                 {
@@ -2902,6 +2933,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -2915,6 +2947,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -2936,7 +2969,8 @@ data:
                     "mode": "absolute",
                     "steps": [
                       {
-                        "color": "green"
+                        "color": "green",
+                        "value": null
                       },
                       {
                         "color": "red",
@@ -3024,7 +3058,6 @@ data:
               "legend": {
                 "show": true
               },
-              "links": [],
               "maxDataPoints": 100,
               "options": {
                 "calculate": false,
@@ -3054,7 +3087,8 @@ data:
                 },
                 "showValue": "never",
                 "tooltip": {
-                  "show": true,
+                  "mode": "single",
+                  "showColorScale": false,
                   "yHistogram": false
                 },
                 "yAxis": {
@@ -3063,7 +3097,7 @@ data:
                   "unit": "dtdurations"
                 }
               },
-              "pluginVersion": "9.3.8",
+              "pluginVersion": "10.4.1",
               "reverseYBuckets": false,
               "targets": [
                 {
@@ -3133,6 +3167,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -3146,6 +3181,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -3185,10 +3221,9 @@ data:
                 "h": 5,
                 "w": 12,
                 "x": 0,
-                "y": 117
+                "y": 6
               },
               "id": 15,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -3227,6 +3262,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -3240,6 +3276,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -3280,10 +3317,9 @@ data:
                 "h": 5,
                 "w": 12,
                 "x": 12,
-                "y": 117
+                "y": 6
               },
               "id": 19,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -3321,6 +3357,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -3334,6 +3371,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -3372,10 +3410,9 @@ data:
                 "h": 5,
                 "w": 12,
                 "x": 0,
-                "y": 122
+                "y": 11
               },
               "id": 29,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -3413,6 +3450,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -3426,6 +3464,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -3464,10 +3503,9 @@ data:
                 "h": 5,
                 "w": 12,
                 "x": 12,
-                "y": 122
+                "y": 11
               },
               "id": 9,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -3506,6 +3544,7 @@ data:
                     "mode": "palette-classic"
                   },
                   "custom": {
+                    "axisBorderShow": false,
                     "axisCenteredZero": false,
                     "axisColorMode": "text",
                     "axisLabel": "",
@@ -3519,6 +3558,7 @@ data:
                       "tooltip": false,
                       "viz": false
                     },
+                    "insertNulls": false,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
                     "pointSize": 5,
@@ -3559,10 +3599,9 @@ data:
                 "h": 5,
                 "w": 24,
                 "x": 0,
-                "y": 127
+                "y": 16
               },
               "id": 17,
-              "links": [],
               "options": {
                 "legend": {
                   "calcs": [],
@@ -3605,8 +3644,7 @@ data:
         }
       ],
       "refresh": false,
-      "schemaVersion": 37,
-      "style": "dark",
+      "schemaVersion": 39,
       "tags": [],
       "templating": {
         "list": [
@@ -3690,7 +3728,7 @@ data:
       "timezone": "",
       "title": "Operations - Entitlements",
       "uid": "TjP_nMWMkd",
-      "version": 4
+      "version": 5
     }
 kind: ConfigMap
 metadata:
