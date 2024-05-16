@@ -28,6 +28,6 @@ func getClient() *http.Client {
 			},
 		},
 	}
-	
+
 	return client
 }

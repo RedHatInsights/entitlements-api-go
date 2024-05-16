@@ -12,7 +12,7 @@ import (
 // For example, a query can look like this: "plan.id LIKE 'WISDOM' AND status IN ('Active')"
 // These methods construct a query string by operator, accepting a field and value to use.
 type QueryBuilder struct {
-	query	string
+	query string
 }
 
 func NewQueryBuilder() *QueryBuilder {
@@ -21,8 +21,8 @@ func NewQueryBuilder() *QueryBuilder {
 	}
 }
 
-var parentheses 	= "()"
-var singleQuotes 	= "''"
+var parentheses = "()"
+var singleQuotes = "''"
 
 func (builder *QueryBuilder) queryOperator(operator, field, value, valWrappers string) {
 	if len(valWrappers) < 2 {
@@ -38,13 +38,13 @@ func (builder *QueryBuilder) queryOperator(operator, field, value, valWrappers s
 	str.WriteString(string(valWrappers[0]))
 	str.WriteString(value)
 	str.WriteString(string(valWrappers[1]))
-	
+
 	builder.query = str.String()
 }
 
 func (builder *QueryBuilder) Like(field, value string) *QueryBuilder {
 	builder.queryOperator("LIKE", field, value, singleQuotes)
-	
+
 	return builder
 }
 
@@ -56,7 +56,7 @@ func (builder *QueryBuilder) Equals(field, value string) *QueryBuilder {
 
 func (builder *QueryBuilder) In(field string, values []string) *QueryBuilder {
 	var value strings.Builder
-	for index,element := range values {
+	for index, element := range values {
 		value.WriteString("'")
 		value.WriteString(element)
 		value.WriteString("'")
@@ -66,7 +66,7 @@ func (builder *QueryBuilder) In(field string, values []string) *QueryBuilder {
 	}
 
 	builder.queryOperator("IN", field, value.String(), parentheses)
-	
+
 	return builder
 }
 
@@ -76,11 +76,11 @@ func (builder *QueryBuilder) And() *QueryBuilder {
 	str.WriteString(" AND ")
 
 	builder.query = str.String()
-	
+
 	return builder
 }
 
 func (builder *QueryBuilder) Build() string {
-	logger.Log.WithFields(logrus.Fields{"ams_search_query":builder.query}).Debug("built ams search query")
+	logger.Log.WithFields(logrus.Fields{"ams_search_query": builder.query}).Debug("built ams search query")
 	return builder.query
 }

@@ -22,6 +22,7 @@ const DEFAULT_ORG_ID string = "4384938490324"
 const DEFAULT_ACCOUNT_NUMBER string = "540155"
 const DEFAULT_IS_INTERNAL bool = false
 const DEFAULT_EMAIL = "test+qa@redhat.com"
+
 var realGetFeatureStatus = GetFeatureStatus
 
 func testRequest(method string, path string, accnum string, orgid string, isinternal bool, email string, fakeCaller func(GetFeatureStatusParams) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
@@ -95,7 +96,7 @@ var _ = Describe("Services Controller", func() {
 		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeGetFeatureStatus("deadbeef12", fakeResponse))
 	})
 
-	It("should build the subscriptions query with only sku based features", func ()  {
+	It("should build the subscriptions query with only sku based features", func() {
 		cfg := config.GetConfig()
 		cfg.Options.Set(config.Keys.Features, "TestBundle1,TestBundle3,TestBundle4,TestBundle5,TestBundle6,TestBundle7")
 		setSubscriptionsQueryFeatures()
@@ -428,7 +429,7 @@ var _ = Describe("Services Controller", func() {
 					return dummyResponse
 				}
 				path := "/"
-				
+
 				// when
 				testRequestWithDefaultOrgId("GET", path, mockGetFeatureStatus)
 
@@ -446,7 +447,7 @@ var _ = Describe("Services Controller", func() {
 					return dummyResponse
 				}
 				path := "/?trial_activated=notABool"
-				
+
 				// when
 				testRequestWithDefaultOrgId("GET", path, mockGetFeatureStatus)
 
@@ -464,7 +465,7 @@ var _ = Describe("Services Controller", func() {
 					return dummyResponse
 				}
 				path := "/?trial_activated=true"
-				
+
 				// when
 				testRequestWithDefaultOrgId("GET", path, mockGetFeatureStatus)
 
@@ -483,7 +484,7 @@ var _ = Describe("Services Controller", func() {
 				// setup mock server
 				subsServer = ghttp.NewServer()
 				subsServer.Writer = GinkgoWriter
-				
+
 				// this will setup our mock server to respond with the following to the first request made to it,
 				// aka the following request to fill cache
 				subsServer.AppendHandlers(ghttp.RespondWith(http.StatusOK, `{"features": [
@@ -493,14 +494,14 @@ var _ = Describe("Services Controller", func() {
 						"entitled":true
 					}
 				]}`, http.Header{"Content-Type": {"application/json"}}))
-		
+
 				// this points our http client to our mock server setup above
 				cfg := config.GetConfig().Options
 				cfg.SetDefault(config.Keys.SubsHost, subsServer.URL())
 
 				// fill cache
 				params := GetFeatureStatusParams{
-					OrgId: DEFAULT_ORG_ID,
+					OrgId:          DEFAULT_ORG_ID,
 					ForceFreshData: true,
 				}
 				GetFeatureStatus(params)
@@ -513,7 +514,7 @@ var _ = Describe("Services Controller", func() {
 			It("serves cached data when req param is false", func() {
 				// given
 				params := GetFeatureStatusParams{
-					OrgId: DEFAULT_ORG_ID,
+					OrgId:          DEFAULT_ORG_ID,
 					ForceFreshData: false,
 				}
 
@@ -525,11 +526,11 @@ var _ = Describe("Services Controller", func() {
 				Expect(response.CacheHit).To(BeTrue())
 				Expect(subsServer.ReceivedRequests()).To(HaveLen(1))
 			})
-	
+
 			It("serves fresh data when req param is true", func() {
 				// given
 				params := GetFeatureStatusParams{
-					OrgId: DEFAULT_ORG_ID,
+					OrgId:          DEFAULT_ORG_ID,
 					ForceFreshData: true,
 				}
 

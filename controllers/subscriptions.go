@@ -49,20 +49,20 @@ var subsTimeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
 })
 
 type GetServicesParams struct {
-	IncludeBundles	[]string
-	ExcludeBundles	[]string
-	TrialActivated	bool
+	IncludeBundles []string
+	ExcludeBundles []string
+	TrialActivated bool
 }
 
 const (
-	IncludeBundlesParamKey 	string = "include_bundles"
-	ExcludeBundlesParamKey 	string = "exclude_bundles"
-	TrialActivatedParamKey	string = "trial_activated"
+	IncludeBundlesParamKey string = "include_bundles"
+	ExcludeBundlesParamKey string = "exclude_bundles"
+	TrialActivatedParamKey string = "trial_activated"
 )
 
 type GetFeatureStatusParams struct {
-	OrgId 		string
-	ForceFreshData	bool
+	OrgId          string
+	ForceFreshData bool
 }
 
 // SetBundleInfo sets the bundle information fetched from the YAML
@@ -102,7 +102,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 	item := cache.Get(orgID)
 	entitleAll := configOptions.GetString(config.Keys.EntitleAll)
 
-	if item != nil && !item.Expired() && !params.ForceFreshData{
+	if item != nil && !item.Expired() && !params.ForceFreshData {
 		return types.SubscriptionsResponse{
 			StatusCode: 200,
 			Data:       item.Value().(types.FeatureStatus),
@@ -131,7 +131,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 		sentry.CaptureException(err)
 		return types.SubscriptionsResponse{
 			Error: err,
-			Url: req,
+			Url:   req,
 		}
 	}
 
@@ -144,7 +144,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 			Error:      nil,
 			Data:       types.FeatureStatus{},
 			CacheHit:   false,
-			Url: req,
+			Url:        req,
 		}
 	}
 
@@ -161,7 +161,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 		StatusCode: resp.StatusCode,
 		Data:       FeatureStatus,
 		CacheHit:   false,
-		Url: req,
+		Url:        req,
 	}
 }
 
@@ -199,11 +199,11 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		}
 		subscriptions := GetFeatureStatus(
 			GetFeatureStatusParams{
-				OrgId: orgId, 
+				OrgId:          orgId,
 				ForceFreshData: queryParams.TrialActivated,
 			},
 		)
-		
+
 		accNum := idObj.AccountNumber
 		isInternal := idObj.User.Internal
 		validEmailMatch, _ := regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)

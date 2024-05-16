@@ -49,12 +49,12 @@ func DoRoutes() chi.Router {
 		if err != nil {
 			panic(fmt.Sprintf("Error constructing ams client: [%s]", err))
 		}
-	
+
 		bopClient, err := bop.NewClient(debug)
 		if err != nil {
 			panic(fmt.Sprintf("Error constructing bop client: [%s]", err))
 		}
-		
+
 		seatManagerApi := controllers.NewSeatManagerApi(amsClient, bopClient)
 		api.HandlerFromMuxWithBaseURL(seatManagerApi, r.With(identity.EnforceIdentity), "/api/entitlements/v1")
 	}
