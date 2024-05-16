@@ -169,10 +169,10 @@ func (c *Client) GetSubscriptions(organizationId string, searchParams api.GetSea
 		queryBuilder = queryBuilder.And().In("status", statuses)
 	} else if statuses == nil && err != nil {
 		return nil, &ClientError{
-			Message: err.Error(),
+			Message:    err.Error(),
 			StatusCode: http.StatusBadRequest,
-			OrgId: organizationId,
-			AmsOrgId: amsOrgId,
+			OrgId:      organizationId,
+			AmsOrgId:   amsOrgId,
 		}
 	}
 
@@ -302,16 +302,16 @@ func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 }
 
 func buildStatusSearch(statuses *api.Status) (api.Status, error) {
-	if statuses == nil || len(*statuses) == 0{
+	if statuses == nil || len(*statuses) == 0 {
 		return nil, nil
 	}
-	
+
 	// ams is case sensitive when searching on status, so title case all input for the consumer
 	caser := cases.Title(language.English)
 	titleCased := api.Status{}
 	for _, status := range *statuses {
 		statusType := api.GetSeatsParamsStatus(caser.String(status))
-		switch statusType{
+		switch statusType {
 		case api.Active, api.Deprovisioned:
 			titleCased = append(titleCased, string(statusType))
 		case "":

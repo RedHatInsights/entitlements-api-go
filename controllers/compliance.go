@@ -76,7 +76,7 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 			} else {
 				failOnComplianceError(w, "Unexpected error returned on request to Export Compliance Service", err, url)
 			}
-			
+
 			return
 		}
 

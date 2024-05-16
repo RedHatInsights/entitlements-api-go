@@ -20,8 +20,8 @@ import (
 )
 
 type SeatManagerApi struct {
-	ams 		ams.AMSInterface
-	bop    		bop.Bop
+	ams ams.AMSInterface
+	bop bop.Bop
 }
 
 const BASE_LINK_URL = "/api/entitlements/v1/seats"
@@ -69,7 +69,7 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 
 	subOrgId, ok := subscription.GetOrganizationID()
 	if !ok {
-		doError(w, http.StatusInternalServerError, 
+		doError(w, http.StatusInternalServerError,
 			fmt.Errorf("Subscription with id [%s] does not have a corresponding ams org id, cannot verify subscription org", id), "")
 		return
 	}
@@ -152,12 +152,12 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 		}
 
 		seats = append(seats, api.Seat{
-			AccountUsername: 	toPtr(creator.Username()),
-			SubscriptionId:  	toPtr(sub.ID()),
-			Status:          	toPtr(sub.Status()),
-			FirstName: 		 	toPtr(creator.FirstName()),
-			LastName: 		 	toPtr(creator.LastName()),
-			Email:				toPtr(creator.Email()),
+			AccountUsername: toPtr(creator.Username()),
+			SubscriptionId:  toPtr(sub.ID()),
+			Status:          toPtr(sub.Status()),
+			FirstName:       toPtr(creator.FirstName()),
+			LastName:        toPtr(creator.LastName()),
+			Email:           toPtr(creator.Email()),
 		})
 		return true
 	})

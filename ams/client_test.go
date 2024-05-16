@@ -14,8 +14,8 @@ import (
 
 var _ = Describe("AMS Client", func() {
 
-	var amsServer 			*ghttp.Server
-	var tokenServer			*ghttp.Server
+	var amsServer *ghttp.Server
+	var tokenServer *ghttp.Server
 
 	BeforeEach(func() {
 		tokenServer = ghttp.NewServer()
@@ -28,8 +28,8 @@ var _ = Describe("AMS Client", func() {
 			"not-before-policy": 0,
 			"session_state": "state",
 			"scope": ""
-		}`, http.Header{"Content-Type": {"application/json"}}))			
-		
+		}`, http.Header{"Content-Type": {"application/json"}}))
+
 		amsServer = ghttp.NewServer()
 		amsServer.Writer = GinkgoWriter
 
@@ -45,7 +45,7 @@ var _ = Describe("AMS Client", func() {
 		amsServer.Close()
 		tokenServer.Close()
 	})
-	
+
 	Context("GetSubscriptions", func() {
 
 		BeforeEach(func() {
@@ -58,14 +58,14 @@ var _ = Describe("AMS Client", func() {
 		})
 
 		It("should construct the base query correctly", func() {
-			returnedSubs :=`{"items":[{"id": "subId", "status": "active"}]}`
-			
+			returnedSubs := `{"items":[{"id": "subId", "status": "active"}]}`
+
 			amsServer.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", ContainSubstring("/api/accounts_mgmt/v1/subscriptions")),
 					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 						params, err := url.ParseQuery(r.URL.RawQuery)
-						
+
 						Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
 						Expect(params).To(HaveLen(4))
 						Expect(params.Has("search")).To(BeTrue(), "params should have search")
@@ -86,7 +86,7 @@ var _ = Describe("AMS Client", func() {
 			params := api.GetSeatsParams{
 				Status: &[]string{},
 			}
-			
+
 			subs, err := client.GetSubscriptions("orgId", params, 1, 0)
 
 			Expect(err).To(BeNil())
@@ -96,18 +96,18 @@ var _ = Describe("AMS Client", func() {
 		When("no statuses are included", func() {
 			handlerFunc := func(w http.ResponseWriter, r *http.Request) {
 				params, err := url.ParseQuery(r.URL.RawQuery)
-				
+
 				Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
 				Expect(params.Has("search")).To(BeTrue(), "params should have search")
-				
+
 				search := params.Get("search")
 				Expect(search).ToNot(ContainSubstring("status"))
 			}
 
-			Context("statuses is nil", func()  {
+			Context("statuses is nil", func() {
 				It("queries for subscriptions without filtering status", func() {
-					returnedSubs :=`{"items":[{"id": "subId"}]}`
-					
+					returnedSubs := `{"items":[{"id": "subId"}]}`
+
 					amsServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
@@ -115,25 +115,25 @@ var _ = Describe("AMS Client", func() {
 							ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
 						),
 					)
-	
+
 					client, err := NewClient(false)
 					Expect(err).To(BeNil())
-	
+
 					params := api.GetSeatsParams{
 						Status: nil,
 					}
-					
+
 					subs, err := client.GetSubscriptions("orgId", params, 1, 0)
-	
+
 					Expect(err).To(BeNil())
 					Expect(subs).ToNot(BeNil())
 				})
 			})
 
-			Context("statuses is empty", func()  {
+			Context("statuses is empty", func() {
 				It("queries for subscriptions without filtering status", func() {
-					returnedSubs :=`{"items":[{"id": "subId"}]}`
-					
+					returnedSubs := `{"items":[{"id": "subId"}]}`
+
 					amsServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
@@ -141,16 +141,16 @@ var _ = Describe("AMS Client", func() {
 							ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
 						),
 					)
-	
+
 					client, err := NewClient(false)
 					Expect(err).To(BeNil())
-	
+
 					params := api.GetSeatsParams{
 						Status: &api.Status{},
 					}
-					
+
 					subs, err := client.GetSubscriptions("orgId", params, 1, 0)
-	
+
 					Expect(err).To(BeNil())
 					Expect(subs).ToNot(BeNil())
 				})
@@ -159,17 +159,17 @@ var _ = Describe("AMS Client", func() {
 
 		When("statuses are included", func() {
 			It("queries for subscriptions with the desired status", func() {
-				returnedSubs :=`{"items":[{"id": "subId", "status": "active"}]}`
-				
+				returnedSubs := `{"items":[{"id": "subId", "status": "active"}]}`
+
 				amsServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
 						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 							params, err := url.ParseQuery(r.URL.RawQuery)
-							
+
 							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
 							Expect(params.Has("search")).To(BeTrue(), "params should have search")
-							
+
 							search := params.Get("search")
 							Expect(search).To(BeEquivalentTo("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND status IN ('Active')"))
 						}),
@@ -183,7 +183,7 @@ var _ = Describe("AMS Client", func() {
 				params := api.GetSeatsParams{
 					Status: &[]string{"active"},
 				}
-				
+
 				subs, err := client.GetSubscriptions("orgId", params, 1, 0)
 
 				Expect(err).To(BeNil())
@@ -194,13 +194,13 @@ var _ = Describe("AMS Client", func() {
 				It("returns an error and does not query ams", func() {
 					client, err := NewClient(false)
 					Expect(err).To(BeNil())
-					
+
 					params := api.GetSeatsParams{
 						Status: &[]string{"active", "inactive"},
 					}
 
 					subs, err := client.GetSubscriptions("orgId", params, 1, 0)
-	
+
 					Expect(subs).To(BeNil())
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring("provided status 'inactive' is an unsupported status"))
@@ -219,17 +219,17 @@ var _ = Describe("AMS Client", func() {
 				client, err := NewClient(false)
 				Expect(err).To(BeNil())
 
-				returnedSubs :=`{"items":[{"id": "subId"}]}`
-				
+				returnedSubs := `{"items":[{"id": "subId"}]}`
+
 				amsServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
 						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 							params, err := url.ParseQuery(r.URL.RawQuery)
-							
+
 							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
 							Expect(params.Has("search")).To(BeTrue(), "params should have search")
-							
+
 							search := params.Get("search")
 							Expect(search).To(BeEquivalentTo("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND creator.username = 'username'"))
 						}),
@@ -254,17 +254,17 @@ var _ = Describe("AMS Client", func() {
 				client, err := NewClient(false)
 				Expect(err).To(BeNil())
 
-				returnedSubs :=`{"items":[{"id": "subId"}]}`
-				
+				returnedSubs := `{"items":[{"id": "subId"}]}`
+
 				amsServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
 						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 							params, err := url.ParseQuery(r.URL.RawQuery)
-							
+
 							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
 							Expect(params.Has("search")).To(BeTrue(), "params should have search")
-							
+
 							search := params.Get("search")
 							Expect(search).To(BeEquivalentTo("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND creator.email = 'email'"))
 						}),
@@ -289,17 +289,17 @@ var _ = Describe("AMS Client", func() {
 				client, err := NewClient(false)
 				Expect(err).To(BeNil())
 
-				returnedSubs :=`{"items":[{"id": "subId"}]}`
-				
+				returnedSubs := `{"items":[{"id": "subId"}]}`
+
 				amsServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
 						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 							params, err := url.ParseQuery(r.URL.RawQuery)
-							
+
 							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
 							Expect(params.Has("search")).To(BeTrue(), "params should have search")
-							
+
 							search := params.Get("search")
 							Expect(search).To(BeEquivalentTo("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND creator.first_name = 'foo'"))
 						}),
@@ -324,17 +324,17 @@ var _ = Describe("AMS Client", func() {
 				client, err := NewClient(false)
 				Expect(err).To(BeNil())
 
-				returnedSubs :=`{"items":[{"id": "subId"}]}`
-				
+				returnedSubs := `{"items":[{"id": "subId"}]}`
+
 				amsServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/subscriptions"),
 						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 							params, err := url.ParseQuery(r.URL.RawQuery)
-							
+
 							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
 							Expect(params.Has("search")).To(BeTrue(), "params should have search")
-							
+
 							search := params.Get("search")
 							Expect(search).To(BeEquivalentTo("plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' AND creator.last_name = 'bar'"))
 						}),
@@ -356,28 +356,28 @@ var _ = Describe("AMS Client", func() {
 
 		When("all search params are used", func() {
 			It("should construct the query correctly", func() {
-				returnedSubs :=`{"items":[{"id": "subId", "status": "active"}]}`
-				
+				returnedSubs := `{"items":[{"id": "subId", "status": "active"}]}`
+
 				amsServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", ContainSubstring("/api/accounts_mgmt/v1/subscriptions")),
 						http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 							params, err := url.ParseQuery(r.URL.RawQuery)
-							
+
 							Expect(err).ToNot(HaveOccurred(), "query should be constructed with valid params")
 							Expect(params).To(HaveLen(4))
 							Expect(params.Has("search")).To(BeTrue(), "params should have search")
 							Expect(params.Has("fetchAccounts")).To(BeTrue(), "params should have fetchAccounts")
 							Expect(params.Has("size")).To(BeTrue(), "params should have size")
 							Expect(params.Has("page")).To(BeTrue(), "params should have page")
-	
+
 							Expect(params.Get("search")).To(BeEquivalentTo(
-								"plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' " + 
-								"AND status IN ('Active','Deprovisioned') " +
-								"AND creator.username = 'foobar' " +
-								"AND creator.email = 'foobar@redhat.com' " + 
-								"AND creator.first_name = 'foo' " + 
-								"AND creator.last_name = 'bar'",
+								"plan.id LIKE 'AnsibleWisdom' AND organization_id = 'amsOrgId' " +
+									"AND status IN ('Active','Deprovisioned') " +
+									"AND creator.username = 'foobar' " +
+									"AND creator.email = 'foobar@redhat.com' " +
+									"AND creator.first_name = 'foo' " +
+									"AND creator.last_name = 'bar'",
 							))
 							Expect(params.Get("fetchAccounts")).To(BeEquivalentTo("true"))
 							Expect(params.Get("size")).To(BeEquivalentTo("2"))
@@ -386,25 +386,25 @@ var _ = Describe("AMS Client", func() {
 						ghttp.RespondWith(http.StatusOK, returnedSubs, http.Header{"Content-Type": {"application/json"}}),
 					),
 				)
-	
+
 				client, err := NewClient(false)
 				Expect(err).To(BeNil())
-				
-				username 	:= "foobar"
-				email 		:= "foobar@redhat.com"
-				fname 		:= "foo"
-				lname 		:= "bar"
+
+				username := "foobar"
+				email := "foobar@redhat.com"
+				fname := "foo"
+				lname := "bar"
 
 				params := api.GetSeatsParams{
-					Status: &api.Status{string(api.Active), string(api.Deprovisioned)},
+					Status:          &api.Status{string(api.Active), string(api.Deprovisioned)},
 					AccountUsername: &username,
-					Email: &email,
-					FirstName: &fname,
-					LastName: &lname,
+					Email:           &email,
+					FirstName:       &fname,
+					LastName:        &lname,
 				}
-				
+
 				subs, err := client.GetSubscriptions("orgId", params, 2, 1)
-	
+
 				Expect(err).To(BeNil())
 				Expect(subs).ToNot(BeNil())
 			})
@@ -429,7 +429,7 @@ var _ = Describe("AMS Client", func() {
 					),
 				)
 
-				amsOrgId, err :=client.ConvertUserOrgId("orgId")
+				amsOrgId, err := client.ConvertUserOrgId("orgId")
 
 				Expect(err).ToNot(HaveOccurred())
 				Expect(amsOrgId).ToNot(BeNil())
@@ -472,7 +472,7 @@ var _ = Describe("AMS Client", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("no corresponding ams org id found"))
 				Expect(amsServer.ReceivedRequests()).To(HaveLen(1))
-				
+
 				var clientError *ClientError
 				Expect(err).To(BeAssignableToTypeOf(clientError))
 				errors.As(err, &clientError)
@@ -484,7 +484,7 @@ var _ = Describe("AMS Client", func() {
 
 		When("invalid user org id used", func() {
 			It("returns an error", func() {
-				orgId 		:= "org-id"
+				orgId := "org-id"
 
 				amsOrgId, err := client.ConvertUserOrgId(orgId)
 
@@ -492,7 +492,7 @@ var _ = Describe("AMS Client", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("invalid user org id"))
 				Expect(amsServer.ReceivedRequests()).To(HaveLen(0))
-				
+
 				var clientError *ClientError
 				Expect(err).To(BeAssignableToTypeOf(clientError))
 				errors.As(err, &clientError)
@@ -504,13 +504,13 @@ var _ = Describe("AMS Client", func() {
 
 		When("invalid ams org id returned", func() {
 			It("returns an error", func() {
-				orgId 		:= "orgId"
-				amsOrgId 	:= "ams-org-id"
+				orgId := "orgId"
+				amsOrgId := "ams-org-id"
 
 				amsServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/api/accounts_mgmt/v1/organizations"),
-						ghttp.RespondWith(http.StatusOK, `{"items":[{"id": "`+ amsOrgId +`"}]}`, http.Header{"Content-Type": {"application/json"}}),
+						ghttp.RespondWith(http.StatusOK, `{"items":[{"id": "`+amsOrgId+`"}]}`, http.Header{"Content-Type": {"application/json"}}),
 					),
 				)
 
@@ -520,7 +520,7 @@ var _ = Describe("AMS Client", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("invalid ams org id"))
 				Expect(amsServer.ReceivedRequests()).To(HaveLen(1))
-				
+
 				var clientError *ClientError
 				Expect(err).To(BeAssignableToTypeOf(clientError))
 				errors.As(err, &clientError)

@@ -16,8 +16,8 @@ import (
 // This mapper provides a way to record known AMS error codes, and map error messages to them via env variables.
 
 // AMS Error Codes
-const acctMgmt11 	= "ACCT-MGMT-11"
-const acctMgmt11Status 	= http.StatusForbidden
+const acctMgmt11 = "ACCT-MGMT-11"
+const acctMgmt11Status = http.StatusForbidden
 
 type SeatsErrorMapper interface {
 	MapResponse(err error, httpStatusCode int) api.Error
@@ -33,42 +33,42 @@ func NewErrorMapper(config *config.EntitlementsConfig) SeatsErrorMapper {
 	}
 }
 
-func(m *DefaultMapper) MapResponse(err error, httpStatusCode int) api.Error {
+func (m *DefaultMapper) MapResponse(err error, httpStatusCode int) api.Error {
 	var amsError *ocmErrors.Error
 	if errors.As(err, &amsError) {
 		reason := m.mapAMSErrorMessage(amsError)
 		return api.Error{
-			Error: 			toPtr(reason),
-			Code:  			toPtr(amsError.Code()),
-			Identifier: 	toPtr(amsError.ID()),
-			OperationId: 	toPtr(amsError.OperationID()),
-			Status: 		toPtr(amsError.Status()),
+			Error:       toPtr(reason),
+			Code:        toPtr(amsError.Code()),
+			Identifier:  toPtr(amsError.ID()),
+			OperationId: toPtr(amsError.OperationID()),
+			Status:      toPtr(amsError.Status()),
 		}
-	} 
-	
+	}
+
 	var clientError *ams.ClientError
 	if errors.As(err, &clientError) {
 		return api.Error{
-			Error: 	toPtr(clientError.Error()),
+			Error:  toPtr(clientError.Error()),
 			Status: toPtr(clientError.StatusCode),
 		}
-	} 
+	}
 
 	var userDetailErr *bop.UserDetailError
 	if errors.As(err, &userDetailErr) {
 		return api.Error{
-			Error: 	toPtr(userDetailErr.Error()),
+			Error:  toPtr(userDetailErr.Error()),
 			Status: toPtr(userDetailErr.StatusCode),
 		}
 	}
 
 	return api.Error{
-		Error: toPtr(err.Error()),
+		Error:  toPtr(err.Error()),
 		Status: toPtr(httpStatusCode),
 	}
 }
 
-func(m *DefaultMapper) mapAMSErrorMessage(err *ocmErrors.Error) string {
+func (m *DefaultMapper) mapAMSErrorMessage(err *ocmErrors.Error) string {
 	if isError(err, acctMgmt11, acctMgmt11Status) {
 		return fmt.Sprintf("%s. %s", err.Reason(), m.config.Options.GetString(config.Keys.AMSAcctMgmt11Msg))
 	}
@@ -84,6 +84,6 @@ type MockMapper struct {
 	Mock func(err *ocmErrors.Error) string
 }
 
-func(m *MockMapper) MapErrorMessage(err *ocmErrors.Error) string {
+func (m *MockMapper) MapErrorMessage(err *ocmErrors.Error) string {
 	return m.Mock(err)
 }

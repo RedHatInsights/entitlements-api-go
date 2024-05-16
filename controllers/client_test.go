@@ -6,7 +6,7 @@ import (
 )
 
 var _ = Describe("http client", func() {
-	It("should not create a new client every call", func(){
+	It("should not create a new client every call", func() {
 		// given
 		client1 := getClient()
 

@@ -195,7 +195,7 @@ var _ = Describe("using the seat managment api", func() {
 				seatApi.GetSeats(rr, req, api.GetSeatsParams{
 					Status: &[]string{"active", "inactive", "a third one"},
 				})
-				
+
 				Expect(actual).To(HaveLen(3))
 				Expect(actual).To(HaveExactElements("active", "inactive", "a third one"))
 			})
@@ -206,17 +206,18 @@ var _ = Describe("using the seat managment api", func() {
 				ams.MockGetSubscriptions = func(organizationId string, searchParams api.GetSeatsParams, size, page int) (*v1.SubscriptionList, error) {
 					return nil, &ams.ClientError{
 						StatusCode: http.StatusBadRequest,
-						Message: "some useful message",
-						OrgId: "orgId",
-						AmsOrgId: "amsOrgId",
-					}}
+						Message:    "some useful message",
+						OrgId:      "orgId",
+						AmsOrgId:   "amsOrgId",
+					}
+				}
 
 				req := MakeRequest("GET", "/api/entitlements/v1/seats", nil)
 				seatApi.GetSeats(rr, req, api.GetSeatsParams{})
-				
+
 				var result api.Error
 				json.NewDecoder(rr.Result().Body).Decode(&result)
-				
+
 				Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
 				Expect(*result.Error).To(ContainSubstring("some useful message"))
 				Expect(*result.Error).To(ContainSubstring("orgId"))
@@ -258,7 +259,7 @@ var _ = Describe("using the seat managment api", func() {
 			It("should not assign the user a seat", func() {
 				mismatchApi := NewSeatManagerApi(client, &bop.Mock{
 					OrgId: "12345",
-				},)
+				})
 				b, err := json.Marshal(api.SeatRequest{
 					AccountUsername: "test-user",
 				})
