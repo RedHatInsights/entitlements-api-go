@@ -73,7 +73,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 692805,
+      "id": 704365,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -409,7 +409,7 @@ data:
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_TELEMETER-RECENT-PRODUCTION}"
+                "uid": "$datasource"
               },
               "gridPos": {
                 "h": 6,
@@ -976,7 +976,7 @@ data:
                   },
                   "links": [],
                   "mappings": [],
-                  "min": 0.95,
+                  "min": 0.9,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -1834,7 +1834,7 @@ data:
                 "yAxis": {
                   "axisPlacement": "left",
                   "reverse": false,
-                  "unit": "dtdurations"
+                  "unit": "dtdurationms"
                 }
               },
               "pluginVersion": "10.4.1",
@@ -2470,7 +2470,7 @@ data:
                 "yAxis": {
                   "axisPlacement": "left",
                   "reverse": false,
-                  "unit": "dtdurations"
+                  "unit": "dtdurationms"
                 }
               },
               "pluginVersion": "10.4.1",
@@ -3697,7 +3697,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-7d",
+        "from": "now-24h",
         "to": "now"
       },
       "timepicker": {
@@ -3728,7 +3728,7 @@ data:
       "timezone": "",
       "title": "Operations - Entitlements",
       "uid": "TjP_nMWMkd",
-      "version": 5
+      "version": 6,
     }
 kind: ConfigMap
 metadata:
