@@ -9,7 +9,7 @@ require (
 	github.com/getsentry/sentry-go v0.20.0
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/karlseguin/ccache v2.0.3+incompatible
-	github.com/oapi-codegen/runtime v1.0.0
+	github.com/oapi-codegen/runtime v1.1.1
 	github.com/onsi/ginkgo/v2 v2.9.2
 	github.com/onsi/gomega v1.27.6
 	github.com/openshift-online/ocm-sdk-go v0.1.331
@@ -40,7 +40,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
-	github.com/google/uuid v1.3.1 // indirect
+	github.com/google/uuid v1.5.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
