@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
-	github.com/aws/aws-sdk-go v1.44.235
+	github.com/aws/aws-sdk-go v1.54.17
 	github.com/getkin/kin-openapi v0.118.0
 	github.com/getsentry/sentry-go v0.20.0
 	github.com/go-chi/chi/v5 v5.0.10
