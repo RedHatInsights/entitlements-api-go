@@ -1,9 +1,9 @@
 package apispec
 
 import (
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/go-chi/chi/v5"
@@ -12,7 +12,7 @@ import (
 // OpenAPISpec responds back with the openapi spec
 func OpenAPISpec(r chi.Router) {
 	specFilePath := config.GetConfig().Options.GetString(config.Keys.OpenAPISpecPath)
-	specFile, err := ioutil.ReadFile(specFilePath)
+	specFile, err := os.ReadFile(specFilePath)
 	if err != nil {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("OpenApi Spec not available\n"))
