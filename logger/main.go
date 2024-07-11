@@ -2,7 +2,7 @@ package logger
 
 import (
 	"flag"
-	"io/ioutil"
+	"io"
 	"os"
 	"time"
 
@@ -43,7 +43,7 @@ func InitLogger() *logrus.Logger {
 
 		// Disable app logs while running tests
 		if test {
-			Log.Out = ioutil.Discard
+			Log.Out = io.Discard
 		}
 
 		formatter := &logrus.JSONFormatter{
