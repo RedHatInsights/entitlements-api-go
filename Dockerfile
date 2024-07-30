@@ -15,6 +15,8 @@ USER root
 RUN go mod download 
 COPY . .
 
+RUN make
+
 # Using ubi8-minimal due to its smaller footprint
 FROM registry.access.redhat.com/ubi8/ubi-minimal
 
