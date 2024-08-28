@@ -208,7 +208,7 @@ spec:
       # use the git-auth workspace for credentials
       - name: basic-auth
         workspace: git-auth
-    - name: task-using-trusted-artifact
+    - name: task-running-unit-tasks
       # make sure the task runs after the artifact is created
       runAfter:
         - clone-repository-oci-ta
