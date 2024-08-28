@@ -4,7 +4,7 @@
 # FROM registry.redhat.io/ubi8/go-toolset as builder
 #FROM quay.io/projectquay/golang:1.20 as builder
 
-FROM registry.access.redhat.com/ubi8/go-toolset:1.20.10 as builder
+FROM registry.access.redhat.com/ubi8/go-toolset:1.21.11-8.1724662611 as builder
 
 WORKDIR /go/src/app
 
