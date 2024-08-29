@@ -2,17 +2,18 @@
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
 # FROM registry.redhat.io/ubi8/go-toolset as builder
-FROM quay.io/projectquay/golang:1.20 as builder
+#FROM quay.io/projectquay/golang:1.20 as builder
+
+FROM registry.access.redhat.com/ubi8/go-toolset:1.20.10 as builder
 
 WORKDIR /go/src/app
 
 COPY go.mod go.sum ./
 
-RUN go mod download
+USER root
 
+RUN go mod download 
 COPY . .
-
-USER 0
 
 RUN make
 
