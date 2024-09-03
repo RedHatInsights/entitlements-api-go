@@ -167,7 +167,7 @@ objects:
 parameters:
 - description: image
   name: IMAGE
-  value: quay.io/cloudservices/platform-feedback
+  value: quay.io/cloudservices/entitlements-api-go
 - description: Log level for the application
   name: LOG_LEVEL
   required: false
