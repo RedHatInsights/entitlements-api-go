@@ -6,6 +6,8 @@ Entitlements service serves as a proxy to various backend Red Hat IT services. I
 * ~~`/seats`~~: query AMS from OCM to read, assign, and delete user subscriptions (a seat is considered an Openshift subscription assignable to a user)
     * __OBSOLETE__ - these apis are no longer enabled in prod
 
+![!entitlements flow diagram](./docs/entitlements-requests-flow.png)
+
 ## SKU/Bundle changes
 - The `/bundles/bundles.example.yml` file in this repo is for **local testing only**
 - To run the app, be sure to copy `/bundles/bundles.example.yml` to `/bundles/bundles.yml`
