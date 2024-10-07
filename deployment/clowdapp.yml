@@ -21,6 +21,9 @@ objects:
         - configMap:
             name: ${CONFIG_MAP_NAME}
           name: default-entitlements-config
+        - secret:
+            secretName: go-api-certs
+          name: go-api-certs-volume
         initContainers:
           - name: bundle-sync
             image: ${IMAGE}:${IMAGE_TAG}
@@ -31,24 +34,18 @@ objects:
               - name: ENT_BUNDLE_INFO_YAML
                 value: /bundles/bundles.yml
               - name: ENT_CERTS_FROM_ENV
-                value: 'true'
+                value: ${CERTS_FROM_ENV}
               - name: ENT_RUN_BUNDLE_SYNC
                 value: ${RUN_BUNDLE_SYNC}
               - name: ENT_CERT
-                valueFrom:
-                  secretKeyRef:
-                    name: go-api-certs
-                    key: ENT_CERT
-                    optional: true
+                value: ${CERT}
               - name: ENT_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: go-api-certs
-                    key: ENT_KEY
-                    optional: true
+                value: ${KEY}
             volumeMounts:
             - mountPath: /bundles
               name: default-entitlements-config
+            - mountPath: /go-api-certs
+              name: go-api-certs-volume
             inheritEnv: true
             resources:
               limits:
@@ -83,13 +80,15 @@ objects:
         volumeMounts:
         - mountPath: /bundles
           name: default-entitlements-config
+        - mountPath: /go-api-certs
+          name: go-api-certs-volume
         env:
           - name: ENT_PORT
             value: ${PORT}
           - name: ENT_ENTITLE_ALL
             value: ${ENTITLE_ALL}
           - name: ENT_CERTS_FROM_ENV
-            value: 'true'
+            value: ${CERTS_FROM_ENV}
           - name: ENT_LOG_LEVEL
             value: ${LOG_LEVEL}
           - name: ENT_AMS_HOST
@@ -122,23 +121,16 @@ objects:
             value: ${AMS_ACCT_MGMT_11_ERR_MSG}
           - name: ENT_IT_SERVICES_TIMEOUT_SECONDS
             value: ${IT_SERVICES_TIMEOUT_SECONDS}
+          - name: ENT_CERT
+            value: ${CERT}
+          - name: ENT_KEY
+            value: ${KEY}
           - name: GLITCHTIP_DSN
             valueFrom:
               secretKeyRef:
                 name: ${GLITCHTIP_SECRET}
                 key: dsn
                 optional: true
-          - name: ENT_CERT
-            valueFrom:
-              secretKeyRef:
-                name: go-api-certs
-                key: ENT_CERT
-                optional: true
-          - name: ENT_KEY
-            valueFrom:
-              secretKeyRef:
-                name: go-api-certs
-                key: ENT_KEY
           - name: ENT_OIDC_CLIENT_ID
             valueFrom:
               secretKeyRef:
@@ -159,10 +151,6 @@ objects:
               secretKeyRef:
                 name: entitlements-api
                 key: token
-        volumes:
-        - configMap:
-            name: ${CONFIG_MAP_NAME}
-          name: default-entitlements-config
 
 parameters:
 - description: image
@@ -187,6 +175,18 @@ parameters:
 - description: Port for listener
   name: PORT
   value: '8000'
+- description: Load certs from env or not
+  name: CERTS_FROM_ENV
+  value: 'false'
+  required: true
+- description: Path to cert file or cert itself
+  name: CERT
+  value: '/go-api-certs/sa-cert.crt'
+  required: true
+- description: Path to key file or key itself
+  name: KEY
+  value: '/go-api-certs/priv.key'
+  required: true
 - description: Subscriptions Service API endpoint
   name: SUBS_HOST
   value: https://subscription.stage.api.redhat.com
