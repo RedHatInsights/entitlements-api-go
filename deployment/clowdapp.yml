@@ -23,7 +23,7 @@ objects:
           name: default-entitlements-config
         initContainers:
           - name: bundle-sync
-            image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
+            image: ${IMAGE}:${IMAGE_TAG}
             command: ["/bundle-sync"]
             env:
               - name: ENT_SUBS_HOST
@@ -59,7 +59,7 @@ objects:
                 memory: ${MEMORY_REQUESTS}
         minReadySeconds: 15
         progressDeadlineSeconds: 600
-        image: quay.io/cloudservices/entitlements-api-go:${IMAGE_TAG}
+        image: ${IMAGE}:${IMAGE_TAG}
         livenessProbe:
           failureThreshold: 3
           httpGet:
@@ -165,6 +165,9 @@ objects:
           name: default-entitlements-config
 
 parameters:
+- description: image
+  name: IMAGE
+  value: quay.io/cloudservices/entitlements-api-go
 - description: Log level for the application
   name: LOG_LEVEL
   required: false
