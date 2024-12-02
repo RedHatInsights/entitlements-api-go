@@ -7,7 +7,7 @@ export APP_NAME="entitlements"  # name of app-sre "application" folder this comp
 export COMPONENT_NAME="entitlements-api-go"  # name of app-sre "resourceTemplate" in deploy.yaml for this component
 export IMAGE="quay.io/cloudservices/entitlements-api-go"  # the image location on quay
 
-export GOROOT="/opt/go/1.20.10"
+export GOROOT="/opt/go/1.22.5"
 export PATH="${GOROOT}/bin:${PATH}"
 
 echo "*** GO version ***"

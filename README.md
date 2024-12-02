@@ -41,7 +41,7 @@ make
 
 If your local version differs from what entitlements is using, you can download the desired version of go here: [go.dev/doc/manage-install](https://go.dev/doc/manage-install), and then pass the path to the go binary to all make commands like so:
 ```sh
-make GO=~/go/bin/go1.20
+make GO=~/go/bin/go1.22
 ```
 
 ## Certificates and Configuration

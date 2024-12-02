@@ -1,10 +1,8 @@
 # Manual Build: YYYY-MM-DD
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
-# FROM registry.redhat.io/ubi8/go-toolset as builder
-#FROM quay.io/projectquay/golang:1.20 as builder
 
-FROM registry.access.redhat.com/ubi8/go-toolset:1.21.13 as builder
+FROM registry.access.redhat.com/ubi8/go-toolset:1.22.7 as builder
 
 WORKDIR /go/src/app
 
