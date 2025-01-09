@@ -159,10 +159,6 @@ objects:
               secretKeyRef:
                 name: entitlements-api
                 key: token
-        volumes:
-        - configMap:
-            name: ${CONFIG_MAP_NAME}
-          name: default-entitlements-config
 
 parameters:
 - description: image
