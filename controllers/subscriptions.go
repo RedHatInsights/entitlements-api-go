@@ -223,7 +223,12 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		}
 
 		subsTimeTaken := time.Since(start).Seconds()
-		l.Log.WithFields(logrus.Fields{"subs_call_duration": subsTimeTaken, "cache_hit": subscriptions.CacheHit, "url": subscriptions.Url, "org_id": orgId}).Info("subs call complete")
+		l.Log.WithFields(logrus.Fields{
+			"subs_call_duration": subsTimeTaken, 
+			"cache_hit": subscriptions.CacheHit, 
+			"url": subscriptions.Url,
+			"org_id": orgId,
+		}).Info("subs call complete")
 		subsTimeHistogram.Observe(subsTimeTaken)
 
 		if subscriptions.StatusCode != 200 {
