@@ -1,6 +1,6 @@
 module github.com/RedHatInsights/entitlements-api-go
 
-go 1.22.9
+go 1.23.1
 
 require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
@@ -12,13 +12,13 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.10
-	github.com/openshift-online/ocm-sdk-go v0.1.459
+	github.com/openshift-online/ocm-sdk-go v0.1.460
 	github.com/prometheus/client_golang v1.20.5
 	github.com/redhatinsights/app-common-go v1.6.8
 	github.com/redhatinsights/platform-go-middlewares v1.0.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.19.0
-	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac
+	golang.org/x/exp v0.0.0-20250228200357-dead58393ab7
 	golang.org/x/text v0.22.0
 	gopkg.in/yaml.v2 v2.4.0
 )
