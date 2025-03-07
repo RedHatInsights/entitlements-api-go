@@ -17,7 +17,7 @@ import (
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/karlseguin/ccache"
+	"github.com/karlseguin/ccache/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
