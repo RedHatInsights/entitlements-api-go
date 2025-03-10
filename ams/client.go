@@ -15,7 +15,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
-	"github.com/karlseguin/ccache"
+	"github.com/karlseguin/ccache/v2"
 	sdk "github.com/openshift-online/ocm-sdk-go"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/openshift-online/ocm-sdk-go/logging"
