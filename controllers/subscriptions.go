@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -21,7 +22,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v2"
 )
 
@@ -122,8 +122,8 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 		setSubscriptionsQueryFeatures()
 	}
 	req := configOptions.GetString(config.Keys.SubsHost) +
-		"/svcrest/subscription/v5/featureStatus" +
-		subsQueryFeatures + "&accountId=" + orgID
+		configOptions.GetString(config.Keys.SubAPIBasePath) + 
+		"featureStatus" + subsQueryFeatures + "&accountId=" + orgID
 
 	resp, err := getClient().Get(req)
 
