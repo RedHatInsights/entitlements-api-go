@@ -167,7 +167,7 @@ func initialize() {
 	options.SetDefault(Keys.CertsFromEnv, false)
 	options.SetDefault(Keys.Port, "3000")
 	options.SetDefault(Keys.LogLevel, "info")
-	options.SetDefault(Keys.SubsHost, "https://subscription.api.redhat.com")
+	options.SetDefault(Keys.SubsHost, "https://feature.api.redhat.com")
 	options.SetDefault(Keys.ComplianceHost, "https://export-compliance.api.redhat.com")
 	options.SetDefault(Keys.CaPath, fmt.Sprintf("%s/../resources/ca.crt", wd))
 	options.SetDefault(Keys.Cert, fmt.Sprintf("%s/../test_data/test.cert", wd)) // default values of Cert and Key are for testing purposes only
@@ -177,7 +177,7 @@ func initialize() {
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
 	options.SetDefault(Keys.CwLogStream, hostname)
 	options.SetDefault(Keys.CwRegion, "us-east-1")
-	options.SetDefault(Keys.SubAPIBasePath, "/svcrest/subscription/v5/")
+	options.SetDefault(Keys.SubAPIBasePath, "/features/v1/")
 	options.SetDefault(Keys.CompAPIBasePath, "/v1/screening")
 	options.SetDefault(Keys.RunBundleSync, false)
 	options.SetDefault(Keys.EntitleAll, false)

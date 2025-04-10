@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -21,7 +22,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v2"
 )
 
@@ -31,7 +31,7 @@ var cache = ccache.New(
 		MaxSize(configOptions.GetInt64(config.Keys.SubsCacheMaxSize)).
 		ItemsToPrune(configOptions.GetUint32(config.Keys.SubsCacheItemPrune)),
 )
-var cacheDurationSeconds = time.Second * time.Duration(configOptions.GetInt64(config.Keys.SubsCacheDuration))
+var cacheDuration = time.Second * time.Duration(configOptions.GetInt64(config.Keys.SubsCacheDuration))
 
 var bundleInfo []types.Bundle
 var subsQueryFeatures string
@@ -122,8 +122,8 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 		setSubscriptionsQueryFeatures()
 	}
 	req := configOptions.GetString(config.Keys.SubsHost) +
-		"/svcrest/subscription/v5/featureStatus" +
-		subsQueryFeatures + "&accountId=" + orgID
+		configOptions.GetString(config.Keys.SubAPIBasePath) + 
+		"featureStatus" + subsQueryFeatures + "&accountId=" + orgID
 
 	resp, err := getClient().Get(req)
 
@@ -155,7 +155,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 	var FeatureStatus types.FeatureStatus
 	json.Unmarshal(body, &FeatureStatus)
 
-	cache.Set(orgID, FeatureStatus, cacheDurationSeconds)
+	cache.Set(orgID, FeatureStatus, cacheDuration)
 
 	return types.SubscriptionsResponse{
 		StatusCode: resp.StatusCode,
@@ -248,11 +248,11 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
 		for _, b := range bundleInfo {
 			if len(include_filter) > 0 {
-				if !contains(include_filter, b.Name) {
+				if !slices.Contains(include_filter, b.Name) {
 					continue
 				}
 			} else if len(exclude_filter) > 0 {
-				if contains(exclude_filter, b.Name) {
+				if slices.Contains(exclude_filter, b.Name) {
 					continue
 				}
 			}
@@ -302,15 +302,6 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(obj))
 	}
-}
-
-func contains(s []string, t string) bool {
-	for _, val := range s {
-		if val == t {
-			return true
-		}
-	}
-	return false
 }
 
 func filtersFromParams(req *http.Request, filterName string) []string {
