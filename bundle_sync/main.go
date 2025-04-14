@@ -89,12 +89,19 @@ func getUpdates(cfg *viper.Viper) ([]t.Bundle, error) {
 }
 
 func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
-	url := fmt.Sprintf("%s%s%s", cfg.GetString(config.Keys.SubsHost), cfg.GetString(config.Keys.SubAPIBasePath), "features/")
-	req, err := client.Post(url, "application/json", strings.NewReader(string(data)))
+	url := fmt.Sprintf("%s%s", cfg.GetString(config.Keys.SubsHost), cfg.GetString(config.Keys.SubAPIBasePath))
+	resp, err := client.Post(url, "application/json", strings.NewReader(string(data)))
 	if err != nil {
 		return err
 	}
-	defer req.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		body, _ := io.ReadAll(resp.Body)
+		respBody := string(body)
+		return fmt.Errorf("error posting update -- response: '%s', status: '%d'. url: '%s', request body: '%s'", respBody, resp.StatusCode, url, string(data))
+	}
+
+	defer resp.Body.Close()
 
 	return nil
 
@@ -115,10 +122,9 @@ func main() {
 	for _, endpoint := range endpoints {
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
-		url := fmt.Sprintf("%s%s%s",
+		url := fmt.Sprintf("%s%s",
 			options.GetString(config.Keys.SubsHost),
-			options.GetString(config.Keys.SubAPIBasePath),
-			"features/")
+			options.GetString(config.Keys.SubAPIBasePath))
 		current, err := getCurrent(client, url+endpoint)
 		if err != nil {
 			log.Fatalf("Unable to get current subscriptions: %s", err)
