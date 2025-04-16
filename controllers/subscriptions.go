@@ -257,37 +257,37 @@ func Services() func(http.ResponseWriter, *http.Request) {
 				}
 			}
 
-			entitle := true
-			trial := false
+			isEntitled := true
+			isTrial := false
 			entitleAll := configOptions.GetString(config.Keys.EntitleAll)
 
 			if entitleAll == "true" {
-				entitlementsResponse[b.Name] = setBundlePayload(entitle, trial)
+				entitlementsResponse[b.Name] = setBundlePayload(isEntitled, isTrial)
 				continue
 			}
 
 			if len(b.Skus) > 0 {
-				entitle = false
+				isEntitled = false
 				for _, f := range subscriptions.Data.Features {
 					if f.Name == b.Name {
-						entitle = f.Entitled
-						trial = f.IsEval
+						isEntitled = f.IsEntitled
+						isTrial = f.IsEval
 					}
 				}
 			}
 
 			if b.UseValidAccNum {
-				entitle = validAccNum && entitle
+				isEntitled = validAccNum && isEntitled
 			}
 
 			if b.UseValidOrgId {
-				entitle = validOrgId && entitle
+				isEntitled = validOrgId && isEntitled
 			}
 
 			if b.UseIsInternal {
-				entitle = validAccNum && isInternal && validEmailMatch
+				isEntitled = validAccNum && isInternal && validEmailMatch
 			}
-			entitlementsResponse[b.Name] = setBundlePayload(entitle, trial)
+			entitlementsResponse[b.Name] = setBundlePayload(isEntitled, isTrial)
 		}
 
 		obj, err := json.Marshal(entitlementsResponse)

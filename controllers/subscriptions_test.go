@@ -284,12 +284,12 @@ var _ = Describe("Services Controller", func() {
 						{
 							Name:     "TestBundle1",
 							IsEval:   false,
-							Entitled: false,
+							IsEntitled: false,
 						},
 						{
 							Name:     "TestBundle2",
 							IsEval:   true,
-							Entitled: true,
+							IsEntitled: true,
 						},
 					},
 				},
