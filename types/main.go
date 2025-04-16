@@ -20,7 +20,7 @@ type SubscriptionsResponse struct {
 type Feature struct {
 	Name     string `json:"name"`
 	IsEval   bool   `json:"isEval"`
-	Entitled bool   `json:"entitled"`
+	IsEntitled bool   `json:"isEntitled"`
 }
 
 type FeatureStatus struct {

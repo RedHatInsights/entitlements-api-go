@@ -270,7 +270,7 @@ func Services() func(http.ResponseWriter, *http.Request) {
 				entitle = false
 				for _, f := range subscriptions.Data.Features {
 					if f.Name == b.Name {
-						entitle = f.Entitled
+						entitle = f.IsEntitled
 						trial = f.IsEval
 					}
 				}
