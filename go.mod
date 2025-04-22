@@ -2,6 +2,8 @@ module github.com/RedHatInsights/entitlements-api-go
 
 go 1.23.0
 
+toolchain go1.23.5
+
 require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
 	github.com/aws/aws-sdk-go v1.55.6
