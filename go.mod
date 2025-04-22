@@ -1,6 +1,6 @@
 module github.com/RedHatInsights/entitlements-api-go
 
-go 1.22.9
+go 1.23.0
 
 require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
