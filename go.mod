@@ -38,7 +38,7 @@ require (
 	github.com/golang/glog v1.2.4 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
+	github.com/google/pprof 337e5dd93bb4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
