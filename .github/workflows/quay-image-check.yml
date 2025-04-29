@@ -1,0 +1,19 @@
+name: Check Quay Image
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  check-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Quay image
+        uses: petracihalova/check-quay-image@v1
+        with:
+          quay_repo: redhat-services-prod/hcc-accessmanagement-tenant/entitlements-api-go
+          commit_sha: ${{ github.sha }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
