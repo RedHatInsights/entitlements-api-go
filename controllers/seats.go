@@ -1,5 +1,5 @@
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0 --config=types.cfg.yaml ../apispec/api.spec.json
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.15.0 --config=server.cfg.yaml ../apispec/api.spec.json
+//go:generate go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@v2.0.0 --config=types.cfg.yaml ../apispec/api.spec.json
+//go:generate go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@v2.0.0 --config=server.cfg.yaml ../apispec/api.spec.json
 
 package controllers
 
