@@ -5,7 +5,7 @@ go 1.23.6
 require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
 	github.com/aws/aws-sdk-go v1.55.7
-	github.com/getkin/kin-openapi v0.131.0
+	github.com/getkin/kin-openapi v0.132.0
 	github.com/getsentry/sentry-go v0.32.0
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/karlseguin/ccache/v2 v2.0.8
@@ -18,7 +18,7 @@ require (
 	github.com/redhatinsights/platform-go-middlewares v1.0.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.20.1
-	golang.org/x/text v0.24.0
+	golang.org/x/text v0.25.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
