@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -204,6 +205,20 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			},
 		)
 
+		if subscriptions.Error != nil {
+			errMsg := "Unexpected error while talking to Feature Service"
+			l.Log.WithFields(logrus.Fields{"error": subscriptions.Error}).Error(errMsg)
+			sentry.WithScope(func(scope *sentry.Scope) {
+				scope.SetExtra("response_body", subscriptions.Body)
+				scope.SetExtra("response_status", subscriptions.StatusCode)
+				scope.SetExtra("url", subscriptions.Url)
+				sentry.CaptureException(fmt.Errorf("%s : %w", errMsg, subscriptions.Error))
+			})
+			
+			failOnDependencyError(errMsg, subscriptions, w)
+			return
+		}
+		
 		accNum := idObj.AccountNumber
 		isInternal := idObj.User.Internal
 		validEmailMatch, _ := regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)
@@ -213,14 +228,6 @@ func Services() func(http.ResponseWriter, *http.Request) {
 
 		include_filter := queryParams.IncludeBundles
 		exclude_filter := queryParams.ExcludeBundles
-
-		if subscriptions.Error != nil {
-			errMsg := "Unexpected error while talking to Feature Service"
-			l.Log.WithFields(logrus.Fields{"error": subscriptions.Error}).Error(errMsg)
-			sentry.CaptureException(subscriptions.Error)
-			failOnDependencyError(errMsg, subscriptions, w)
-			return
-		}
 
 		subsTimeTaken := time.Since(start).Seconds()
 		l.Log.WithFields(logrus.Fields{
@@ -238,6 +245,7 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			sentry.WithScope(func(scope *sentry.Scope) {
 				scope.SetExtra("response_body", subscriptions.Body)
 				scope.SetExtra("response_status", subscriptions.StatusCode)
+				scope.SetExtra("url", subscriptions.Url)
 				sentry.CaptureException(errors.New(errMsg))
 			})
 
