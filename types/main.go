@@ -6,9 +6,9 @@ type EntitlementsSection struct {
 	IsTrial    bool `json:"is_trial"`
 }
 
-// SubscriptionsResponse is a struct that is used to unmarshal the data that comes back from the
-// Subscriptions Service
-type SubscriptionsResponse struct {
+// FeatureResponse is a struct that is used to unmarshal the data that comes back from the
+// Feature Service
+type FeatureResponse struct {
 	StatusCode int
 	Body       string
 	Error      error

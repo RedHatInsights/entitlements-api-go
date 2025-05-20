@@ -25,7 +25,7 @@ const DEFAULT_EMAIL = "test+qa@redhat.com"
 
 var realGetFeatureStatus = GetFeatureStatus
 
-func testRequest(method string, path string, accnum string, orgid string, isinternal bool, email string, fakeCaller func(GetFeatureStatusParams) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func testRequest(method string, path string, accnum string, orgid string, isinternal bool, email string, fakeCaller func(GetFeatureStatusParams) FeatureResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	req, err := http.NewRequest(method, path, nil)
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
@@ -61,12 +61,12 @@ func testRequest(method string, path string, accnum string, orgid string, isinte
 	return rr, ret, string(out)
 }
 
-func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(GetFeatureStatusParams) SubscriptionsResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(GetFeatureStatusParams) FeatureResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
 	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeCaller)
 }
 
-func fakeGetFeatureStatus(expectedOrgID string, response SubscriptionsResponse) func(GetFeatureStatusParams) SubscriptionsResponse {
-	return func(params GetFeatureStatusParams) SubscriptionsResponse {
+func fakeGetFeatureStatus(expectedOrgID string, response FeatureResponse) func(GetFeatureStatusParams) FeatureResponse {
+	return func(params GetFeatureStatusParams) FeatureResponse {
 		Expect(expectedOrgID).To(Equal(params.OrgId))
 		return response
 	}
@@ -87,7 +87,7 @@ var _ = Describe("Services Controller", func() {
 	})
 
 	It("should call GetFeatureStatus with the org_id on the context", func() {
-		fakeResponse := SubscriptionsResponse{
+		fakeResponse := FeatureResponse{
 			StatusCode: 200,
 			Data:       FeatureStatus{},
 			CacheHit:   false,
@@ -99,14 +99,14 @@ var _ = Describe("Services Controller", func() {
 	It("should build the subscriptions query with only sku based features", func() {
 		cfg := config.GetConfig()
 		cfg.Options.Set(config.Keys.Features, "TestBundle1,TestBundle3,TestBundle4,TestBundle5,TestBundle6,TestBundle7")
-		setSubscriptionsQueryFeatures()
-		Expect(subsQueryFeatures).To(BeEquivalentTo("?features=TestBundle1&features=TestBundle6"))
+		setFeaturesQuery()
+		Expect(featuresQuery).To(BeEquivalentTo("?features=TestBundle1&features=TestBundle6"))
 	})
 
 	Context("When the Subs API sends back a non-200", func() {
 		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) SubscriptionsResponse {
-				return SubscriptionsResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false}
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
+				return FeatureResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false}
 			})
 
 			var jsonResponse DependencyErrorResponse
@@ -123,8 +123,8 @@ var _ = Describe("Services Controller", func() {
 
 	Context("When the Subs API sends back an error", func() {
 		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) SubscriptionsResponse {
-				return SubscriptionsResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false, Error: errors.New("Sub Failure")}
+			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
+				return FeatureResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false, Error: errors.New("Sub Failure")}
 			})
 
 			var jsonResponse DependencyErrorResponse
@@ -156,7 +156,7 @@ var _ = Describe("Services Controller", func() {
 	})
 
 	Context("When the account number is -1 or '' ", func() {
-		fakeResponse := SubscriptionsResponse{
+		fakeResponse := FeatureResponse{
 			StatusCode: 200,
 			Data:       FeatureStatus{},
 			CacheHit:   false,
@@ -186,7 +186,7 @@ var _ = Describe("Services Controller", func() {
 	})
 
 	Context("When a bundle uses only Valid Account Number", func() {
-		fakeResponse := SubscriptionsResponse{
+		fakeResponse := FeatureResponse{
 			StatusCode: 200,
 			Data:       FeatureStatus{},
 			CacheHit:   false,
@@ -206,7 +206,7 @@ var _ = Describe("Services Controller", func() {
 	})
 
 	Context("When a bundle is defined with use_valid_org_id", func() {
-		fakeResponse := SubscriptionsResponse{
+		fakeResponse := FeatureResponse{
 			StatusCode: 200,
 			Data:       FeatureStatus{},
 			CacheHit:   false,
@@ -236,7 +236,7 @@ var _ = Describe("Services Controller", func() {
 	})
 
 	Context("When a bundle uses only use_is_internal", func() {
-		fakeResponse := SubscriptionsResponse{
+		fakeResponse := FeatureResponse{
 			StatusCode: 200,
 			Data:       FeatureStatus{},
 			CacheHit:   false,
@@ -275,7 +275,7 @@ var _ = Describe("Services Controller", func() {
 
 	Context("When the Subscriptions API returns features", func() {
 		It("should set values based on response from the featureStatus request", func() {
-			fakeResponse := SubscriptionsResponse{
+			fakeResponse := FeatureResponse{
 				StatusCode: 200,
 				Body:       "",
 				Error:      nil,
@@ -308,7 +308,7 @@ var _ = Describe("Services Controller", func() {
 	})
 
 	Context("When the request contains query filters", func() {
-		fakeResponse := SubscriptionsResponse{
+		fakeResponse := FeatureResponse{
 			StatusCode: 200,
 			Data:       FeatureStatus{},
 			CacheHit:   false,
@@ -374,7 +374,7 @@ var _ = Describe("Services Controller", func() {
 		AfterEach(func() {
 			os.Setenv("ENT_ENTITLE_ALL", "")
 		})
-		fakeResponse := SubscriptionsResponse{
+		fakeResponse := FeatureResponse{
 			StatusCode: 200,
 			Data:       FeatureStatus{},
 			CacheHit:   false,
@@ -414,7 +414,7 @@ var _ = Describe("Services Controller", func() {
 
 	Context("The request contains trial_activated", func() {
 		When("trial_activated is correctly parsed from the query", func() {
-			dummyResponse := SubscriptionsResponse{
+			dummyResponse := FeatureResponse{
 				StatusCode: 200,
 				Data:       FeatureStatus{},
 				CacheHit:   false,
@@ -423,7 +423,7 @@ var _ = Describe("Services Controller", func() {
 			It("defaults the param to false when its absent", func() {
 				// given
 				var actualForceFreshData *bool
-				mockGetFeatureStatus := func(params GetFeatureStatusParams) SubscriptionsResponse {
+				mockGetFeatureStatus := func(params GetFeatureStatusParams) FeatureResponse {
 					actualForceFreshData = &params.ForceFreshData
 
 					return dummyResponse
@@ -441,7 +441,7 @@ var _ = Describe("Services Controller", func() {
 			It("defaults the param to false when its not a valid bool", func() {
 				// given
 				var actualForceFreshData *bool
-				mockGetFeatureStatus := func(params GetFeatureStatusParams) SubscriptionsResponse {
+				mockGetFeatureStatus := func(params GetFeatureStatusParams) FeatureResponse {
 					actualForceFreshData = &params.ForceFreshData
 
 					return dummyResponse
@@ -459,7 +459,7 @@ var _ = Describe("Services Controller", func() {
 			It("set the param to true when its a valid bool", func() {
 				// given
 				var actualForceFreshData *bool
-				mockGetFeatureStatus := func(params GetFeatureStatusParams) SubscriptionsResponse {
+				mockGetFeatureStatus := func(params GetFeatureStatusParams) FeatureResponse {
 					actualForceFreshData = &params.ForceFreshData
 
 					return dummyResponse
@@ -560,7 +560,7 @@ var _ = Describe("Services Controller", func() {
 func BenchmarkRequest(b *testing.B) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		fakeResponse := SubscriptionsResponse{
+		fakeResponse := FeatureResponse{
 			StatusCode: 200,
 			Data:       FeatureStatus{},
 			CacheHit:   false,

@@ -127,7 +127,7 @@ func main() {
 			options.GetString(config.Keys.SubAPIBasePath))
 		current, err := getCurrent(client, url+endpoint)
 		if err != nil {
-			log.Fatalf("Unable to get current subscriptions: %s", err)
+			log.Fatalf("Unable to get current features: %s", err)
 			os.Exit(1)
 		}
 
@@ -167,7 +167,7 @@ func main() {
 			}
 			err = postUpdates(options, client, b)
 			if err != nil {
-				log.Fatalf("Unable to post updates to subscriptions API: %s", err)
+				log.Fatalf("Unable to post updates to features API: %s", err)
 				os.Exit(1)
 			} else {
 				fmt.Printf("Updated %s\n", endpoint)
