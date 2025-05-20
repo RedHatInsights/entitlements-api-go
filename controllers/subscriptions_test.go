@@ -103,7 +103,7 @@ var _ = Describe("Services Controller", func() {
 		Expect(featuresQuery).To(BeEquivalentTo("?features=TestBundle1&features=TestBundle6"))
 	})
 
-	Context("When the Subs API sends back a non-200", func() {
+	Context("When the Feature API sends back a non-200", func() {
 		It("should fail the response", func() {
 			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
 				return FeatureResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false}
@@ -114,14 +114,14 @@ var _ = Describe("Services Controller", func() {
 
 			Expect(rr.Result().StatusCode).To(Equal(500))
 			Expect(jsonResponse.Error.DependencyFailure).To(Equal(true))
-			Expect(jsonResponse.Error.Service).To(Equal("Subscriptions Service"))
+			Expect(jsonResponse.Error.Service).To(Equal("Feature Service"))
 			Expect(jsonResponse.Error.Status).To(Equal(503))
 			Expect(jsonResponse.Error.Endpoint).To(Equal("https://feature.api.redhat.com"))
-			Expect(jsonResponse.Error.Message).To(Equal("Got back a non 200 status code from Subscriptions Service"))
+			Expect(jsonResponse.Error.Message).To(Equal("Got back a non 200 status code from Feature Service"))
 		})
 	})
 
-	Context("When the Subs API sends back an error", func() {
+	Context("When the Feature API sends back an error", func() {
 		It("should fail the response", func() {
 			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
 				return FeatureResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false, Error: errors.New("Sub Failure")}
@@ -132,10 +132,10 @@ var _ = Describe("Services Controller", func() {
 
 			Expect(rr.Result().StatusCode).To(Equal(500))
 			Expect(jsonResponse.Error.DependencyFailure).To(Equal(true))
-			Expect(jsonResponse.Error.Service).To(Equal("Subscriptions Service"))
+			Expect(jsonResponse.Error.Service).To(Equal("Feature Service"))
 			Expect(jsonResponse.Error.Status).To(Equal(503))
 			Expect(jsonResponse.Error.Endpoint).To(Equal("https://feature.api.redhat.com"))
-			Expect(jsonResponse.Error.Message).To(Equal("Unexpected error while talking to Subs Service"))
+			Expect(jsonResponse.Error.Message).To(Equal("Unexpected error while talking to Feature Service"))
 		})
 	})
 
