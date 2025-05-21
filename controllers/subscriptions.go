@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -34,17 +35,17 @@ var cache = ccache.New(
 var cacheDuration = time.Second * time.Duration(configOptions.GetInt64(config.Keys.SubsCacheDuration))
 
 var bundleInfo []types.Bundle
-var subsQueryFeatures string
+var featuresQuery string
 var subsFailure = promauto.NewCounterVec(
 	prometheus.CounterOpts{
-		Name: "it_subscriptions_service_failure",
-		Help: "Total number of IT subscriptions service failures",
+		Name: "it_feature_service_failure",
+		Help: "Total number of IT feature service failures",
 	},
 	[]string{"code"},
 )
 var subsTimeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
-	Name:    "it_subscriptions_service_time_taken",
-	Help:    "Subscriptions latency distributions.",
+	Name:    "it_feature_service_time_taken",
+	Help:    "Feature service latency distributions.",
 	Buckets: prometheus.LinearBuckets(0.25, 0.25, 20),
 })
 
@@ -83,7 +84,7 @@ func SetBundleInfo(yamlFilePath string) error {
 	return nil
 }
 
-func setSubscriptionsQueryFeatures() {
+func setFeaturesQuery() {
 	features := strings.Split(configOptions.GetString(config.Keys.Features), ",")
 
 	var skuBasedFeatures []string
@@ -93,17 +94,17 @@ func setSubscriptionsQueryFeatures() {
 		}
 	}
 
-	subsQueryFeatures = "?features=" + strings.Join(skuBasedFeatures, "&features=")
+	featuresQuery = "?features=" + strings.Join(skuBasedFeatures, "&features=")
 }
 
 // GetFeatureStatus calls the IT subs service features endpoint and returns the entitlements for specified features/bundles
-var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsResponse {
+var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse {
 	orgID := params.OrgId
 	item := cache.Get(orgID)
 	entitleAll := configOptions.GetString(config.Keys.EntitleAll)
 
 	if item != nil && !item.Expired() && !params.ForceFreshData {
-		return types.SubscriptionsResponse{
+		return types.FeatureResponse{
 			StatusCode: 200,
 			Data:       item.Value().(types.FeatureStatus),
 			CacheHit:   true,
@@ -111,25 +112,25 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 	}
 
 	if entitleAll == "true" {
-		return types.SubscriptionsResponse{
+		return types.FeatureResponse{
 			StatusCode: 200,
 			Data:       types.FeatureStatus{},
 			CacheHit:   false,
 		}
 	}
 
-	if subsQueryFeatures == "" { // build the static part of our query only once
-		setSubscriptionsQueryFeatures()
+	if featuresQuery == "" { // build the static part of our query only once
+		setFeaturesQuery()
 	}
 	req := configOptions.GetString(config.Keys.SubsHost) +
 		configOptions.GetString(config.Keys.SubAPIBasePath) + 
-		"featureStatus" + subsQueryFeatures + "&accountId=" + orgID
+		"featureStatus" + featuresQuery + "&accountId=" + orgID
 
 	resp, err := getClient().Get(req)
 
 	if err != nil {
 		sentry.CaptureException(err)
-		return types.SubscriptionsResponse{
+		return types.FeatureResponse{
 			Error: err,
 			Url:   req,
 		}
@@ -138,7 +139,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
 		body, _ := io.ReadAll(resp.Body)
-		return types.SubscriptionsResponse{
+		return types.FeatureResponse{
 			StatusCode: resp.StatusCode,
 			Body:       string(body),
 			Error:      nil,
@@ -157,7 +158,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 
 	cache.Set(orgID, FeatureStatus, cacheDuration)
 
-	return types.SubscriptionsResponse{
+	return types.FeatureResponse{
 		StatusCode: resp.StatusCode,
 		Data:       FeatureStatus,
 		CacheHit:   false,
@@ -165,10 +166,10 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.SubscriptionsRe
 	}
 }
 
-func failOnDependencyError(errMsg string, res types.SubscriptionsResponse, w http.ResponseWriter) {
+func failOnDependencyError(errMsg string, res types.FeatureResponse, w http.ResponseWriter) {
 	dependencyError := types.DependencyErrorDetails{
 		DependencyFailure: true,
-		Service:           "Subscriptions Service",
+		Service:           "Feature Service",
 		Status:            res.StatusCode,
 		Endpoint:          configOptions.GetString(config.Keys.SubsHost),
 		Message:           errMsg,
@@ -204,6 +205,20 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			},
 		)
 
+		if subscriptions.Error != nil {
+			errMsg := "Unexpected error while talking to Feature Service"
+			l.Log.WithFields(logrus.Fields{"error": subscriptions.Error}).Error(errMsg)
+			sentry.WithScope(func(scope *sentry.Scope) {
+				scope.SetExtra("response_body", subscriptions.Body)
+				scope.SetExtra("response_status", subscriptions.StatusCode)
+				scope.SetExtra("url", subscriptions.Url)
+				sentry.CaptureException(fmt.Errorf("%s : %w", errMsg, subscriptions.Error))
+			})
+			
+			failOnDependencyError(errMsg, subscriptions, w)
+			return
+		}
+		
 		accNum := idObj.AccountNumber
 		isInternal := idObj.User.Internal
 		validEmailMatch, _ := regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)
@@ -214,30 +229,23 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		include_filter := queryParams.IncludeBundles
 		exclude_filter := queryParams.ExcludeBundles
 
-		if subscriptions.Error != nil {
-			errMsg := "Unexpected error while talking to Subs Service"
-			l.Log.WithFields(logrus.Fields{"error": subscriptions.Error}).Error(errMsg)
-			sentry.CaptureException(subscriptions.Error)
-			failOnDependencyError(errMsg, subscriptions, w)
-			return
-		}
-
 		subsTimeTaken := time.Since(start).Seconds()
 		l.Log.WithFields(logrus.Fields{
 			"subs_call_duration": subsTimeTaken, 
 			"cache_hit": subscriptions.CacheHit, 
 			"url": subscriptions.Url,
 			"org_id": orgId,
-		}).Info("subs call complete")
+		}).Info("feature service call complete")
 		subsTimeHistogram.Observe(subsTimeTaken)
 
 		if subscriptions.StatusCode != 200 {
-			errMsg := "Got back a non 200 status code from Subscriptions Service"
+			errMsg := "Got back a non 200 status code from Feature Service"
 			l.Log.WithFields(logrus.Fields{"code": subscriptions.StatusCode, "body": subscriptions.Body}).Error(errMsg)
 
 			sentry.WithScope(func(scope *sentry.Scope) {
 				scope.SetExtra("response_body", subscriptions.Body)
 				scope.SetExtra("response_status", subscriptions.StatusCode)
+				scope.SetExtra("url", subscriptions.Url)
 				sentry.CaptureException(errors.New(errMsg))
 			})
 
