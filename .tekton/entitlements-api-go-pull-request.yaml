@@ -165,6 +165,7 @@ spec:
       workspaces:
       - name: basic-auth
         workspace: git-auth
+    # clone the repository for the unit tests
     - name: clone-repository-oci-ta
       params:
       - name: url
@@ -187,6 +188,7 @@ spec:
       workspaces:
       - name: basic-auth
         workspace: git-auth
+    # run the unit tests
     - name: task-running-unit-tasks
       params:
       - name: SOURCE_ARTIFACT
