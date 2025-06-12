@@ -34,6 +34,8 @@ objects:
                 value: 'true'
               - name: ENT_RUN_BUNDLE_SYNC
                 value: ${RUN_BUNDLE_SYNC}
+              - name: ENT_AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED
+                value: ${AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED}
               - name: ENT_CERT
                 valueFrom:
                   secretKeyRef:
@@ -46,13 +48,25 @@ objects:
                     name: go-api-certs
                     key: ENT_KEY
                     optional: true
+              - name: ENT_IT_CERTIFICATE
+                valueFrom:
+                  secretKeyRef:
+                    name: it-key-pair
+                    key: tls.crt
+                    optional: true
+              - name: ENT_IT_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: it-key-pair
+                    key: tls.key
+                    optional: true
             volumeMounts:
             - mountPath: /bundles
               name: default-entitlements-config
             inheritEnv: true
             resources:
               limits:
-                cpu: ${CPU_LIMIT} 
+                cpu: ${CPU_LIMIT}
                 memory: ${MEMORY_LIMIT}
               requests:
                 cpu: ${CPU_REQUESTS}
@@ -75,7 +89,7 @@ objects:
           timeoutSeconds: 60
         resources:
           limits:
-            cpu: ${CPU_LIMIT} 
+            cpu: ${CPU_LIMIT}
             memory: ${MEMORY_LIMIT}
           requests:
             cpu: ${CPU_REQUESTS}
@@ -122,6 +136,8 @@ objects:
             value: ${AMS_ACCT_MGMT_11_ERR_MSG}
           - name: ENT_IT_SERVICES_TIMEOUT_SECONDS
             value: ${IT_SERVICES_TIMEOUT_SECONDS}
+          - name: ENT_AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED
+            value: ${AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED}
           - name: GLITCHTIP_DSN
             valueFrom:
               secretKeyRef:
@@ -139,6 +155,18 @@ objects:
               secretKeyRef:
                 name: go-api-certs
                 key: ENT_KEY
+          - name: ENT_IT_CERTIFICATE
+            valueFrom:
+              secretKeyRef:
+                name: it-key-pair
+                key: tls.crt
+                optional: true
+          - name: ENT_IT_KEY
+            valueFrom:
+              secretKeyRef:
+                name: it-key-pair
+                key: tls.key
+                optional: true
           - name: ENT_OIDC_CLIENT_ID
             valueFrom:
               secretKeyRef:
@@ -245,3 +273,6 @@ parameters:
 - description: Timeout for outbound requests to IT services, in seconds
   name: IT_SERVICES_TIMEOUT_SECONDS
   required: false
+- description: Enables grabbing the certificates from the secret that provides certificates that will be automatically renewed.
+  name: AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED
+  value: 'false'
