@@ -50,8 +50,8 @@ make GO=~/go/bin/go1.23
 
 To run the Entitlements API locally, you will need an Enterprise Services cert with access to the dev subscription endpoint /search/criteria and the export compliance service in whatever environment you are testing in.
 
-* You can request a personal cert by following ALL steps in this [mojo doc](https://mojo.redhat.com/docs/DOC-1144091).
-* You can request access to export compliance service by following the appropriate steps in this [doc](https://source.redhat.com/groups/public/it-legal-program/legal_restricted_party_screening_solution_wiki/how_to_use_export_compliance_service#jive_content_id_AuthenticationAccess_as_yourself_for_testingdevelopmentCreating_a_certificate).
+* You can request a personal cert by following ALL steps in this [doc](https://source.redhat.com/departments/it/identityaccessmanagement/it_iam_pki_rhcs_and_digicert/rhcs_v2_start_your_certificate_journey_here_2023#user-certificates).
+* If you need access to export compliance service, you can request access via it-legal-help@redhat.com. Be sure to include the UID of your cert for access. For help from that team, see [here](https://source.redhat.com/groups/public/it-legal-program/restricted_party_screening)
 * You can export your crt and key like so:
     `openssl pkcs12 -in your-p12-cert.p12 -out your-key.key -nocerts -nodes`
     `openssl pkcs12 -in your-p12-cert.p12 -out your-cert-sans-key.crt -clcerts -nokeys`
@@ -146,3 +146,25 @@ make build
 For example, release [`Entitlements v1.16.1`](https://github.com/RedHatInsights/entitlements-api-go/releases/tag/v1.16.1) has a corresponding tag [`v1.16.1`](https://github.com/RedHatInsights/entitlements-api-go/tree/v1.16.1).
 
 **Deployment:** Once a PR merges to master, our [build-main](https://ci.ext.devshift.net/job/RedHatInsights-entitlements-api-go-gh-build-master/) jenkins job will build/deploy an image to `quay.io` and tag it with the commit sha. We then update the image tag of our deployment in app-interface to that same commit SHA.
+
+## Production Deployments
+
+Deployment configuration is stored in [/deployment/clowdapp.yml](/deployment/clowdapp.yml)
+
+### Certificates
+
+In stage and prod, we have 2 ways of deploying our required certs.
+
+#### Automatic Renewal via IT (default method)
+AppSRE provides the option to automatically generate and renew certs in our openshift applications.
+
+If `AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED` is set to `true`: the certs will be automatially loaded as secrets in openshift. Entitlements will load the cert & key data from the secret into env vars that it can read. The env vars the cert & key are stored in are `ENT_IT_CERTIFICATE` and `ENT_IT_KEY`. 
+
+**IMPORTANT**: if using automatic cert renewal, `ENT_CERTS_FROM_ENV` must be set to `false`
+
+If `AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED` is set to `false`: the manual method must be used. 
+
+#### Manually via env or files
+If `ENT_CERTS_FROM_ENV` is set to `false`: store cert & key data in files, and set `ENT_CERT` and `ENT_KEY` to the locations of those files for the appliation to load.
+
+If `ENT_CERTS_FROM_ENV` is set to `true`: store cert & key data in the env vars `ENT_CERT` and `ENT_KEY` directly. 

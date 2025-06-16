@@ -140,10 +140,10 @@ func loadCerts(options *viper.Viper) (tls.Certificate, error) {
 		)
 	}
 
-	if options.GetBool(Keys.AutomaticCertificateRenewalEnabled) {
-		return tls.LoadX509KeyPair(
-			options.GetString(Keys.ITCertificate),
-			options.GetString(Keys.ITKey),
+	if options.GetBool(Keys.AutomaticCertificateRenewalEnabled) {		
+		return tls.X509KeyPair(
+			[]byte(options.GetString(Keys.ITCertificate)),
+			[]byte(options.GetString(Keys.ITKey)),
 		)
 	}
 
