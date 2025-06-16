@@ -273,7 +273,7 @@ parameters:
 - description: Timeout for outbound requests to IT services, in seconds
   name: IT_SERVICES_TIMEOUT_SECONDS
   required: false
-- description: Booleon to determine if we should retrieve certs from env vars or not
+- description: Boolean to determine if we should retrieve certs from env vars or not
   name: CERTS_FROM_ENV
   required: true
   value: 'true'
