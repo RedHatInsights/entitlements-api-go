@@ -6,7 +6,7 @@ require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
 	github.com/aws/aws-sdk-go v1.55.7
 	github.com/getkin/kin-openapi v0.132.0
-	github.com/getsentry/sentry-go v0.32.0
+	github.com/getsentry/sentry-go v0.33.0
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/karlseguin/ccache/v2 v2.0.8
 	github.com/oapi-codegen/runtime v1.1.1
@@ -18,7 +18,7 @@ require (
 	github.com/redhatinsights/platform-go-middlewares v1.0.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.20.1
-	golang.org/x/text v0.25.0
+	golang.org/x/text v0.26.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -67,10 +67,10 @@ require (
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/tools v0.31.0 // indirect
+	golang.org/x/tools v0.34.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
