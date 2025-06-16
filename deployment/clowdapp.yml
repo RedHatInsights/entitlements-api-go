@@ -31,7 +31,7 @@ objects:
               - name: ENT_BUNDLE_INFO_YAML
                 value: /bundles/bundles.yml
               - name: ENT_CERTS_FROM_ENV
-                value: 'true'
+                value: ${CERTS_FROM_ENV}
               - name: ENT_RUN_BUNDLE_SYNC
                 value: ${RUN_BUNDLE_SYNC}
               - name: ENT_AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED
@@ -103,7 +103,7 @@ objects:
           - name: ENT_ENTITLE_ALL
             value: ${ENTITLE_ALL}
           - name: ENT_CERTS_FROM_ENV
-            value: 'true'
+            value: ${CERTS_FROM_ENV}
           - name: ENT_LOG_LEVEL
             value: ${LOG_LEVEL}
           - name: ENT_AMS_HOST
@@ -273,6 +273,10 @@ parameters:
 - description: Timeout for outbound requests to IT services, in seconds
   name: IT_SERVICES_TIMEOUT_SECONDS
   required: false
+- description: Boolean to determine if we should retrieve certs from env vars or not
+  name: CERTS_FROM_ENV
+  required: true
+  value: 'true'
 - description: Enables grabbing the certificates from the secret that provides certificates that will be automatically renewed.
   name: AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED
   value: 'false'
