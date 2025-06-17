@@ -21,6 +21,9 @@ objects:
         - configMap:
             name: ${CONFIG_MAP_NAME}
           name: default-entitlements-config
+        - secret:
+            secretName: it-key-pair
+          name: it-certificates
         initContainers:
           - name: bundle-sync
             image: ${IMAGE}:${IMAGE_TAG}
@@ -48,21 +51,12 @@ objects:
                     name: go-api-certs
                     key: ENT_KEY
                     optional: true
-              - name: ENT_IT_CERTIFICATE
-                valueFrom:
-                  secretKeyRef:
-                    name: it-key-pair
-                    key: tls.crt
-                    optional: true
-              - name: ENT_IT_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: it-key-pair
-                    key: tls.key
-                    optional: true
             volumeMounts:
             - mountPath: /bundles
               name: default-entitlements-config
+            - mountPath: /certificates
+              name: it-certificates
+              readOnly: true
             inheritEnv: true
             resources:
               limits:
@@ -97,6 +91,9 @@ objects:
         volumeMounts:
         - mountPath: /bundles
           name: default-entitlements-config
+        - mountPath: /certificates
+          name: it-certificates
+          readOnly: true
         env:
           - name: ENT_PORT
             value: ${PORT}
@@ -155,17 +152,6 @@ objects:
               secretKeyRef:
                 name: go-api-certs
                 key: ENT_KEY
-          - name: ENT_IT_CERTIFICATE
-            valueFrom:
-              secretKeyRef:
-                name: it-key-pair
-                key: tls.crt
-                optional: true
-          - name: ENT_IT_KEY
-            valueFrom:
-              secretKeyRef:
-                name: it-key-pair
-                key: tls.key
                 optional: true
           - name: ENT_OIDC_CLIENT_ID
             valueFrom:

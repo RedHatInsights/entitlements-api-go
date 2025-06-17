@@ -95,10 +95,10 @@ then run one of the following
 # this will generate, build, and run the built executable (good for debugging)
 make exe
 ```
-or you can also run 
+or you can also run
 ```bash
 # this will run `go run ...` which will build a stripped down optimized version of the app
-make run 
+make run
 ```
 
 To run locally with Docker:
@@ -158,13 +158,16 @@ In stage and prod, we have 2 ways of deploying our required certs.
 #### Automatic Renewal via IT (default method)
 AppSRE provides the option to automatically generate and renew certs in our openshift applications.
 
-If `AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED` is set to `true`: the certs will be automatially loaded as secrets in openshift. Entitlements will load the cert & key data from the secret into env vars that it can read. The env vars the cert & key are stored in are `ENT_IT_CERTIFICATE` and `ENT_IT_KEY`. 
+If `AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED` is set to `true`: the certs will be
+automatically placed in the `/certificates` directory, and both the
+certificates themselves and the CA certificates will be read from those files.
 
-**IMPORTANT**: if using automatic cert renewal, `ENT_CERTS_FROM_ENV` must be set to `false`
+**IMPORTANT**: if using automatic cert renewal, `ENT_CERTS_FROM_ENV` must be
+set to `false`.
 
-If `AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED` is set to `false`: the manual method must be used. 
+If `AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED` is set to `false`: the manual method must be used.
 
 #### Manually via env or files
 If `ENT_CERTS_FROM_ENV` is set to `false`: store cert & key data in files, and set `ENT_CERT` and `ENT_KEY` to the locations of those files for the appliation to load.
 
-If `ENT_CERTS_FROM_ENV` is set to `true`: store cert & key data in the env vars `ENT_CERT` and `ENT_KEY` directly. 
+If `ENT_CERTS_FROM_ENV` is set to `true`: store cert & key data in the env vars `ENT_CERT` and `ENT_KEY` directly.
