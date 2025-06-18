@@ -61,8 +61,6 @@ type EntitlementsConfigKeysType struct {
 	SubsCacheMaxSize                   string
 	SubsCacheItemPrune                 string
 	AMSAcctMgmt11Msg                   string
-	ITCertificate                      string
-	ITKey                              string
 	ITServicesTimeoutSeconds           string
 }
 
@@ -104,12 +102,10 @@ var Keys = EntitlementsConfigKeysType{
 	SubsCacheMaxSize:                   "SUBS_CACHE_MAX_SIZE",
 	SubsCacheItemPrune:                 "SUBS_CACHE_ITEM_PRUNE",
 	AMSAcctMgmt11Msg:                   "AMS_ACCT_MGMT_11_ERR_MSG",
-	ITCertificate:                      "IT_CERTIFICATE",
-	ITKey:                              "IT_KEY",
 	ITServicesTimeoutSeconds:           "IT_SERVICES_TIMEOUT_SECONDS",
 }
 
-func getRootCAs(localCertFile string) *x509.CertPool {
+func getRootCAs(options *viper.Viper) *x509.CertPool {
 	// force the CA cert
 	rootCAs, err := x509.SystemCertPool()
 	if rootCAs == nil {
@@ -118,6 +114,13 @@ func getRootCAs(localCertFile string) *x509.CertPool {
 
 	if err != nil {
 		panic(fmt.Sprintf("Could not load system CA certs: %v", err))
+	}
+
+	var localCertFile string
+	if options.GetBool(Keys.AutomaticCertificateRenewalEnabled) {
+		localCertFile = "/certificates/ca.crt"
+	} else {
+		localCertFile = options.GetString(Keys.CaPath)
 	}
 
 	certs, err := os.ReadFile(localCertFile)
@@ -141,13 +144,10 @@ func loadCerts(options *viper.Viper) (tls.Certificate, error) {
 	}
 
 	if options.GetBool(Keys.AutomaticCertificateRenewalEnabled) {
-		return tls.LoadX509KeyPair(
-			options.GetString(Keys.ITCertificate),
-			options.GetString(Keys.ITKey),
-		)
+		return tls.LoadX509KeyPair("/certificates/tls.crt", "/certificates/tls.key")
+	} else {
+		return tls.LoadX509KeyPair(options.GetString(Keys.Cert), options.GetString(Keys.Key))
 	}
-
-	return tls.LoadX509KeyPair(options.GetString(Keys.Cert), options.GetString(Keys.Key))
 }
 
 func getCerts(options *viper.Viper) *tls.Certificate {
@@ -213,7 +213,7 @@ func initialize() {
 
 	config = &EntitlementsConfig{
 		Certs:   getCerts(options),
-		RootCAs: getRootCAs(options.GetString(Keys.CaPath)),
+		RootCAs: getRootCAs(options),
 		Options: options,
 	}
 
