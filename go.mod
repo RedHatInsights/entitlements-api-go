@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.55.7
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/getsentry/sentry-go v0.33.0
-	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/karlseguin/ccache/v2 v2.0.8
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/onsi/ginkgo/v2 v2.23.4
