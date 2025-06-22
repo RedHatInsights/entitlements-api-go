@@ -12,7 +12,7 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
-	github.com/openshift-online/ocm-sdk-go v0.1.467
+	github.com/openshift-online/ocm-sdk-go v0.1.469
 	github.com/prometheus/client_golang v1.22.0
 	github.com/redhatinsights/app-common-go v1.6.8
 	github.com/redhatinsights/platform-go-middlewares v1.0.0
