@@ -17,148 +17,92 @@ var config *EntitlementsConfig
 
 // EntitlementsConfig is a global configuration struct for the API
 type EntitlementsConfig struct {
-	Certs   *tls.Certificate
-	RootCAs *x509.CertPool
-	Port    string
-	Options *viper.Viper
+	Certs                *tls.Certificate
+	IsTestingEnvironment bool
+	RootCAs              *x509.CertPool
+	Port                 string
+	Options              *viper.Viper
 }
 
 // EntitlementsConfigKeysType is the definition of the struct hat houses all the env variables key names
 type EntitlementsConfigKeysType struct {
-	AutomaticCertificateRenewalEnabled string
-	Key                                string
-	Cert                               string
-	Port                               string
-	LogLevel                           string
-	CertsFromEnv                       string
-	SubsHost                           string
-	ComplianceHost                     string
-	CaPath                             string
-	OpenAPISpecPath                    string
-	BundleInfoYaml                     string
-	CwLogGroup                         string
-	CwLogStream                        string
-	CwRegion                           string
-	CwKey                              string
-	CwSecret                           string
-	Features                           string
-	SubAPIBasePath                     string
-	CompAPIBasePath                    string
-	RunBundleSync                      string
-	EntitleAll                         string
-	AMSHost                            string
-	ClientID                           string
-	ClientSecret                       string
-	TokenURL                           string
-	Debug                              string
-	BOPClientID                        string
-	BOPToken                           string
-	BOPURL                             string
-	BOPEnv                             string
-	BOPMockOrgId                       string
-	DisableSeatManager                 string
-	SubsCacheDuration                  string
-	SubsCacheMaxSize                   string
-	SubsCacheItemPrune                 string
-	AMSAcctMgmt11Msg                   string
-	ITServicesTimeoutSeconds           string
+	CaCert                   string
+	Cert                     string
+	Key                      string
+	Port                     string
+	LogLevel                 string
+	CertsFromEnv             string
+	SubsHost                 string
+	ComplianceHost           string
+	CaPath                   string
+	OpenAPISpecPath          string
+	BundleInfoYaml           string
+	CwLogGroup               string
+	CwLogStream              string
+	CwRegion                 string
+	CwKey                    string
+	CwSecret                 string
+	Features                 string
+	SubAPIBasePath           string
+	CompAPIBasePath          string
+	RunBundleSync            string
+	EntitleAll               string
+	AMSHost                  string
+	ClientID                 string
+	ClientSecret             string
+	TokenURL                 string
+	Debug                    string
+	BOPClientID              string
+	BOPToken                 string
+	BOPURL                   string
+	BOPEnv                   string
+	BOPMockOrgId             string
+	DisableSeatManager       string
+	SubsCacheDuration        string
+	SubsCacheMaxSize         string
+	SubsCacheItemPrune       string
+	AMSAcctMgmt11Msg         string
+	ITServicesTimeoutSeconds string
 }
 
 // Keys is a struct that houses all the env variables key names
 var Keys = EntitlementsConfigKeysType{
-	AutomaticCertificateRenewalEnabled: "AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED",
-	Key:                                "KEY",
-	Cert:                               "CERT",
-	Port:                               "PORT",
-	LogLevel:                           "LOG_LEVEL",
-	CertsFromEnv:                       "CERTS_FROM_ENV",
-	SubsHost:                           "SUBS_HOST",
-	ComplianceHost:                     "COMPLIANCE_HOST",
-	CaPath:                             "CA_PATH",
-	OpenAPISpecPath:                    "OPENAPI_SPEC_PATH",
-	BundleInfoYaml:                     "BUNDLE_INFO_YAML",
-	CwLogGroup:                         "CW_LOG_GROUP",
-	CwLogStream:                        "CW_LOG_STEAM",
-	CwRegion:                           "CW_REGION",
-	CwKey:                              "CW_KEY",
-	CwSecret:                           "CW_SECRET",
-	Features:                           "FEATURES",
-	SubAPIBasePath:                     "SUB_API_BASE_PATH",
-	CompAPIBasePath:                    "COMP_API_BASE_PATH",
-	RunBundleSync:                      "RUN_BUNDLE_SYNC",
-	EntitleAll:                         "ENTITLE_ALL",
-	AMSHost:                            "AMS_HOST",
-	ClientID:                           "OIDC_CLIENT_ID",
-	ClientSecret:                       "OIDC_CLIENT_SECRET",
-	TokenURL:                           "OAUTH_TOKEN_URL",
-	BOPClientID:                        "BOP_CLIENT_ID",
-	BOPToken:                           "BOP_TOKEN",
-	BOPURL:                             "BOP_URL",
-	BOPMockOrgId:                       "BOP_MOCK_ORG_ID",
-	BOPEnv:                             "BOP_ENV",
-	Debug:                              "DEBUG",
-	DisableSeatManager:                 "DISABLE_SEAT_MANAGER",
-	SubsCacheDuration:                  "SUBS_CACHE_DURATION_SECONDS",
-	SubsCacheMaxSize:                   "SUBS_CACHE_MAX_SIZE",
-	SubsCacheItemPrune:                 "SUBS_CACHE_ITEM_PRUNE",
-	AMSAcctMgmt11Msg:                   "AMS_ACCT_MGMT_11_ERR_MSG",
-	ITServicesTimeoutSeconds:           "IT_SERVICES_TIMEOUT_SECONDS",
-}
-
-func getRootCAs(options *viper.Viper) *x509.CertPool {
-	// force the CA cert
-	rootCAs, err := x509.SystemCertPool()
-	if rootCAs == nil {
-		panic("Could not load system CA certs")
-	}
-
-	if err != nil {
-		panic(fmt.Sprintf("Could not load system CA certs: %v", err))
-	}
-
-	var localCertFile string
-	if options.GetBool(Keys.AutomaticCertificateRenewalEnabled) {
-		localCertFile = "/certificates/ca.crt"
-	} else {
-		localCertFile = options.GetString(Keys.CaPath)
-	}
-
-	certs, err := os.ReadFile(localCertFile)
-	if err != nil {
-		panic(fmt.Sprintf("Failed to append %q to RootCAs: %v", localCertFile, err))
-	}
-
-	if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
-		panic(fmt.Sprintf("Failed to AppendCertsFromPEM %q to RootCAs", localCertFile))
-	}
-
-	return rootCAs
-}
-
-func loadCerts(options *viper.Viper) (tls.Certificate, error) {
-	if options.GetBool(Keys.CertsFromEnv) {
-		return tls.X509KeyPair(
-			[]byte(options.GetString(Keys.Cert)),
-			[]byte(options.GetString(Keys.Key)),
-		)
-	}
-
-	if options.GetBool(Keys.AutomaticCertificateRenewalEnabled) {
-		return tls.LoadX509KeyPair("/certificates/tls.crt", "/certificates/tls.key")
-	} else {
-		return tls.LoadX509KeyPair(options.GetString(Keys.Cert), options.GetString(Keys.Key))
-	}
-}
-
-func getCerts(options *viper.Viper) *tls.Certificate {
-	// Read the key pair to create certificate
-	cert, err := loadCerts(options)
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return &cert
+	CaCert:                   "CA_CERT",
+	Cert:                     "CERT",
+	Key:                      "KEY",
+	Port:                     "PORT",
+	LogLevel:                 "LOG_LEVEL",
+	CertsFromEnv:             "CERTS_FROM_ENV",
+	SubsHost:                 "SUBS_HOST",
+	ComplianceHost:           "COMPLIANCE_HOST",
+	OpenAPISpecPath:          "OPENAPI_SPEC_PATH",
+	BundleInfoYaml:           "BUNDLE_INFO_YAML",
+	CwLogGroup:               "CW_LOG_GROUP",
+	CwLogStream:              "CW_LOG_STEAM",
+	CwRegion:                 "CW_REGION",
+	CwKey:                    "CW_KEY",
+	CwSecret:                 "CW_SECRET",
+	Features:                 "FEATURES",
+	SubAPIBasePath:           "SUB_API_BASE_PATH",
+	CompAPIBasePath:          "COMP_API_BASE_PATH",
+	RunBundleSync:            "RUN_BUNDLE_SYNC",
+	EntitleAll:               "ENTITLE_ALL",
+	AMSHost:                  "AMS_HOST",
+	ClientID:                 "OIDC_CLIENT_ID",
+	ClientSecret:             "OIDC_CLIENT_SECRET",
+	TokenURL:                 "OAUTH_TOKEN_URL",
+	BOPClientID:              "BOP_CLIENT_ID",
+	BOPToken:                 "BOP_TOKEN",
+	BOPURL:                   "BOP_URL",
+	BOPMockOrgId:             "BOP_MOCK_ORG_ID",
+	BOPEnv:                   "BOP_ENV",
+	Debug:                    "DEBUG",
+	DisableSeatManager:       "DISABLE_SEAT_MANAGER",
+	SubsCacheDuration:        "SUBS_CACHE_DURATION_SECONDS",
+	SubsCacheMaxSize:         "SUBS_CACHE_MAX_SIZE",
+	SubsCacheItemPrune:       "SUBS_CACHE_ITEM_PRUNE",
+	AMSAcctMgmt11Msg:         "AMS_ACCT_MGMT_11_ERR_MSG",
+	ITServicesTimeoutSeconds: "IT_SERVICES_TIMEOUT_SECONDS",
 }
 
 func initialize() {
@@ -211,10 +155,12 @@ func initialize() {
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
 
-	config = &EntitlementsConfig{
-		Certs:   getCerts(options),
-		RootCAs: getRootCAs(options),
-		Options: options,
+	config = &EntitlementsConfig{Options: options}
+
+	// Load the certificates.
+	err = loadCertificates(config)
+	if err != nil {
+		panic(fmt.Sprintf("unable to load certificates: %s", err))
 	}
 
 	if clowder.IsClowderEnabled() {
