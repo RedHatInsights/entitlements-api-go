@@ -158,14 +158,12 @@ In stage and prod, we have 2 ways of deploying our required certs.
 #### Automatic Renewal via IT (default method)
 AppSRE provides the option to automatically generate and renew certs in our openshift applications.
 
-If `AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED` is set to `true`: the certs will be
-automatically placed in the `/certificates` directory, and both the
-certificates themselves and the CA certificates will be read from those files.
+The certs will be automatically placed in the `/certificates` directory, and
+both the certificates themselves and the CA certificates will be read from
+those files.
 
 **IMPORTANT**: if using automatic cert renewal, `ENT_CERTS_FROM_ENV` must be
 set to `false`.
-
-If `AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED` is set to `false`: the manual method must be used.
 
 #### Manually via env or files
 If `ENT_CERTS_FROM_ENV` is set to `false`: store cert & key data in files, and set `ENT_CERT` and `ENT_KEY` to the locations of those files for the appliation to load.

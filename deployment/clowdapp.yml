@@ -37,20 +37,12 @@ objects:
                 value: ${CERTS_FROM_ENV}
               - name: ENT_RUN_BUNDLE_SYNC
                 value: ${RUN_BUNDLE_SYNC}
-              - name: ENT_AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED
-                value: ${AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED}
+              - name: ENT_CA_CERT
+                value: ${ENT_CA_CERT}
               - name: ENT_CERT
-                valueFrom:
-                  secretKeyRef:
-                    name: go-api-certs
-                    key: ENT_CERT
-                    optional: true
+                value: ${ENT_CERT}
               - name: ENT_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: go-api-certs
-                    key: ENT_KEY
-                    optional: true
+                value: ${ENT_KEY}
             volumeMounts:
             - mountPath: /bundles
               name: default-entitlements-config
@@ -109,8 +101,6 @@ objects:
             value: ${BOP_URL}
           - name: ENT_BOP_ENV
             value: ${BOP_ENV}
-          - name: ENT_CA_PATH
-            value: /resources/ca.crt
           - name: ENT_SUBS_HOST
             value: ${SUBS_HOST}
           - name: ENT_COMPLIANCE_HOST
@@ -133,25 +123,17 @@ objects:
             value: ${AMS_ACCT_MGMT_11_ERR_MSG}
           - name: ENT_IT_SERVICES_TIMEOUT_SECONDS
             value: ${IT_SERVICES_TIMEOUT_SECONDS}
-          - name: ENT_AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED
-            value: ${AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED}
+          - name: ENT_CA_CERT
+            value: ${ENT_CA_CERT}
+          - name: ENT_CERT
+            value: ${ENT_CERT}
+          - name: ENT_KEY
+            value: ${ENT_KEY}
           - name: GLITCHTIP_DSN
             valueFrom:
               secretKeyRef:
                 name: ${GLITCHTIP_SECRET}
                 key: dsn
-                optional: true
-          - name: ENT_CERT
-            valueFrom:
-              secretKeyRef:
-                name: go-api-certs
-                key: ENT_CERT
-                optional: true
-          - name: ENT_KEY
-            valueFrom:
-              secretKeyRef:
-                name: go-api-certs
-                key: ENT_KEY
                 optional: true
           - name: ENT_OIDC_CLIENT_ID
             valueFrom:
@@ -259,10 +241,13 @@ parameters:
 - description: Timeout for outbound requests to IT services, in seconds
   name: IT_SERVICES_TIMEOUT_SECONDS
   required: false
-- description: Boolean to determine if we should retrieve certs from env vars or not
+- description: Determines whether the certificates are loaded from the "ENT_CA_CERT", "ENT_CERT" and "ENT_KEY" environment variables or not. When the value is "false", the files are loaded directly from the "it-certificates" volume.
   name: CERTS_FROM_ENV
   required: true
-  value: 'true'
-- description: Enables grabbing the certificates from the secret that provides certificates that will be automatically renewed.
-  name: AUTOMATIC_CERTIFICATE_RENEWAL_ENABLED
   value: 'false'
+- description: The CA's chain of certificates to be used for the certificate verification. Requires the "CERTS_FROM_ENV" environment variable to be "true"
+  name: ENT_CA_CERT
+- description: The certificate to be used to talk to the IT services. Requires the "CERTS_FROM_ENV" environment variable to be "true"
+  name: ENT_CERT
+- description: The key to be used to talk to the IT services. Requires the "CERTS_FROM_ENV" environment variable to be "true"
+  name: ENT_KEY
