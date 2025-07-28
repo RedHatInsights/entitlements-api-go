@@ -9,10 +9,10 @@ require (
 	github.com/getsentry/sentry-go v0.33.0
 	github.com/go-chi/chi/v5 v5.2.2
 	github.com/karlseguin/ccache/v2 v2.0.8
-	github.com/oapi-codegen/runtime v1.1.1
+	github.com/oapi-codegen/runtime v1.1.2
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
-	github.com/openshift-online/ocm-sdk-go v0.1.469
+	github.com/openshift-online/ocm-sdk-go v0.1.473
 	github.com/prometheus/client_golang v1.22.0
 	github.com/redhatinsights/app-common-go v1.6.8
 	github.com/redhatinsights/platform-go-middlewares v1.0.0
@@ -52,8 +52,8 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
-	github.com/openshift-online/ocm-api-model/clientapi v0.0.0-20250705042545-3ad1fed60d82 // indirect
-	github.com/openshift-online/ocm-api-model/model v0.0.0-20250705042545-3ad1fed60d82 // indirect
+	github.com/openshift-online/ocm-api-model/clientapi v0.0.426 // indirect
+	github.com/openshift-online/ocm-api-model/model v0.0.426 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
@@ -64,7 +64,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.9.2 // indirect
-	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/spf13/pflag v1.0.7 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
