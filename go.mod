@@ -4,7 +4,7 @@ go 1.23.9
 
 require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
-	github.com/aws/aws-sdk-go v1.55.7
+	github.com/aws/aws-sdk-go v1.55.8
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/getsentry/sentry-go v0.33.0
 	github.com/go-chi/chi/v5 v5.2.2
