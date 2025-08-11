@@ -177,7 +177,7 @@ objects:
 parameters:
 - description: image
   name: IMAGE
-  value: quay.io/cloudservices/entitlements-api-go
+  value: quay.io/redhat-services-prod/hcc-accessmanagement-tenant/entitlements-api-go
 - description: Log level for the application
   name: LOG_LEVEL
   required: false
