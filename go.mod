@@ -4,7 +4,7 @@ go 1.23.9
 
 require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
-	github.com/aws/aws-sdk-go v1.55.7
+	github.com/aws/aws-sdk-go v1.55.8
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/getsentry/sentry-go v0.33.0
 	github.com/go-chi/chi/v5 v5.2.2
@@ -31,7 +31,7 @@ require (
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
-	github.com/go-openapi/jsonpointer v0.21.1 // indirect
+	github.com/go-openapi/jsonpointer v0.21.2 // indirect
 	github.com/go-openapi/swag v0.23.1 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
@@ -59,9 +59,9 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.65.0 // indirect
 	github.com/prometheus/procfs v0.17.0 // indirect
-	github.com/sagikazarmark/locafero v0.7.0 // indirect
+	github.com/sagikazarmark/locafero v0.10.0 // indirect
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
-	github.com/sourcegraph/conc v0.3.0 // indirect
+	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.9.2 // indirect
 	github.com/spf13/pflag v1.0.7 // indirect
@@ -73,6 +73,6 @@ require (
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
+	google.golang.org/protobuf v1.36.7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
