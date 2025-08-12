@@ -142,10 +142,10 @@ make build
 
 **Versioning:** All releases should follow [SemVer](http://semver.org) versioning.
 
-**Release Tagging:** Releases are drafted with a version, and then `master` is tagged with the version number.
+**Release Tagging:** Releases are drafted with a version, and then `main` is tagged with the version number.
 For example, release [`Entitlements v1.16.1`](https://github.com/RedHatInsights/entitlements-api-go/releases/tag/v1.16.1) has a corresponding tag [`v1.16.1`](https://github.com/RedHatInsights/entitlements-api-go/tree/v1.16.1).
 
-**Deployment:** Once a PR merges to master, our [build-main](https://ci.ext.devshift.net/job/RedHatInsights-entitlements-api-go-gh-build-master/) jenkins job will build/deploy an image to `quay.io` and tag it with the commit sha. We then update the image tag of our deployment in app-interface to that same commit SHA.
+**Deployment:** Once a PR merges to main, our Konflux pipelines are automatically triggered. These pipelines build and deploy a new image to `quay.io` and then trigger the Tekton pipeline (managed in the app-interface repository) to perform the stage deployment. For production deployment, update the image tag in the app-interface deployment configuration file to the desired commit SHA.
 
 ## Production Deployments
 
@@ -166,6 +166,6 @@ those files.
 set to `false`.
 
 #### Manually via env or files
-If `ENT_CERTS_FROM_ENV` is set to `false`: store cert & key data in files, and set `ENT_CERT` and `ENT_KEY` to the locations of those files for the appliation to load.
+If `ENT_CERTS_FROM_ENV` is set to `false`: store cert & key data in files, and set `ENT_CERT` and `ENT_KEY` to the locations of those files for the application to load.
 
 If `ENT_CERTS_FROM_ENV` is set to `true`: store cert & key data in the env vars `ENT_CERT` and `ENT_KEY` directly.
