@@ -10,7 +10,7 @@ COPY go.mod go.sum ./
 
 USER root
 
-RUN go mod download 
+RUN go mod download
 COPY . .
 
 RUN make
@@ -23,7 +23,6 @@ WORKDIR /
 # Copy GO executable file and need directories from the builder image
 COPY --from=builder /go/src/app/entitlements-api-go ./entitlements-api-go
 COPY --from=builder /go/src/app/bundle-sync ./bundle-sync
-COPY resources ./resources
 COPY apispec ./apispec
 COPY bundles ./bundles
 
