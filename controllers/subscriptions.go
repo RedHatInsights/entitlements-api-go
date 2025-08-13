@@ -205,6 +205,7 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			},
 		)
 
+		degraded := false
 		if subscriptions.Error != nil {
 			errMsg := "Unexpected error while talking to Feature Service"
 			l.Log.WithFields(logrus.Fields{"error": subscriptions.Error}).Error(errMsg)
@@ -214,9 +215,9 @@ func Services() func(http.ResponseWriter, *http.Request) {
 				scope.SetExtra("url", subscriptions.Url)
 				sentry.CaptureException(fmt.Errorf("%s : %w", errMsg, subscriptions.Error))
 			})
-			
-			failOnDependencyError(errMsg, subscriptions, w)
-			return
+			// the request is degraded because we received an error from the feature service
+			degraded = true
+			subsFailure.WithLabelValues(strconv.Itoa(subscriptions.StatusCode)).Inc()
 		}
 		
 		accNum := idObj.AccountNumber
@@ -249,8 +250,9 @@ func Services() func(http.ResponseWriter, *http.Request) {
 				sentry.CaptureException(errors.New(errMsg))
 			})
 
-			failOnDependencyError(errMsg, subscriptions, w)
-			return
+			// the request is degraded because we received a non-200 from the feature service
+			degraded = true
+			subsFailure.WithLabelValues(strconv.Itoa(subscriptions.StatusCode)).Inc()
 		}
 
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
@@ -308,6 +310,10 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		if degraded {
+			w.Header().Set("X-Entitlements-Degraded", "true")
+			w.Header().Set("X-Entitlements-Degraded-Status", strconv.Itoa(subscriptions.StatusCode))
+		}
 		w.Write([]byte(obj))
 	}
 }
