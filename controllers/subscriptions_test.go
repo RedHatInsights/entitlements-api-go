@@ -104,38 +104,36 @@ var _ = Describe("Services Controller", func() {
 	})
 
 	Context("When the Feature API sends back a non-200", func() {
-		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
+		It("should respond 200, mark degraded, and fail closed for SKU-based bundles", func() {
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
 				return FeatureResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false}
 			})
 
-			var jsonResponse DependencyErrorResponse
-			json.Unmarshal([]byte(rawBody), &jsonResponse)
+			Expect(rr.Result().StatusCode).To(Equal(200))
+			Expect(rr.Result().Header.Get("X-Entitlements-Degraded")).To(Equal("true"))
+			Expect(rr.Result().Header.Get("X-Entitlements-Degraded-Status")).To(Equal("503"))
 
-			Expect(rr.Result().StatusCode).To(Equal(500))
-			Expect(jsonResponse.Error.DependencyFailure).To(Equal(true))
-			Expect(jsonResponse.Error.Service).To(Equal("Feature Service"))
-			Expect(jsonResponse.Error.Status).To(Equal(503))
-			Expect(jsonResponse.Error.Endpoint).To(Equal("https://feature.api.redhat.com"))
-			Expect(jsonResponse.Error.Message).To(Equal("Got back a non 200 status code from Feature Service"))
+			// SKU-based bundles should be false
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle6"].IsEntitled).To(Equal(false))
 		})
 	})
 
 	Context("When the Feature API sends back an error", func() {
-		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
+		It("should respond 200, mark degraded, and fail closed for SKU-based bundles", func() {
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
 				return FeatureResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false, Error: errors.New("Sub Failure")}
 			})
 
-			var jsonResponse DependencyErrorResponse
-			json.Unmarshal([]byte(rawBody), &jsonResponse)
+			Expect(rr.Result().StatusCode).To(Equal(200))
+			Expect(rr.Result().Header.Get("X-Entitlements-Degraded")).To(Equal("true"))
+			Expect(rr.Result().Header.Get("X-Entitlements-Degraded-Status")).ToNot(BeEmpty())
 
-			Expect(rr.Result().StatusCode).To(Equal(500))
-			Expect(jsonResponse.Error.DependencyFailure).To(Equal(true))
-			Expect(jsonResponse.Error.Service).To(Equal("Feature Service"))
-			Expect(jsonResponse.Error.Status).To(Equal(503))
-			Expect(jsonResponse.Error.Endpoint).To(Equal("https://feature.api.redhat.com"))
-			Expect(jsonResponse.Error.Message).To(Equal("Unexpected error while talking to Feature Service"))
+			// SKU-based bundles should be false
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle6"].IsEntitled).To(Equal(false))
 		})
 	})
 
