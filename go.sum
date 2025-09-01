@@ -66,8 +66,8 @@ github.com/google/go-cmp v0.4.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
-github.com/google/pprof v0.0.0-20250820193118-f64d9cf942d6 h1:EEHtgt9IwisQ2AZ4pIsMjahcegHh6rmhqxzIRQIyepY=
-github.com/google/pprof v0.0.0-20250820193118-f64d9cf942d6/go.mod h1:I6V7YzU0XDpsHqbsyrghnFZLO1gwK6NPTNvmetQIk9U=
+github.com/google/pprof v0.0.0-20250830080959-101d87ff5bc3 h1:c5evqpRcU++SkQZGh5cviTzmranbfRv/G2cPNDIVbCE=
+github.com/google/pprof v0.0.0-20250830080959-101d87ff5bc3/go.mod h1:I6V7YzU0XDpsHqbsyrghnFZLO1gwK6NPTNvmetQIk9U=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gorilla/css v1.0.1 h1:ntNaBIghp6JmvWnxbZKANoLyuXTPZ4cAMlo6RyhlbO8=
@@ -146,10 +146,10 @@ github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7J
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
 github.com/onsi/gomega v1.37.0 h1:CdEG8g0S133B4OswTDC/5XPSzE1OeP29QOioj2PID2Y=
 github.com/onsi/gomega v1.37.0/go.mod h1:8D9+Txp43QWKhM24yyOBEdpkzN8FvJyAwecBgsU4KU0=
-github.com/openshift-online/ocm-api-model/clientapi v0.0.430 h1:YoF8AxWegIjb/5TL3PFUzo6tHtcI1vII1ZfE4wJ3vmM=
-github.com/openshift-online/ocm-api-model/clientapi v0.0.430/go.mod h1:fZwy5HY2URG9nrExvQeXrDU/08TGqZ16f8oymVEN5lo=
-github.com/openshift-online/ocm-api-model/model v0.0.430 h1:mI8DYdKVngLKdAJ2v8pFF1elO1lb80ERRAcS8TxZToA=
-github.com/openshift-online/ocm-api-model/model v0.0.430/go.mod h1:PQIoq6P8Vlb7goOdRMLK8nJY+B7HH0RTqYAa4kyidTE=
+github.com/openshift-online/ocm-api-model/clientapi v0.0.432 h1:0jJgy/qqThsjqDHlBp1ud5oo3Zqe7PGpLdtp7+i4MaM=
+github.com/openshift-online/ocm-api-model/clientapi v0.0.432/go.mod h1:fZwy5HY2URG9nrExvQeXrDU/08TGqZ16f8oymVEN5lo=
+github.com/openshift-online/ocm-api-model/model v0.0.432 h1:BA8TIXaPslOC/Whz5pFn7jfa0nDEtU6G9puoS0xfxxI=
+github.com/openshift-online/ocm-api-model/model v0.0.432/go.mod h1:PQIoq6P8Vlb7goOdRMLK8nJY+B7HH0RTqYAa4kyidTE=
 github.com/openshift-online/ocm-sdk-go v0.1.473 h1:m/NWIBCzhC/8PototMQ7x8MQXCeSLjW7q0qR7bPGXKk=
 github.com/openshift-online/ocm-sdk-go v0.1.473/go.mod h1:5Gw/YZE+c5FAPaBtO1w/asd9qbs2ljQwg7fpVq51UW4=
 github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
