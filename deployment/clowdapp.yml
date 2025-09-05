@@ -218,7 +218,7 @@ parameters:
   value: 'entitlements-secret'
 - description: List of feature bundles to onboard during bundle sync
   name: FEATURES
-  value: ansible,rhods,openshift,acs
+  value: ansible,smart_management,rhods,rhoam,rhosak,openshift,acs
   required: false
 - description: Flag to disable seat manager by not exposing any of the apis related to the feature
   name: DISABLE_SEAT_MANAGER
