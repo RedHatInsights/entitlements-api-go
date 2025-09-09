@@ -130,22 +130,29 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse
 
 	if err != nil {
 		sentry.CaptureException(err)
+		// cache fail-closed state to avoid repeated downstream calls until TTL expires
+		cache.Set(orgID, types.FeatureStatus{}, cacheDuration)
 		return types.FeatureResponse{
+			StatusCode: 0,
 			Error: err,
-			Url:   req,
+			Data: types.FeatureStatus{},
+			CacheHit: false,
+			Url: req,
 		}
 	}
 
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
 		body, _ := io.ReadAll(resp.Body)
+		// cache fail-closed state to avoid repeated downstream calls until TTL expires
+		cache.Set(orgID, types.FeatureStatus{}, cacheDuration)
 		return types.FeatureResponse{
 			StatusCode: resp.StatusCode,
-			Body:       string(body),
-			Error:      nil,
-			Data:       types.FeatureStatus{},
-			CacheHit:   false,
-			Url:        req,
+			Body: string(body),
+			Error: nil,
+			Data: types.FeatureStatus{},
+			CacheHit: false,
+			Url: req,
 		}
 	}
 
@@ -184,6 +191,11 @@ func failOnDependencyError(errMsg string, res types.FeatureResponse, w http.Resp
 
 func setBundlePayload(entitle bool, trial bool) types.EntitlementsSection {
 	return types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
+}
+
+// Represents a fail-closed state (empty feature set cached after failure).
+func isCachedFailClosed(res types.FeatureResponse) bool {
+	return res.CacheHit && len(res.Data.Features) == 0
 }
 
 // Services the handler for GETs to /api/entitlements/v1/services/
@@ -255,6 +267,10 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			subsFailure.WithLabelValues(strconv.Itoa(subscriptions.StatusCode)).Inc()
 		}
 
+		if isCachedFailClosed(subscriptions) {
+			degraded = true
+		}
+
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
 		for _, b := range bundleInfo {
 			if len(include_filter) > 0 {
@@ -312,7 +328,11 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if degraded {
 			w.Header().Set("X-Entitlements-Degraded", "true")
-			w.Header().Set("X-Entitlements-Degraded-Status", strconv.Itoa(subscriptions.StatusCode))
+			statusForHeader := subscriptions.StatusCode
+			if isCachedFailClosed(subscriptions) {
+				statusForHeader = 0
+			}
+			w.Header().Set("X-Entitlements-Degraded-Status", strconv.Itoa(statusForHeader))
 		}
 		w.Write([]byte(obj))
 	}

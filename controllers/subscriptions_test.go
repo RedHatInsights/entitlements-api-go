@@ -551,6 +551,37 @@ var _ = Describe("Services Controller", func() {
 				Expect(response.Data.Features[0].Name).To(BeEquivalentTo("dummy feature 2!"))
 				Expect(subsServer.ReceivedRequests()).To(HaveLen(2))
 			})
+
+			It("caches fail-closed when non-200 is returned and serves cached fail-closed on subsequent call", func() {
+				// given: next downstream call will fail with 503
+				subsServer.AppendHandlers(ghttp.RespondWith(http.StatusServiceUnavailable, `down`, http.Header{"Content-Type": {"text/plain"}}))
+
+				params := GetFeatureStatusParams{
+					OrgId:          DEFAULT_ORG_ID,
+					ForceFreshData: true, // bypass positive cache to force downstream failure and cache fail-closed
+				}
+
+				// when: first call records fail-closed in cache
+				response1 := GetFeatureStatus(params)
+
+				// then: fail-closed
+				Expect(response1).ToNot(BeNil())
+				Expect(response1.CacheHit).To(BeFalse())
+				Expect(response1.Data.Features).To(BeEmpty())
+				Expect(response1.StatusCode).To(Equal(http.StatusServiceUnavailable))
+				Expect(subsServer.ReceivedRequests()).To(HaveLen(2))
+
+				// when: second call with same params should use cached fail-closed and avoid a downstream call
+				params2 := GetFeatureStatusParams{OrgId: DEFAULT_ORG_ID, ForceFreshData: false}
+				response2 := GetFeatureStatus(params2)
+
+				// then: cached fail-closed used
+				Expect(response2).ToNot(BeNil())
+				Expect(response2.CacheHit).To(BeTrue())
+				Expect(response2.Data.Features).To(BeEmpty())
+				Expect(response2.StatusCode).To(Equal(200))
+				Expect(subsServer.ReceivedRequests()).To(HaveLen(2))
+			})
 		})
 	})
 })
