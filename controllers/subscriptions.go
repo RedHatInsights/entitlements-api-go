@@ -239,7 +239,7 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		}).Info("feature service call complete")
 		subsTimeHistogram.Observe(subsTimeTaken)
 
-		if subscriptions.StatusCode != 200 {
+		if subscriptions.Error == nil && subscriptions.StatusCode != 200 {
 			errMsg := "Got back a non 200 status code from Feature Service"
 			l.Log.WithFields(logrus.Fields{"code": subscriptions.StatusCode, "body": subscriptions.Body}).Error(errMsg)
 
