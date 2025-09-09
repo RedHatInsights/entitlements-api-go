@@ -2,7 +2,7 @@
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
 
-FROM registry.access.redhat.com/ubi9/go-toolset:9.6-1754467841 as builder
+FROM registry.access.redhat.com/ubi9/go-toolset:9.6-1756993846 as builder
 
 WORKDIR /go/src/app
 
@@ -16,7 +16,7 @@ COPY . .
 RUN make
 
 # Using ubi9-minimal due to its smaller footprint
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1754584681
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1755695350
 
 WORKDIR /
 

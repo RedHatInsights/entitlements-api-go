@@ -120,6 +120,7 @@ func main() {
 
 	endpoints := strings.Split(c.Options.GetString(config.Keys.Features), ",")
 	for _, endpoint := range endpoints {
+		log.Printf("Checking for updates to %s\n", endpoint)
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
 		url := fmt.Sprintf("%s%s",
