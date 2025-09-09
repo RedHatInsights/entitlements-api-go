@@ -104,38 +104,36 @@ var _ = Describe("Services Controller", func() {
 	})
 
 	Context("When the Feature API sends back a non-200", func() {
-		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
+		It("should respond 200, mark degraded, and fail closed for SKU-based bundles", func() {
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
 				return FeatureResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false}
 			})
 
-			var jsonResponse DependencyErrorResponse
-			json.Unmarshal([]byte(rawBody), &jsonResponse)
+			Expect(rr.Result().StatusCode).To(Equal(200))
+			Expect(rr.Result().Header.Get("X-Entitlements-Degraded")).To(Equal("true"))
+			Expect(rr.Result().Header.Get("X-Entitlements-Degraded-Status")).To(Equal("503"))
 
-			Expect(rr.Result().StatusCode).To(Equal(500))
-			Expect(jsonResponse.Error.DependencyFailure).To(Equal(true))
-			Expect(jsonResponse.Error.Service).To(Equal("Feature Service"))
-			Expect(jsonResponse.Error.Status).To(Equal(503))
-			Expect(jsonResponse.Error.Endpoint).To(Equal("https://feature.api.redhat.com"))
-			Expect(jsonResponse.Error.Message).To(Equal("Got back a non 200 status code from Feature Service"))
+			// SKU-based bundles should be false
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle6"].IsEntitled).To(Equal(false))
 		})
 	})
 
 	Context("When the Feature API sends back an error", func() {
-		It("should fail the response", func() {
-			rr, _, rawBody := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
+		It("should respond 200, mark degraded, and fail closed for SKU-based bundles", func() {
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
 				return FeatureResponse{StatusCode: 503, Data: FeatureStatus{}, CacheHit: false, Error: errors.New("Sub Failure")}
 			})
 
-			var jsonResponse DependencyErrorResponse
-			json.Unmarshal([]byte(rawBody), &jsonResponse)
+			Expect(rr.Result().StatusCode).To(Equal(200))
+			Expect(rr.Result().Header.Get("X-Entitlements-Degraded")).To(Equal("true"))
+			Expect(rr.Result().Header.Get("X-Entitlements-Degraded-Status")).ToNot(BeEmpty())
 
-			Expect(rr.Result().StatusCode).To(Equal(500))
-			Expect(jsonResponse.Error.DependencyFailure).To(Equal(true))
-			Expect(jsonResponse.Error.Service).To(Equal("Feature Service"))
-			Expect(jsonResponse.Error.Status).To(Equal(503))
-			Expect(jsonResponse.Error.Endpoint).To(Equal("https://feature.api.redhat.com"))
-			Expect(jsonResponse.Error.Message).To(Equal("Unexpected error while talking to Feature Service"))
+			// SKU-based bundles should be false
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle2"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle6"].IsEntitled).To(Equal(false))
 		})
 	})
 
@@ -551,6 +549,37 @@ var _ = Describe("Services Controller", func() {
 				Expect(response.Data.Features).ToNot(BeNil())
 				Expect(response.Data.Features).To(HaveLen(1))
 				Expect(response.Data.Features[0].Name).To(BeEquivalentTo("dummy feature 2!"))
+				Expect(subsServer.ReceivedRequests()).To(HaveLen(2))
+			})
+
+			It("caches fail-closed when non-200 is returned and serves cached fail-closed on subsequent call", func() {
+				// given: next downstream call will fail with 503
+				subsServer.AppendHandlers(ghttp.RespondWith(http.StatusServiceUnavailable, `down`, http.Header{"Content-Type": {"text/plain"}}))
+
+				params := GetFeatureStatusParams{
+					OrgId:          DEFAULT_ORG_ID,
+					ForceFreshData: true, // bypass positive cache to force downstream failure and cache fail-closed
+				}
+
+				// when: first call records fail-closed in cache
+				response1 := GetFeatureStatus(params)
+
+				// then: fail-closed
+				Expect(response1).ToNot(BeNil())
+				Expect(response1.CacheHit).To(BeFalse())
+				Expect(response1.Data.Features).To(BeEmpty())
+				Expect(response1.StatusCode).To(Equal(http.StatusServiceUnavailable))
+				Expect(subsServer.ReceivedRequests()).To(HaveLen(2))
+
+				// when: second call with same params should use cached fail-closed and avoid a downstream call
+				params2 := GetFeatureStatusParams{OrgId: DEFAULT_ORG_ID, ForceFreshData: false}
+				response2 := GetFeatureStatus(params2)
+
+				// then: cached fail-closed used
+				Expect(response2).ToNot(BeNil())
+				Expect(response2.CacheHit).To(BeTrue())
+				Expect(response2.Data.Features).To(BeEmpty())
+				Expect(response2.StatusCode).To(Equal(200))
 				Expect(subsServer.ReceivedRequests()).To(HaveLen(2))
 			})
 		})

@@ -130,22 +130,29 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse
 
 	if err != nil {
 		sentry.CaptureException(err)
+		// cache fail-closed state to avoid repeated downstream calls until TTL expires
+		cache.Set(orgID, types.FeatureStatus{}, cacheDuration)
 		return types.FeatureResponse{
+			StatusCode: 0,
 			Error: err,
-			Url:   req,
+			Data: types.FeatureStatus{},
+			CacheHit: false,
+			Url: req,
 		}
 	}
 
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
 		body, _ := io.ReadAll(resp.Body)
+		// cache fail-closed state to avoid repeated downstream calls until TTL expires
+		cache.Set(orgID, types.FeatureStatus{}, cacheDuration)
 		return types.FeatureResponse{
 			StatusCode: resp.StatusCode,
-			Body:       string(body),
-			Error:      nil,
-			Data:       types.FeatureStatus{},
-			CacheHit:   false,
-			Url:        req,
+			Body: string(body),
+			Error: nil,
+			Data: types.FeatureStatus{},
+			CacheHit: false,
+			Url: req,
 		}
 	}
 
@@ -186,6 +193,11 @@ func setBundlePayload(entitle bool, trial bool) types.EntitlementsSection {
 	return types.EntitlementsSection{IsEntitled: entitle, IsTrial: trial}
 }
 
+// Represents a fail-closed state (empty feature set cached after failure).
+func isCachedFailClosed(res types.FeatureResponse) bool {
+	return res.CacheHit && len(res.Data.Features) == 0
+}
+
 // Services the handler for GETs to /api/entitlements/v1/services/
 func Services() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -205,6 +217,7 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			},
 		)
 
+		degraded := false
 		if subscriptions.Error != nil {
 			errMsg := "Unexpected error while talking to Feature Service"
 			l.Log.WithFields(logrus.Fields{"error": subscriptions.Error}).Error(errMsg)
@@ -214,9 +227,9 @@ func Services() func(http.ResponseWriter, *http.Request) {
 				scope.SetExtra("url", subscriptions.Url)
 				sentry.CaptureException(fmt.Errorf("%s : %w", errMsg, subscriptions.Error))
 			})
-			
-			failOnDependencyError(errMsg, subscriptions, w)
-			return
+			// the request is degraded because we received an error from the feature service
+			degraded = true
+			subsFailure.WithLabelValues(strconv.Itoa(subscriptions.StatusCode)).Inc()
 		}
 		
 		accNum := idObj.AccountNumber
@@ -238,7 +251,7 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		}).Info("feature service call complete")
 		subsTimeHistogram.Observe(subsTimeTaken)
 
-		if subscriptions.StatusCode != 200 {
+		if subscriptions.Error == nil && subscriptions.StatusCode != 200 {
 			errMsg := "Got back a non 200 status code from Feature Service"
 			l.Log.WithFields(logrus.Fields{"code": subscriptions.StatusCode, "body": subscriptions.Body}).Error(errMsg)
 
@@ -249,8 +262,13 @@ func Services() func(http.ResponseWriter, *http.Request) {
 				sentry.CaptureException(errors.New(errMsg))
 			})
 
-			failOnDependencyError(errMsg, subscriptions, w)
-			return
+			// the request is degraded because we received a non-200 from the feature service
+			degraded = true
+			subsFailure.WithLabelValues(strconv.Itoa(subscriptions.StatusCode)).Inc()
+		}
+
+		if isCachedFailClosed(subscriptions) {
+			degraded = true
 		}
 
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
@@ -308,6 +326,14 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		if degraded {
+			w.Header().Set("X-Entitlements-Degraded", "true")
+			statusForHeader := subscriptions.StatusCode
+			if isCachedFailClosed(subscriptions) {
+				statusForHeader = 0
+			}
+			w.Header().Set("X-Entitlements-Degraded-Status", strconv.Itoa(statusForHeader))
+		}
 		w.Write([]byte(obj))
 	}
 }

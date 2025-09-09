@@ -113,6 +113,28 @@ docker run -p 3000:3000 entitlements-api-go
 The Entitlements API requires that you pass in a valid `x-redhat-identity` header or it rejects requests.
 For an example see `cat ./scripts/xrhid.sh`
 
+### Degraded state headers
+
+When the IT Feature Service is unavailable or returns a non-200 during `/api/entitlements/v1/services` calls, the API responds with HTTP 200 but defaults all SKU-based bundles to `is_entitled: false`. The response will include headers to signal a degraded state:
+
+- `X-Entitlements-Degraded`: `true` when a dependency failure occurred
+- `X-Entitlements-Degraded-Status`: HTTP status code from the dependency ("0" if none was received)
+
+Example:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-Entitlements-Degraded: true
+X-Entitlements-Degraded-Status: 503
+
+{
+  "rhel": { "is_entitled": false, "is_trial": false },
+  "openshift": { "is_entitled": false, "is_trial": false },
+  "cloud": { "is_entitled": true,  "is_trial": false }
+}
+```
+
 ## Testing the bundle-sync
 
 To test the bundle sync behavior, you'll need to configure your environment similar to the instructions above, build the script, and run it against the dev environment:
