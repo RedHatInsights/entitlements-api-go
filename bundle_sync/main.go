@@ -63,6 +63,8 @@ func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 	if err != nil {
 		return t.SubModel{}, err
 	}
+	
+	log.Printf("raw response from '%s': '%s'", url, string(data))
 
 	var currentSubs t.SubModel
 	err = json.Unmarshal(data, &currentSubs)
