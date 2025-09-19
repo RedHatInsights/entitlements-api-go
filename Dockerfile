@@ -16,7 +16,7 @@ COPY . .
 RUN make
 
 # Using ubi9-minimal due to its smaller footprint
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1755695350
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1758184547
 
 WORKDIR /
 
