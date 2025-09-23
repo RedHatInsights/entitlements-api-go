@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -18,6 +19,8 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
+
+var dryRun bool
 
 // assertEq compares two slices of strings and returns true if they are equal
 func assertEq(test []string, ans []string) bool {
@@ -92,6 +95,13 @@ func getUpdates(cfg *viper.Viper) ([]t.Bundle, error) {
 
 func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
 	url := fmt.Sprintf("%s%s", cfg.GetString(config.Keys.SubsHost), cfg.GetString(config.Keys.SubAPIBasePath))
+
+	if dryRun {
+		// print updates that would be made but don't actually run them
+		log.Printf("*** POST '%s' - '%s'", url, string(data))
+		return nil
+	}
+
 	resp, err := client.Post(url, "application/json", strings.NewReader(string(data)))
 	if err != nil {
 		return err
@@ -110,6 +120,9 @@ func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
 }
 
 func main() {
+	flag.BoolVar(&dryRun, "dry-run", false, "Include to do a dry run which won't post updates and print the updates that would happen")
+	flag.Parse()
+	
 	c := config.GetConfig()
 	client := getClient(c)
 	options := c.Options
@@ -145,8 +158,10 @@ func main() {
 			}
 		}
 
-		for _, v := range current.Rules.MatchProducts {
-			current_skus[endpoint] = append(current_skus[endpoint], v.SkuCodes...)
+		for _, rule := range current.Rules {
+			for _, mp := range rule.MatchProducts {
+				current_skus[endpoint] = append(current_skus[endpoint], mp.SkuCodes...)
+			}
 		}
 
 		sort.Strings(skus[endpoint])
@@ -157,11 +172,10 @@ func main() {
 		} else {
 			var m []t.MatchProducts
 			m = append(m, t.MatchProducts{SkuCodes: skus[endpoint]})
+			rules := t.Rules{MatchProducts: m,}
 			v := t.SubModel{
 				Name: endpoint,
-				Rules: t.Rules{
-					MatchProducts: m,
-				},
+				Rules: []t.Rules{rules},
 			}
 			b, err := json.Marshal(v)
 			if err != nil {

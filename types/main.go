@@ -66,7 +66,7 @@ type RequestErrorResponse struct {
 // SubModel is the struct for GET and POST data for subscriptions
 type SubModel struct {
 	Name  string `json:"name"`
-	Rules Rules  `json:"rules"`
+	Rules []Rules  `json:"rules"`
 }
 
 // Rules contains match and exclude product arrays
