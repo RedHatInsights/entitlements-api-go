@@ -145,6 +145,12 @@ make build
 ./bundle-sync
 ```
 
+You can dry run bundle sync by using the '--dry-run' flag:
+```bash
+./bundle-sync --dry-run
+```
+This will run the program but won't actually POST any updates, it will just print them.
+
 ## Running the Unit Tests
 
 * To run the unit tests, execute the following commands from the terminal:
@@ -187,7 +193,5 @@ those files.
 **IMPORTANT**: if using automatic cert renewal, `ENT_CERTS_FROM_ENV` must be
 set to `false`.
 
-#### Manually via env or files
-If `ENT_CERTS_FROM_ENV` is set to `false`: store cert & key data in files, and set `ENT_CERT` and `ENT_KEY` to the locations of those files for the application to load.
-
+#### Manually via env (useful for local dev)
 If `ENT_CERTS_FROM_ENV` is set to `true`: store cert & key data in the env vars `ENT_CERT` and `ENT_KEY` directly.
