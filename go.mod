@@ -17,7 +17,7 @@ require (
 	github.com/redhatinsights/app-common-go v1.6.8
 	github.com/redhatinsights/platform-go-middlewares v1.0.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/viper v1.20.1
+	github.com/spf13/viper v1.21.0
 	golang.org/x/text v0.29.0
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -28,7 +28,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/fsnotify/fsnotify v1.8.0 // indirect
+	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-openapi/jsonpointer v0.22.0 // indirect
@@ -69,6 +69,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/net v0.44.0 // indirect
 	golang.org/x/oauth2 v0.31.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
