@@ -15,7 +15,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
-	"github.com/karlseguin/ccache/v2"
+	"github.com/karlseguin/ccache/v3"
 	sdk "github.com/openshift-online/ocm-sdk-go"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/openshift-online/ocm-sdk-go/logging"
@@ -86,7 +86,7 @@ func (e *ClientError) Error() string {
 
 type Client struct {
 	client *sdk.Connection
-	cache  ccache.Cache
+	cache  *ccache.Cache[string]
 }
 
 var _ AMSInterface = &Client{}
@@ -122,7 +122,7 @@ func NewClient(debug bool) (AMSInterface, error) {
 
 	return &Client{
 		client: client,
-		cache:  *ccache.New(ccache.Configure()),
+		cache:  ccache.New(ccache.Configure[string]()),
 	}, err
 }
 
@@ -248,7 +248,7 @@ func (c *Client) QuotaAuthorization(accountUsername, quotaVersion string) (*v1.Q
 func (c *Client) ConvertUserOrgId(userOrgId string) (string, error) {
 	item := c.cache.Get(userOrgId)
 	if item != nil && !item.Expired() {
-		converted := item.Value().(string)
+		converted := item.Value()
 		l.Log.WithFields(logrus.Fields{"ams_org_id": converted, "org_id": userOrgId}).Debug("found converted ams org id in cache")
 		return converted, nil
 	}
