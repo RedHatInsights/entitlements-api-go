@@ -5,7 +5,7 @@ go 1.24.6
 require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
 	github.com/aws/aws-sdk-go v1.55.8
-	github.com/getkin/kin-openapi v0.132.0
+	github.com/getkin/kin-openapi v0.133.0
 	github.com/getsentry/sentry-go v0.35.3
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/karlseguin/ccache/v2 v2.0.8
@@ -66,6 +66,7 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/woodsbury/decimal128 v1.3.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
