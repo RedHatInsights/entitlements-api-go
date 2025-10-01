@@ -17,7 +17,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	t "github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var dryRun bool
