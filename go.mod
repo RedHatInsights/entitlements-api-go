@@ -76,5 +76,5 @@ require (
 	golang.org/x/oauth2 v0.31.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
-	google.golang.org/protobuf v1.36.9 // indirect
+	google.golang.org/protobuf v1.36.10 // indirect
 )
