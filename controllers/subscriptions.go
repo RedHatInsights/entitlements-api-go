@@ -19,7 +19,7 @@ import (
 	"github.com/redhatinsights/platform-go-middlewares/identity"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/karlseguin/ccache/v2"
+	"github.com/karlseguin/ccache/v3"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
@@ -28,7 +28,7 @@ import (
 
 var configOptions = config.GetConfig().Options
 var cache = ccache.New(
-	ccache.Configure().
+	ccache.Configure[types.FeatureStatus]().
 		MaxSize(configOptions.GetInt64(config.Keys.SubsCacheMaxSize)).
 		ItemsToPrune(configOptions.GetUint32(config.Keys.SubsCacheItemPrune)),
 )
@@ -106,7 +106,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse
 	if item != nil && !item.Expired() && !params.ForceFreshData {
 		return types.FeatureResponse{
 			StatusCode: 200,
-			Data:       item.Value().(types.FeatureStatus),
+			Data:       item.Value(),
 			CacheHit:   true,
 		}
 	}
@@ -123,7 +123,7 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse
 		setFeaturesQuery()
 	}
 	req := configOptions.GetString(config.Keys.SubsHost) +
-		configOptions.GetString(config.Keys.SubAPIBasePath) + 
+		configOptions.GetString(config.Keys.SubAPIBasePath) +
 		"featureStatus" + featuresQuery + "&accountId=" + orgID
 
 	resp, err := getClient().Get(req)
@@ -134,10 +134,10 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse
 		cache.Set(orgID, types.FeatureStatus{}, cacheDuration)
 		return types.FeatureResponse{
 			StatusCode: 0,
-			Error: err,
-			Data: types.FeatureStatus{},
-			CacheHit: false,
-			Url: req,
+			Error:      err,
+			Data:       types.FeatureStatus{},
+			CacheHit:   false,
+			Url:        req,
 		}
 	}
 
@@ -148,11 +148,11 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse
 		cache.Set(orgID, types.FeatureStatus{}, cacheDuration)
 		return types.FeatureResponse{
 			StatusCode: resp.StatusCode,
-			Body: string(body),
-			Error: nil,
-			Data: types.FeatureStatus{},
-			CacheHit: false,
-			Url: req,
+			Body:       string(body),
+			Error:      nil,
+			Data:       types.FeatureStatus{},
+			CacheHit:   false,
+			Url:        req,
 		}
 	}
 
@@ -231,7 +231,7 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			degraded = true
 			subsFailure.WithLabelValues(strconv.Itoa(subscriptions.StatusCode)).Inc()
 		}
-		
+
 		accNum := idObj.AccountNumber
 		isInternal := idObj.User.Internal
 		validEmailMatch, _ := regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)
@@ -244,10 +244,10 @@ func Services() func(http.ResponseWriter, *http.Request) {
 
 		subsTimeTaken := time.Since(start).Seconds()
 		l.Log.WithFields(logrus.Fields{
-			"subs_call_duration": subsTimeTaken, 
-			"cache_hit": subscriptions.CacheHit, 
-			"url": subscriptions.Url,
-			"org_id": orgId,
+			"subs_call_duration": subsTimeTaken,
+			"cache_hit":          subscriptions.CacheHit,
+			"url":                subscriptions.Url,
+			"org_id":             orgId,
 		}).Info("feature service call complete")
 		subsTimeHistogram.Observe(subsTimeTaken)
 
