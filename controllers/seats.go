@@ -16,7 +16,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
 	"github.com/RedHatInsights/entitlements-api-go/bop"
-	"github.com/redhatinsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/platform-go-middlewares/v2/identity"
 )
 
 type SeatManagerApi struct {
@@ -54,7 +54,7 @@ func doError(w http.ResponseWriter, httpStatusCode int, err error, source string
 }
 
 func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, id string) {
-	idObj := identity.Get(r.Context()).Identity
+	idObj := identity.GetIdentity(r.Context()).Identity
 
 	if !idObj.User.OrgAdmin {
 		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s. User must be org admin", id), "")
@@ -111,7 +111,7 @@ func fillDefaults(params *api.GetSeatsParams) {
 
 func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params api.GetSeatsParams) {
 
-	idObj := identity.Get(r.Context()).Identity
+	idObj := identity.GetIdentity(r.Context()).Identity
 
 	// AMS uses fixed pages rather than offsets So we are forcing the
 	// offset to be tied to the nearest previous page.
@@ -194,7 +194,7 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 }
 
 func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
-	idObj := identity.Get(r.Context()).Identity
+	idObj := identity.GetIdentity(r.Context()).Identity
 
 	if !idObj.User.OrgAdmin {
 		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats, must be an org admin."), "")

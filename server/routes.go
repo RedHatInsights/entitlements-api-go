@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 
 	chilogger "github.com/766b/chi-logger"
@@ -15,7 +16,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/redhatinsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/platform-go-middlewares/v2/identity"
 )
 
 // DoRoutes sets up the routes used by the server.
@@ -35,6 +36,14 @@ func DoRoutes() chi.Router {
 	r.Use(middleware.Recoverer)
 	r.Use(chilogger.NewLogrusMiddleware("router", log.Log))
 	r.Use(sentryMiddleware.Handle)
+
+	// Setup identity enforcement with logging
+	enforceIdentity := identity.EnforceIdentityWithLogger(func(ctx context.Context, id, msg string) {
+		log.Log.WithFields(map[string]interface{}{
+			"identity_header": id,
+			"error":           msg,
+		}).Error("Identity validation failed")
+	})
 
 	configOptions := config.GetConfig().Options
 
@@ -56,14 +65,14 @@ func DoRoutes() chi.Router {
 		}
 
 		seatManagerApi := controllers.NewSeatManagerApi(amsClient, bopClient)
-		api.HandlerFromMuxWithBaseURL(seatManagerApi, r.With(identity.EnforceIdentity), "/api/entitlements/v1")
+		api.HandlerFromMuxWithBaseURL(seatManagerApi, r.With(enforceIdentity), "/api/entitlements/v1")
 	}
 
 	r.Route("/api/entitlements/v1", func(r chi.Router) {
-		r.With(identity.EnforceIdentity).Route("/", controllers.LubDub)
+		r.With(enforceIdentity).Route("/", controllers.LubDub)
 		r.Route("/openapi.json", apispec.OpenAPISpec)
-		r.With(identity.EnforceIdentity).Get("/services", controllers.Services())
-		r.With(identity.EnforceIdentity).Get("/compliance", controllers.Compliance())
+		r.With(enforceIdentity).Get("/services", controllers.Services())
+		r.With(enforceIdentity).Get("/compliance", controllers.Compliance())
 	})
 
 	r.Route("/status", controllers.Status)

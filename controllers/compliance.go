@@ -17,7 +17,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/redhatinsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/platform-go-middlewares/v2/identity"
 	"github.com/sirupsen/logrus"
 )
 
@@ -40,7 +40,7 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		start := time.Now()
 
-		userIdentity := identity.Get(req.Context()).Identity
+		userIdentity := identity.GetIdentity(req.Context()).Identity
 		if len(strings.TrimSpace(userIdentity.User.Username)) == 0 {
 			err := errors.New("compliance: x-rh-identity header has a missing or whitespace username")
 			failOnBadRequest(w, "Invalid x-rh-identity header", err)
