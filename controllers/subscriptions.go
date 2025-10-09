@@ -16,7 +16,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
 	"github.com/RedHatInsights/entitlements-api-go/types"
-	"github.com/redhatinsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/platform-go-middlewares/v2/identity"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/karlseguin/ccache/v3"
@@ -202,7 +202,7 @@ func isCachedFailClosed(res types.FeatureResponse) bool {
 func Services() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		start := time.Now()
-		idObj := identity.Get(req.Context()).Identity
+		idObj := identity.GetIdentity(req.Context()).Identity
 		orgId := idObj.Internal.OrgID
 
 		queryParams := GetServicesParams{

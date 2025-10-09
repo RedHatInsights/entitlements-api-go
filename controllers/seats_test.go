@@ -14,7 +14,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
-	"github.com/redhatinsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/platform-go-middlewares/v2/identity"
 )
 
 const DEFAULT_ORG_ADMIN = true
@@ -49,7 +49,7 @@ func MakeRequest(method, path string, body io.Reader, options ...opt) *http.Requ
 	r.ID = identity.XRHID{
 		Identity: identity.Identity{
 			AccountNumber: DEFAULT_ACCOUNT_NUMBER,
-			User: identity.User{
+			User: &identity.User{
 				Internal: DEFAULT_IS_INTERNAL,
 				Email:    DEFAULT_EMAIL,
 				OrgAdmin: DEFAULT_ORG_ADMIN,
@@ -64,7 +64,7 @@ func MakeRequest(method, path string, body io.Reader, options ...opt) *http.Requ
 		o(&r)
 	}
 
-	r.Ctx = context.WithValue(context.Background(), identity.Key, r.ID)
+	r.Ctx = identity.WithIdentity(context.Background(), r.ID)
 
 	req, err := http.NewRequestWithContext(r.Ctx, r.Method, r.Path, body)
 	Expect(err).To(BeNil(), "NewRequest error was  not nil")
