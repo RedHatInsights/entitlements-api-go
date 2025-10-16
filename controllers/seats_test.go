@@ -72,6 +72,28 @@ func MakeRequest(method, path string, body io.Reader, options ...opt) *http.Requ
 
 }
 
+func MakeServiceAccountRequest(method, path string, body io.Reader) *http.Request {
+	xrhid := identity.XRHID{
+		Identity: identity.Identity{
+			AccountNumber: DEFAULT_ACCOUNT_NUMBER,
+			Type:          "ServiceAccount",
+			User:          nil,
+			ServiceAccount: &identity.ServiceAccount{
+				Username: "service-account-test",
+				ClientId: "test-client-id",
+			},
+			Internal: identity.Internal{
+				OrgID: DEFAULT_ORG_ID,
+			},
+		},
+	}
+
+	ctx := identity.WithIdentity(context.Background(), xrhid)
+	req, err := http.NewRequestWithContext(ctx, method, path, body)
+	Expect(err).To(BeNil(), "NewRequest error was not nil")
+	return req
+}
+
 var _ = Describe("using the seat managment api", func() {
 	var client ams.AMSInterface
 	var bopClient bop.Bop
@@ -112,6 +134,13 @@ var _ = Describe("using the seat managment api", func() {
 				req := MakeRequest("DELETE", "", nil)
 				seatApi.DeleteSeatsId(rr, req, "")
 				Expect(rr.Result().StatusCode).To(Equal(http.StatusInternalServerError))
+			})
+		})
+		Context("and the caller is a Service Account", func() {
+			It("should deny the request with 403", func() {
+				req := MakeServiceAccountRequest("DELETE", "", nil)
+				seatApi.DeleteSeatsId(rr, req, "1")
+				Expect(rr.Result().StatusCode).To(Equal(http.StatusForbidden))
 			})
 		})
 	})
@@ -267,6 +296,20 @@ var _ = Describe("using the seat managment api", func() {
 
 				req := MakeRequest("POST", "/api/entitlements/v1/seats", bytes.NewBuffer(b), OrgAdmin(false))
 				mismatchApi.PostSeats(rr, req)
+
+				Expect(rr.Result().StatusCode).To(Equal(403))
+			})
+		})
+
+		Context("the caller is a Service Account", func() {
+			It("should deny the request with 403", func() {
+				b, err := json.Marshal(api.SeatRequest{
+					AccountUsername: "test-user",
+				})
+				Expect(err).To(BeNil())
+
+				req := MakeServiceAccountRequest("POST", "/api/entitlements/v1/seats", bytes.NewBuffer(b))
+				seatApi.PostSeats(rr, req)
 
 				Expect(rr.Result().StatusCode).To(Equal(403))
 			})

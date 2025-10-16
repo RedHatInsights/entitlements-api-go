@@ -39,6 +39,26 @@ func getContextWithIdentity(username string) context.Context {
 	return ctx
 }
 
+func getContextWithServiceAccount() context.Context {
+	ctx := context.Background()
+	ctx = identity.WithIdentity(ctx, identity.XRHID{
+		Identity: identity.Identity{
+			AccountNumber: "540155",
+			Type:          "ServiceAccount",
+			User:          nil,
+			ServiceAccount: &identity.ServiceAccount{
+				Username: "service-account-test",
+				ClientId: "test-client-id",
+			},
+			Internal: identity.Internal{
+				OrgID: "11789772",
+			},
+		},
+	})
+
+	return ctx
+}
+
 var _ = Describe("Compliance Controller", func() {
 	Context("When username is empty", func() {
 		It("should return an error and status 400", func() {
@@ -259,6 +279,30 @@ var _ = Describe("Compliance Controller", func() {
 				IdentityType: "login",
 				Identity:     defaultEmail,
 			}))
+		})
+	})
+
+	Context("When identity is a Service Account", func() {
+		It("should reject Service Account with 400 and clear error message", func() {
+			// given
+			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
+			req = req.WithContext(getContextWithServiceAccount())
+			rr := httptest.NewRecorder()
+
+			// when
+			Compliance()(rr, req)
+
+			// then
+			Expect(rr.Result().StatusCode).To(Equal(http.StatusBadRequest))
+			resp := readResponse(rr.Result().Body)
+
+			var errorResp types.RequestErrorResponse
+			err := json.Unmarshal(resp, &errorResp)
+			Expect(err).To(BeNil(), "Error unmarshalling server response")
+
+			Expect(errorResp.Error).ToNot(BeNil())
+			Expect(errorResp.Error.Message).To(ContainSubstring("Service Accounts are not supported"))
+			Expect(errorResp.Error.Status).To(Equal(http.StatusBadRequest))
 		})
 	})
 })
