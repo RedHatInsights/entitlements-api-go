@@ -233,8 +233,14 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		}
 
 		accNum := idObj.AccountNumber
-		isInternal := idObj.User.Internal
-		validEmailMatch, _ := regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)
+
+		// For Service Accounts, User field is nil
+		isInternal := false
+		validEmailMatch := false
+		if idObj.User != nil {
+			isInternal = idObj.User.Internal
+			validEmailMatch, _ = regexp.MatchString(`^.*@redhat.com$`, idObj.User.Email)
+		}
 
 		validAccNum := !(accNum == "" || accNum == "-1")
 		validOrgId := !(orgId == "" || orgId == "-1")
