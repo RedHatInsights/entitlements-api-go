@@ -65,6 +65,44 @@ func testRequestWithDefaultOrgId(method string, path string, fakeCaller func(Get
 	return testRequest(method, path, DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeCaller)
 }
 
+func testRequestWithServiceAccount(method string, path string, accnum string, orgid string, fakeCaller func(GetFeatureStatusParams) FeatureResponse) (*httptest.ResponseRecorder, map[string]EntitlementsSection, string) {
+	req, err := http.NewRequest(method, path, nil)
+	Expect(err).To(BeNil(), "NewRequest error was not nil")
+
+	ctx := context.Background()
+	ctx = identity.WithIdentity(ctx, identity.XRHID{
+		Identity: identity.Identity{
+			AccountNumber: accnum,
+			Type:          "ServiceAccount",
+			User:          nil,
+			ServiceAccount: &identity.ServiceAccount{
+				Username: "service-account-test",
+				ClientId: "test-client-id",
+			},
+			Internal: identity.Internal{
+				OrgID: orgid,
+			},
+		},
+	})
+
+	req = req.WithContext(ctx)
+	rr := httptest.NewRecorder()
+
+	GetFeatureStatus = fakeCaller
+
+	Services()(rr, req)
+
+	out, err := io.ReadAll(rr.Result().Body)
+	Expect(err).To(BeNil(), "io.ReadAll error was not nil")
+
+	rr.Result().Body.Close()
+
+	var ret map[string]EntitlementsSection
+	json.Unmarshal(out, &ret)
+
+	return rr, ret, string(out)
+}
+
 func fakeGetFeatureStatus(expectedOrgID string, response FeatureResponse) func(GetFeatureStatusParams) FeatureResponse {
 	return func(params GetFeatureStatusParams) FeatureResponse {
 		Expect(expectedOrgID).To(Equal(params.OrgId))
@@ -582,6 +620,52 @@ var _ = Describe("Services Controller", func() {
 				Expect(response2.StatusCode).To(Equal(200))
 				Expect(subsServer.ReceivedRequests()).To(HaveLen(2))
 			})
+		})
+	})
+
+	Context("When identity is a Service Account", func() {
+		It("should handle Service Account requests without nil pointer errors", func() {
+			// given
+			fakeResponse := FeatureResponse{
+				StatusCode: 200,
+				Data:       FeatureStatus{},
+				CacheHit:   false,
+			}
+
+			// when
+			rr, body, _ := testRequestWithServiceAccount("GET", "/", DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+
+			// then
+			Expect(rr.Result().StatusCode).To(Equal(200))
+			Expect(rr.Result().Header.Get("Content-Type")).To(Equal("application/json"))
+			Expect(body).ToNot(BeNil())
+		})
+
+		It("should treat Service Accounts as non-internal users", func() {
+			// given
+			cfg := config.GetConfig()
+			cfg.Options.Set(config.Keys.Features, "TestBundle1,TestBundle2")
+
+			fakeResponse := FeatureResponse{
+				StatusCode: 200,
+				Data: FeatureStatus{
+					Features: []Feature{
+						{Name: "TestBundle1", IsEntitled: true, IsEval: false},
+					},
+				},
+				CacheHit: false,
+			}
+
+			// when
+			rr, body, _ := testRequestWithServiceAccount("GET", "/", DEFAULT_ACCOUNT_NUMBER, DEFAULT_ORG_ID, fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+
+			// then
+			Expect(rr.Result().StatusCode).To(Equal(200))
+			for _, bundle := range bundleInfo {
+				if bundle.UseIsInternal {
+					Expect(body[bundle.Name].IsEntitled).To(Equal(false), "Service Account should not have internal-only bundles")
+				}
+			}
 		})
 	})
 })

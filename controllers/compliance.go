@@ -41,6 +41,14 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		start := time.Now()
 
 		userIdentity := identity.GetIdentity(req.Context()).Identity
+
+		// Service Accounts don't have User field and cannot be screened for compliance
+		if userIdentity.User == nil {
+			err := errors.New("compliance: Service Accounts are not supported for compliance screening")
+			failOnBadRequest(w, "Invalid identity type", err)
+			return
+		}
+
 		if len(strings.TrimSpace(userIdentity.User.Username)) == 0 {
 			err := errors.New("compliance: x-rh-identity header has a missing or whitespace username")
 			failOnBadRequest(w, "Invalid x-rh-identity header", err)

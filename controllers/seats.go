@@ -56,7 +56,8 @@ func doError(w http.ResponseWriter, httpStatusCode int, err error, source string
 func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, id string) {
 	idObj := identity.GetIdentity(r.Context()).Identity
 
-	if !idObj.User.OrgAdmin {
+	// Service Accounts don't have User field and cannot be org admins
+	if idObj.User == nil || !idObj.User.OrgAdmin {
 		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s. User must be org admin", id), "")
 		return
 	}
@@ -196,7 +197,8 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 	idObj := identity.GetIdentity(r.Context()).Identity
 
-	if !idObj.User.OrgAdmin {
+	// Service Accounts don't have User field and cannot be org admins
+	if idObj.User == nil || !idObj.User.OrgAdmin {
 		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats, must be an org admin."), "")
 		return
 	}
