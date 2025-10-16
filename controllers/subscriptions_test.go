@@ -15,7 +15,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
-	"github.com/redhatinsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/platform-go-middlewares/v2/identity"
 )
 
 const DEFAULT_ORG_ID string = "4384938490324"
@@ -30,10 +30,10 @@ func testRequest(method string, path string, accnum string, orgid string, isinte
 	Expect(err).To(BeNil(), "NewRequest error was not nil")
 
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, identity.Key, identity.XRHID{
+	ctx = identity.WithIdentity(ctx, identity.XRHID{
 		Identity: identity.Identity{
 			AccountNumber: accnum,
-			User: identity.User{
+			User: &identity.User{
 				Internal: isinternal,
 				Email:    email,
 			},
@@ -280,13 +280,13 @@ var _ = Describe("Services Controller", func() {
 				Data: FeatureStatus{
 					Features: []Feature{
 						{
-							Name:     "TestBundle1",
-							IsEval:   false,
+							Name:       "TestBundle1",
+							IsEval:     false,
 							IsEntitled: false,
 						},
 						{
-							Name:     "TestBundle2",
-							IsEval:   true,
+							Name:       "TestBundle2",
+							IsEval:     true,
 							IsEntitled: true,
 						},
 					},

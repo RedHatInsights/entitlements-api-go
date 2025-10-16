@@ -12,7 +12,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/types"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/redhatinsights/platform-go-middlewares/identity"
+	"github.com/redhatinsights/platform-go-middlewares/v2/identity"
 )
 
 var defaultEmail = "test@redhat.com"
@@ -27,10 +27,10 @@ func readResponse(respBody io.ReadCloser) []byte {
 
 func getContextWithIdentity(username string) context.Context {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, identity.Key, identity.XRHID{
+	ctx = identity.WithIdentity(ctx, identity.XRHID{
 		Identity: identity.Identity{
 			AccountNumber: "540155",
-			User: identity.User{
+			User: &identity.User{
 				Username: username,
 			},
 		},

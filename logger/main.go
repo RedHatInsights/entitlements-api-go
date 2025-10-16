@@ -9,7 +9,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	lc "github.com/redhatinsights/platform-go-middlewares/logging/cloudwatch"
+	lc "github.com/redhatinsights/platform-go-middlewares/v2/logging/cloudwatch"
 	"github.com/sirupsen/logrus"
 )
 
@@ -60,13 +60,14 @@ func InitLogger() *logrus.Logger {
 		if cwKey != "" && !test {
 			cred := credentials.NewStaticCredentials(cwKey, cwSecret, "")
 			awsconf := aws.NewConfig().WithRegion(cwRegion).WithCredentials(cred)
-			hook, err := lc.NewBatchingHook(cwLogGroup, cwLogStream, awsconf, 10*time.Second)
+			writer, err := lc.NewBatchWriterWithDuration(cwLogGroup, cwLogStream, awsconf, 10*time.Second)
 
 			if err != nil {
 				Log.Info(err)
 				return nil
 			}
 
+			hook := lc.NewLogrusHook(writer)
 			Log.Hooks.Add(hook)
 		}
 	}
