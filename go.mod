@@ -10,7 +10,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/karlseguin/ccache/v3 v3.0.6
 	github.com/oapi-codegen/runtime v1.1.2
-	github.com/onsi/ginkgo/v2 v2.27.1
+	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2
 	github.com/openshift-online/ocm-sdk-go v0.1.480
 	github.com/prometheus/client_golang v1.23.2
@@ -67,7 +67,6 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/woodsbury/decimal128 v1.4.0 // indirect
-	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
