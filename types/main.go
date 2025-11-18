@@ -29,11 +29,20 @@ type FeatureStatus struct {
 
 // Bundle is a struct that is used to unmarshal the bundle info from bundles.yml
 type Bundle struct {
-	Name           string   `yaml:"name"`
-	UseValidAccNum bool     `yaml:"use_valid_acc_num"`
-	UseValidOrgId  bool     `yaml:"use_valid_org_id"`
-	UseIsInternal  bool     `yaml:"use_is_internal"`
-	Skus           []string `yaml:"skus"`
+	Name           	string   `yaml:"name"`
+	UseValidAccNum 	bool     `yaml:"use_valid_acc_num"`
+	UseValidOrgId  	bool     `yaml:"use_valid_org_id"`
+	UseIsInternal  	bool     `yaml:"use_is_internal"`
+	Skus           	[]string `yaml:"skus"`
+	PaidSkus		[]string `yaml:"paid_skus"`
+}
+
+func (b *Bundle) IsPaid() bool {
+	return b.PaidSkus != nil && len(b.PaidSkus) > 0
+}
+
+func (b *Bundle) IsSkuBased() bool {
+	return b.Skus != nil && len(b.Skus) > 0
 }
 
 // DependencyErrorDetails is a struct that is used to marshal failure details

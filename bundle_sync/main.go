@@ -77,19 +77,69 @@ func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 	return currentSubs, nil
 }
 
-func getUpdates(cfg *viper.Viper) ([]t.Bundle, error) {
+// filter out duplicate skus in a slice by converting to a set, then back to a slice
+func uniqueSkus(skus []string) ([]string){
+	uniqueSkusSet := make(map[string]struct{})
+	for _, sku := range skus {
+		uniqueSkusSet[sku] = struct{}{}
+	}
+	
+	fmt.Println(uniqueSkusSet)
+
+	uniqueSkus := make([]string, len(uniqueSkusSet))
+
+	i := 0
+	for sku,_ := range uniqueSkusSet {
+		uniqueSkus[i] = sku
+		i++
+	}
+
+	return uniqueSkus
+}
+
+func getBundlesConfig(cfg *viper.Viper) (map[string]t.Bundle, error) {
+	bundlesMap := make(map[string]t.Bundle)
 	bundlesYaml, err := os.ReadFile(cfg.GetString(config.Keys.BundleInfoYaml))
 	if err != nil {
-		return []t.Bundle{}, err
+		return bundlesMap, err
 	}
 
-	var m []t.Bundle
-	err = yaml.Unmarshal(bundlesYaml, &m)
+	var bundles []t.Bundle
+	err = yaml.Unmarshal(bundlesYaml, &bundles)
 	if err != nil {
-		return []t.Bundle{}, err
+		return bundlesMap, err
 	}
 
-	return m, nil
+	paidFeatureSuffix := cfg.GetString(config.Keys.PaidFeatureSuffix)
+
+	for _, bundle := range bundles {
+		if bundle.IsPaid() {
+			// expand this into 2 features: "feature" and "feature_paid"
+			fullBundle := t.Bundle{
+				Name: bundle.Name,
+				Skus: uniqueSkus(append(bundle.Skus, bundle.PaidSkus...)),
+				UseValidAccNum: bundle.UseValidAccNum,
+				UseValidOrgId: bundle.UseValidOrgId,
+				UseIsInternal: bundle.UseIsInternal,
+			}
+
+			paidBundle := t.Bundle{
+				Name: bundle.Name + paidFeatureSuffix,
+				Skus: uniqueSkus(bundle.PaidSkus),
+				UseValidAccNum: bundle.UseValidAccNum,
+				UseValidOrgId: bundle.UseValidOrgId,
+				UseIsInternal: bundle.UseIsInternal,
+			}
+
+			bundlesMap[fullBundle.Name] = fullBundle
+			bundlesMap[paidBundle.Name] = paidBundle
+		} else {
+			bundlesMap[bundle.Name] = bundle
+		}
+
+	}
+
+	return bundlesMap, nil
 
 }
 
@@ -132,30 +182,47 @@ func main() {
 		fmt.Println("Bundle sync disabled")
 		return
 	}
+	
+	url := fmt.Sprintf("%s%s",
+		options.GetString(config.Keys.SubsHost),
+		options.GetString(config.Keys.SubAPIBasePath))
+
+	bundlesConfig, err := getBundlesConfig(options)
+	if err != nil {
+		log.Fatalf("Unable to get updated YAML: %s", err)
+		os.Exit(1)
+	}
 
 	endpoints := strings.Split(c.Options.GetString(config.Keys.Features), ",")
+	var paidEndpoints []string
+
+	// expand any endpoint into "feature" and "feature_paid" if it has paid skus configured
+	paidFeatureSuffix := options.GetString(config.Keys.PaidFeatureSuffix)
+	for _, endpoint := range endpoints {
+		paidFeatureName := endpoint + paidFeatureSuffix
+		_, exists := bundlesConfig[paidFeatureName]
+
+		if exists {
+			paidEndpoints = append(paidEndpoints, paidFeatureName)
+		}
+	}
+	endpoints = append(endpoints, paidEndpoints...)
+
 	for _, endpoint := range endpoints {
 		log.Printf("Checking for updates to %s\n", endpoint)
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
-		url := fmt.Sprintf("%s%s",
-			options.GetString(config.Keys.SubsHost),
-			options.GetString(config.Keys.SubAPIBasePath))
 		current, err := getCurrent(client, url+endpoint)
 		if err != nil {
 			log.Fatalf("Unable to get current features: %s", err)
 			os.Exit(1)
 		}
 
-		sku_updates, err := getUpdates(options)
-		if err != nil {
-			log.Fatalf("Unable to get updated YAML: %s", err)
-			os.Exit(1)
-		}
-		for _, v := range sku_updates {
-			if v.Name == endpoint {
-				skus[endpoint] = append(skus[endpoint], v.Skus...)
-			}
+		bundle, exists := bundlesConfig[endpoint]
+		if exists {
+			// this shouln't ever be false, ie we should never have a feature listed that doesn't exist in the bundle config
+			// but in case we do, maybe due to a typo or misinput, this check will prevent an error from stopping the program
+			skus[endpoint] = append(skus[endpoint], bundle.Skus...)
 		}
 
 		for _, rule := range current.Rules {

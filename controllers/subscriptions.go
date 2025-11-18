@@ -36,6 +36,7 @@ var cacheDuration = time.Second * time.Duration(configOptions.GetInt64(config.Ke
 
 var bundleInfo []types.Bundle
 var featuresQuery string
+var paidFeatureSuffix string
 var subsFailure = promauto.NewCounterVec(
 	prometheus.CounterOpts{
 		Name: "it_feature_service_failure",
@@ -86,18 +87,23 @@ func SetBundleInfo(yamlFilePath string) error {
 
 func setFeaturesQuery() {
 	features := strings.Split(configOptions.GetString(config.Keys.Features), ",")
+	paidFeatureSuffix = configOptions.GetString(config.Keys.PaidFeatureSuffix)
 
 	var skuBasedFeatures []string
 	for _, bundle := range bundleInfo {
-		if slices.Contains(features, bundle.Name) && bundle.Skus != nil && len(bundle.Skus) > 0 {
+		if slices.Contains(features, bundle.Name) && bundle.IsSkuBased() {
 			skuBasedFeatures = append(skuBasedFeatures, bundle.Name)
+
+			if bundle.IsPaid() {
+				skuBasedFeatures = append(skuBasedFeatures, bundle.Name + paidFeatureSuffix)
+			}
 		}
 	}
 
 	featuresQuery = "?features=" + strings.Join(skuBasedFeatures, "&features=")
 }
 
-// GetFeatureStatus calls the IT subs service features endpoint and returns the entitlements for specified features/bundles
+// GetFeatureStatus calls the IT feature service features endpoint and returns the entitlements for specified features/bundles
 var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse {
 	orgID := params.OrgId
 	item := cache.Get(orgID)
@@ -217,6 +223,11 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			},
 		)
 
+		subscriptionsMap := make(map[string]types.Feature)
+		for _, feature := range subscriptions.Data.Features {
+			subscriptionsMap[feature.Name] = feature
+		}
+
 		degraded := false
 		if subscriptions.Error != nil {
 			errMsg := "Unexpected error while talking to Feature Service"
@@ -298,13 +309,14 @@ func Services() func(http.ResponseWriter, *http.Request) {
 				continue
 			}
 
+			feature := subscriptionsMap[b.Name]
+
 			if len(b.Skus) > 0 {
-				isEntitled = false
-				for _, f := range subscriptions.Data.Features {
-					if f.Name == b.Name {
-						isEntitled = f.IsEntitled
-						isTrial = f.IsEval
-					}
+				isEntitled = feature.IsEntitled
+
+				if isEntitled && b.IsPaid() {
+					paidFeature, exists := subscriptionsMap[b.Name + paidFeatureSuffix]
+					isTrial = exists && !paidFeature.IsEntitled
 				}
 			}
 
