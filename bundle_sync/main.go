@@ -83,8 +83,6 @@ func uniqueSkus(skus []string) ([]string){
 	for _, sku := range skus {
 		uniqueSkusSet[sku] = struct{}{}
 	}
-	
-	fmt.Println(uniqueSkusSet)
 
 	uniqueSkus := make([]string, len(uniqueSkusSet))
 
