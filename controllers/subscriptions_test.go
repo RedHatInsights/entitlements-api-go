@@ -319,12 +319,10 @@ var _ = Describe("Services Controller", func() {
 					Features: []Feature{
 						{
 							Name:       "TestBundle1",
-							IsEval:     false,
 							IsEntitled: false,
 						},
 						{
 							Name:       "TestBundle2",
-							IsEval:     true,
 							IsEntitled: true,
 						},
 					},
@@ -334,9 +332,6 @@ var _ = Describe("Services Controller", func() {
 
 			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
-			Expect(body["TestBundle1"].IsTrial).To(Equal(false))
-			Expect(body["TestBundle2"].IsTrial).To(Equal(true))
-			Expect(body["TestBundle6"].IsTrial).To(Equal(false))
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(true))
 			Expect(body["TestBundle6"].IsEntitled).To(Equal(false))
