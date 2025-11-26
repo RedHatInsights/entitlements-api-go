@@ -141,6 +141,32 @@ var _ = Describe("Services Controller", func() {
 		Expect(featuresQuery).To(BeEquivalentTo("?features=TestBundle1&features=TestBundle6"))
 	})
 
+	Context("When bundles have paid and eval SKUs", func() {
+		BeforeEach(func() {
+			bundleInfo = []Bundle{
+				{
+					Name:     "SplitBundle",
+					PaidSkus: []string{"PAID1"},
+					EvalSkus: []string{"EVAL1"},
+				},
+				{
+					Name: "RegularBundle",
+					Skus: []string{"SKU1"},
+				},
+			}
+		})
+
+		It("should include _paid suffix for paid bundles in features query", func() {
+			cfg := config.GetConfig()
+			cfg.Options.Set(config.Keys.Features, "SplitBundle,RegularBundle")
+			setFeaturesQuery()
+
+			Expect(featuresQuery).To(ContainSubstring("SplitBundle"))
+			Expect(featuresQuery).To(ContainSubstring("SplitBundle_paid"))
+			Expect(featuresQuery).To(ContainSubstring("RegularBundle"))
+		})
+	})
+
 	Context("When the Feature API sends back a non-200", func() {
 		It("should respond 200, mark degraded, and fail closed for SKU-based bundles", func() {
 			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", func(GetFeatureStatusParams) FeatureResponse {
@@ -335,6 +361,110 @@ var _ = Describe("Services Controller", func() {
 			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(true))
 			Expect(body["TestBundle6"].IsEntitled).To(Equal(false))
+		})
+	})
+
+	Context("When determining trial status for paid bundles", func() {
+		BeforeEach(func() {
+			bundleInfo = []Bundle{
+				{
+					Name:     "SplitBundle",
+					PaidSkus: []string{"PAID1"},
+					EvalSkus: []string{"EVAL1"},
+				},
+				{
+					Name: "RegularBundle",
+					Skus: []string{"SKU1"},
+				},
+			}
+		})
+
+		It("should set isTrial to false when user has paid SKU", func() {
+			fakeResponse := FeatureResponse{
+				StatusCode: 200,
+				Data: FeatureStatus{
+					Features: []Feature{
+						{
+							Name:       "SplitBundle",
+							IsEntitled: true,
+						},
+						{
+							Name:       "SplitBundle_paid",
+							IsEntitled: true,
+						},
+					},
+				},
+				CacheHit: false,
+			}
+
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["SplitBundle"].IsEntitled).To(Equal(true))
+			Expect(body["SplitBundle"].IsTrial).To(Equal(false))
+		})
+
+		It("should set isTrial to true when user has eval SKU only", func() {
+			fakeResponse := FeatureResponse{
+				StatusCode: 200,
+				Data: FeatureStatus{
+					Features: []Feature{
+						{
+							Name:       "SplitBundle",
+							IsEntitled: true,
+						},
+						{
+							Name:       "SplitBundle_paid",
+							IsEntitled: false,
+						},
+					},
+				},
+				CacheHit: false,
+			}
+
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["SplitBundle"].IsEntitled).To(Equal(true))
+			Expect(body["SplitBundle"].IsTrial).To(Equal(true))
+		})
+
+		It("should set isTrial to false when user is not entitled to paid or eval bundle", func() {
+			fakeResponse := FeatureResponse{
+				StatusCode: 200,
+				Data: FeatureStatus{
+					Features: []Feature{
+						{
+							Name:       "SplitBundle",
+							IsEntitled: false,
+						},
+					},
+				},
+				CacheHit: false,
+			}
+
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["SplitBundle"].IsEntitled).To(Equal(false))
+			Expect(body["SplitBundle"].IsTrial).To(Equal(false))
+		})
+
+		It("should set isTrial to false for regular bundles", func() {
+			fakeResponse := FeatureResponse{
+				StatusCode: 200,
+				Data: FeatureStatus{
+					Features: []Feature{
+						{
+							Name:       "RegularBundle",
+							IsEntitled: true,
+						},
+					},
+				},
+				CacheHit: false,
+			}
+
+			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
+			expectPass(rr.Result())
+			Expect(body["RegularBundle"].IsEntitled).To(Equal(true))
+			Expect(body["RegularBundle"].IsTrial).To(Equal(false))
 		})
 	})
 
