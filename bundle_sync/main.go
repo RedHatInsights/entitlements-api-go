@@ -115,7 +115,7 @@ func getBundlesConfig(cfg *viper.Viper) (map[string]t.Bundle, error) {
 			// expand this into 2 features: "feature" and "feature_paid"
 			fullBundle := t.Bundle{
 				Name: bundle.Name,
-				Skus: uniqueSkus(append(bundle.Skus, bundle.PaidSkus...)),
+				Skus: uniqueSkus(append(bundle.EvalSkus, bundle.PaidSkus...)),
 				UseValidAccNum: bundle.UseValidAccNum,
 				UseValidOrgId: bundle.UseValidOrgId,
 				UseIsInternal: bundle.UseIsInternal,

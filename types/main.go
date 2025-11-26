@@ -34,15 +34,16 @@ type Bundle struct {
 	UseValidOrgId  	bool     `yaml:"use_valid_org_id"`
 	UseIsInternal  	bool     `yaml:"use_is_internal"`
 	Skus           	[]string `yaml:"skus"`
+	EvalSkus		[]string `yaml:"eval_skus"`
 	PaidSkus		[]string `yaml:"paid_skus"`
 }
 
 func (b *Bundle) IsPaid() bool {
-	return b.PaidSkus != nil && len(b.PaidSkus) > 0
+	return (b.PaidSkus != nil && len(b.PaidSkus) > 0) || (b.EvalSkus != nil && len(b.EvalSkus) > 0)
 }
 
 func (b *Bundle) IsSkuBased() bool {
-	return b.Skus != nil && len(b.Skus) > 0
+	return (b.Skus != nil && len(b.Skus) > 0) || b.IsPaid()
 }
 
 // DependencyErrorDetails is a struct that is used to marshal failure details
