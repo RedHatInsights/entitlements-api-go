@@ -309,15 +309,15 @@ func Services() func(http.ResponseWriter, *http.Request) {
 				continue
 			}
 
-			// we only query feature service for sku based features, 
-			// so if a feature does not exist in this map then the feature is not sku based
-			feature, exists := subscriptionsMap[b.Name]
-			if exists {
-				isEntitled = feature.IsEntitled
+			if b.IsSkuBased() {
+				isEntitled = false
+				
+				feature, featExists := subscriptionsMap[b.Name]
+				isEntitled = featExists && feature.IsEntitled
 
 				if isEntitled && b.IsPaid() {
-					paidFeature, exists := subscriptionsMap[b.Name + paidFeatureSuffix]
-					isTrial = exists && !paidFeature.IsEntitled
+					paidFeature, paidFeatExists := subscriptionsMap[b.Name + paidFeatureSuffix]
+					isTrial = paidFeatExists && !paidFeature.IsEntitled
 				}
 			}
 
