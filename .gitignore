@@ -6,4 +6,3 @@ local
 entitlements-api-go
 *.gen.go
 coverage.out
-mocks/mocks
