@@ -95,7 +95,7 @@ func setFeaturesQuery() {
 			skuBasedFeatures = append(skuBasedFeatures, bundle.Name)
 
 			if bundle.IsPaid() {
-				skuBasedFeatures = append(skuBasedFeatures, bundle.Name + paidFeatureSuffix)
+				skuBasedFeatures = append(skuBasedFeatures, bundle.Name+paidFeatureSuffix)
 			}
 		}
 	}
@@ -311,12 +311,12 @@ func Services() func(http.ResponseWriter, *http.Request) {
 
 			if b.IsSkuBased() {
 				isEntitled = false
-				
+
 				feature, featExists := subscriptionsMap[b.Name]
 				isEntitled = featExists && feature.IsEntitled
 
 				if isEntitled && b.IsPaid() {
-					paidFeature, paidFeatExists := subscriptionsMap[b.Name + paidFeatureSuffix]
+					paidFeature, paidFeatExists := subscriptionsMap[b.Name+paidFeatureSuffix]
 					isTrial = paidFeatExists && !paidFeature.IsEntitled
 				} else {
 					// this is needed for backwards compatibility while entitlements-config is being updated

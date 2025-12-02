@@ -18,8 +18,8 @@ type FeatureResponse struct {
 }
 
 type Feature struct {
-	Name     string `json:"name"`
-	IsEval   bool   `json:"isEval"`
+	Name       string `json:"name"`
+	IsEval     bool   `json:"isEval"`
 	IsEntitled bool   `json:"isEntitled"`
 }
 
@@ -29,13 +29,13 @@ type FeatureStatus struct {
 
 // Bundle is a struct that is used to unmarshal the bundle info from bundles.yml
 type Bundle struct {
-	Name           	string   `yaml:"name"`
-	UseValidAccNum 	bool     `yaml:"use_valid_acc_num"`
-	UseValidOrgId  	bool     `yaml:"use_valid_org_id"`
-	UseIsInternal  	bool     `yaml:"use_is_internal"`
-	Skus           	[]string `yaml:"skus"`
-	EvalSkus		[]string `yaml:"eval_skus"`
-	PaidSkus		[]string `yaml:"paid_skus"`
+	Name           string   `yaml:"name"`
+	UseValidAccNum bool     `yaml:"use_valid_acc_num"`
+	UseValidOrgId  bool     `yaml:"use_valid_org_id"`
+	UseIsInternal  bool     `yaml:"use_is_internal"`
+	Skus           []string `yaml:"skus"`
+	EvalSkus       []string `yaml:"eval_skus"`
+	PaidSkus       []string `yaml:"paid_skus"`
 }
 
 func (b *Bundle) IsPaid() bool {
@@ -75,8 +75,8 @@ type RequestErrorResponse struct {
 
 // SubModel is the struct for GET and POST data for subscriptions
 type SubModel struct {
-	Name  string `json:"name"`
-	Rules []Rules  `json:"rules"`
+	Name  string  `json:"name"`
+	Rules []Rules `json:"rules"`
 }
 
 // Rules contains match and exclude product arrays

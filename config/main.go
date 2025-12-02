@@ -63,7 +63,7 @@ type EntitlementsConfigKeysType struct {
 	SubsCacheItemPrune       string
 	AMSAcctMgmt11Msg         string
 	ITServicesTimeoutSeconds string
-	PaidFeatureSuffix		 string
+	PaidFeatureSuffix        string
 }
 
 // Keys is a struct that houses all the env variables key names
@@ -104,7 +104,7 @@ var Keys = EntitlementsConfigKeysType{
 	SubsCacheItemPrune:       "SUBS_CACHE_ITEM_PRUNE",
 	AMSAcctMgmt11Msg:         "AMS_ACCT_MGMT_11_ERR_MSG",
 	ITServicesTimeoutSeconds: "IT_SERVICES_TIMEOUT_SECONDS",
-	PaidFeatureSuffix: 		  "PAID_FEATURE_SUFFIX",
+	PaidFeatureSuffix:        "PAID_FEATURE_SUFFIX",
 }
 
 func initialize() {
@@ -154,7 +154,7 @@ func initialize() {
 	options.SetDefault(Keys.ITServicesTimeoutSeconds, 10)
 	options.SetDefault(Keys.DisableSeatManager, true) // this feature is obsolete, see https://issues.redhat.com/browse/RHCLOUD-30697
 
-	options.Set(Keys.PaidFeatureSuffix, "_paid") // we don't want this to be configurable by env 
+	options.Set(Keys.PaidFeatureSuffix, "_paid") // we don't want this to be configurable by env
 
 	options.SetEnvPrefix("ENT")
 	options.AutomaticEnv()
