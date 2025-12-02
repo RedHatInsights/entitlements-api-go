@@ -2,7 +2,21 @@
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
 
-FROM registry.access.redhat.com/ubi9/go-toolset:9.7-1763038106 as builder
+FROM registry.access.redhat.com/ubi9/go-toolset:9.7-1763633888 as builder
+
+LABEL name="entitlements-api-go" \
+      summary="Red Hat Entitlements API Service" \
+      description="Go-based API service that manages user entitlements for Red Hat products, acting as a proxy to backend services including subscriptions and compliance" \
+      io.k8s.description="Go-based API service that manages user entitlements for Red Hat products, acting as a proxy to backend services including subscriptions and compliance" \
+      io.k8s.display-name="Red Hat Entitlements API" \
+      io.openshift.tags="insights,entitlements,api,subscriptions,compliance" \
+      com.redhat.component="entitlements-api-go" \
+      version="1.0" \
+      release="1" \
+      vendor="Red Hat, Inc." \
+      url="https://github.com/RedHatInsights/entitlements-go-api" \
+      distribution-scope="private" \
+      maintainer="platform-accessmanagement@redhat.com"
 
 WORKDIR /go/src/app
 
@@ -16,7 +30,7 @@ COPY . .
 RUN make
 
 # Using ubi9-minimal due to its smaller footprint
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1763362218
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1764578379
 
 WORKDIR /
 
