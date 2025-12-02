@@ -84,12 +84,10 @@ func uniqueSkus(skus []string) ([]string){
 		uniqueSkusSet[sku] = struct{}{}
 	}
 
-	uniqueSkus := make([]string, len(uniqueSkusSet))
+	uniqueSkus := make([]string, 0, len(uniqueSkusSet))
 
-	i := 0
 	for sku,_ := range uniqueSkusSet {
-		uniqueSkus[i] = sku
-		i++
+		uniqueSkus = append(uniqueSkus, sku)
 	}
 
 	return uniqueSkus
