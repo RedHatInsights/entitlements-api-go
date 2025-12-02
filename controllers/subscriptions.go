@@ -321,7 +321,7 @@ func Services() func(http.ResponseWriter, *http.Request) {
 				} else {
 					// this is needed for backwards compatibility while entitlements-config is being updated
 					// to be removed in this ticket: https://issues.redhat.com/browse/RHCLOUD-43575
-					isTrial = feature.IsEval
+					isTrial = featExists && feature.IsEval
 				}
 			}
 
