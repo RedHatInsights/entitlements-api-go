@@ -45,6 +45,14 @@ var _ = Describe("Bundle Sync", func() {
 			Expect(len(result)).To(Equal(1))
 			Expect(result).To(ContainElement("SKU1"))
 		})
+
+		It("should return sorted results", func() {
+			input := []string{"SKU3", "SKU1", "SKU4", "SKU2", "SKU3"}
+			result := uniqueSkus(input)
+
+			Expect(len(result)).To(Equal(4))
+			Expect(result).To(Equal([]string{"SKU1", "SKU2", "SKU3", "SKU4"}))
+		})
 	})
 
 	Describe("getBundlesConfig", func() {

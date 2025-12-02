@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -89,7 +90,8 @@ func uniqueSkus(skus []string) ([]string){
 	for sku,_ := range uniqueSkusSet {
 		uniqueSkus = append(uniqueSkus, sku)
 	}
-
+	
+	slices.Sort(uniqueSkus)
 	return uniqueSkus
 }
 
