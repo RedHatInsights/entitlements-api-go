@@ -67,7 +67,7 @@ func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 	if err != nil {
 		return t.SubModel{}, err
 	}
-	
+
 	log.Printf("raw response from '%s': '%s'", url, string(data))
 
 	var currentSubs t.SubModel
@@ -79,7 +79,7 @@ func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 }
 
 // filter out duplicate skus in a slice by converting to a set, then back to a slice
-func uniqueSkus(skus []string) ([]string){
+func uniqueSkus(skus []string) []string {
 	uniqueSkusSet := make(map[string]struct{})
 	for _, sku := range skus {
 		uniqueSkusSet[sku] = struct{}{}
@@ -87,10 +87,10 @@ func uniqueSkus(skus []string) ([]string){
 
 	uniqueSkus := make([]string, 0, len(uniqueSkusSet))
 
-	for sku,_ := range uniqueSkusSet {
+	for sku, _ := range uniqueSkusSet {
 		uniqueSkus = append(uniqueSkus, sku)
 	}
-	
+
 	slices.Sort(uniqueSkus)
 	return uniqueSkus
 }
@@ -114,19 +114,19 @@ func getBundlesConfig(cfg *viper.Viper) (map[string]t.Bundle, error) {
 		if bundle.IsPaid() {
 			// expand this into 2 features: "feature" and "feature_paid"
 			fullBundle := t.Bundle{
-				Name: bundle.Name,
-				Skus: uniqueSkus(append(bundle.EvalSkus, bundle.PaidSkus...)),
+				Name:           bundle.Name,
+				Skus:           uniqueSkus(append(bundle.EvalSkus, bundle.PaidSkus...)),
 				UseValidAccNum: bundle.UseValidAccNum,
-				UseValidOrgId: bundle.UseValidOrgId,
-				UseIsInternal: bundle.UseIsInternal,
+				UseValidOrgId:  bundle.UseValidOrgId,
+				UseIsInternal:  bundle.UseIsInternal,
 			}
 
 			paidBundle := t.Bundle{
-				Name: bundle.Name + paidFeatureSuffix,
-				Skus: uniqueSkus(bundle.PaidSkus),
+				Name:           bundle.Name + paidFeatureSuffix,
+				Skus:           uniqueSkus(bundle.PaidSkus),
 				UseValidAccNum: bundle.UseValidAccNum,
-				UseValidOrgId: bundle.UseValidOrgId,
-				UseIsInternal: bundle.UseIsInternal,
+				UseValidOrgId:  bundle.UseValidOrgId,
+				UseIsInternal:  bundle.UseIsInternal,
 			}
 
 			bundlesMap[fullBundle.Name] = fullBundle
@@ -170,7 +170,7 @@ func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
 func main() {
 	flag.BoolVar(&dryRun, "dry-run", false, "Include to do a dry run which won't post updates and print the updates that would happen")
 	flag.Parse()
-	
+
 	c := config.GetConfig()
 	client := getClient(c)
 	options := c.Options
@@ -180,7 +180,7 @@ func main() {
 		fmt.Println("Bundle sync disabled")
 		return
 	}
-	
+
 	url := fmt.Sprintf("%s%s",
 		options.GetString(config.Keys.SubsHost),
 		options.GetString(config.Keys.SubAPIBasePath))
@@ -237,9 +237,9 @@ func main() {
 		} else {
 			var m []t.MatchProducts
 			m = append(m, t.MatchProducts{SkuCodes: skus[endpoint]})
-			rules := t.Rules{MatchProducts: m,}
+			rules := t.Rules{MatchProducts: m}
 			v := t.SubModel{
-				Name: endpoint,
+				Name:  endpoint,
 				Rules: []t.Rules{rules},
 			}
 			b, err := json.Marshal(v)
