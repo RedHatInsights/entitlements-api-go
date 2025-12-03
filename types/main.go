@@ -18,8 +18,8 @@ type FeatureResponse struct {
 }
 
 type Feature struct {
-	Name     string `json:"name"`
-	IsEval   bool   `json:"isEval"`
+	Name       string `json:"name"`
+	IsEval     bool   `json:"isEval"`
 	IsEntitled bool   `json:"isEntitled"`
 }
 
@@ -34,6 +34,16 @@ type Bundle struct {
 	UseValidOrgId  bool     `yaml:"use_valid_org_id"`
 	UseIsInternal  bool     `yaml:"use_is_internal"`
 	Skus           []string `yaml:"skus"`
+	EvalSkus       []string `yaml:"eval_skus"`
+	PaidSkus       []string `yaml:"paid_skus"`
+}
+
+func (b *Bundle) IsPaid() bool {
+	return (b.PaidSkus != nil && len(b.PaidSkus) > 0) || (b.EvalSkus != nil && len(b.EvalSkus) > 0)
+}
+
+func (b *Bundle) IsSkuBased() bool {
+	return (b.Skus != nil && len(b.Skus) > 0) || b.IsPaid()
 }
 
 // DependencyErrorDetails is a struct that is used to marshal failure details
@@ -65,8 +75,8 @@ type RequestErrorResponse struct {
 
 // SubModel is the struct for GET and POST data for subscriptions
 type SubModel struct {
-	Name  string `json:"name"`
-	Rules []Rules  `json:"rules"`
+	Name  string  `json:"name"`
+	Rules []Rules `json:"rules"`
 }
 
 // Rules contains match and exclude product arrays
