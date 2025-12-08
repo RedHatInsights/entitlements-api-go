@@ -24,6 +24,7 @@ COPY go.mod go.sum ./
 
 USER root
 
+ENV GOTOOLCHAIN=auto
 RUN go mod download
 COPY . .
 
