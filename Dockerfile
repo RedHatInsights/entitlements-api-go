@@ -24,6 +24,13 @@ COPY go.mod go.sum ./
 
 USER root
 
+# Install Go 1.25.5 to address CVE-2025-61729 (Until new ubi9 minimal image supports this go version)
+RUN curl -LO https://go.dev/dl/go1.25.5.linux-amd64.tar.gz && \
+    rm -rf /usr/local/go && \
+    tar -C /usr/local -xzf go1.25.5.linux-amd64.tar.gz && \
+    rm go1.25.5.linux-amd64.tar.gz
+ENV PATH="/usr/local/go/bin:${PATH}"
+
 RUN go mod download
 COPY . .
 
