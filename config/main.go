@@ -149,7 +149,7 @@ func initialize() {
 	options.SetDefault(Keys.DisableSeatManager, false)
 	options.SetDefault(Keys.SubsCacheDuration, 1800) // seconds
 	options.SetDefault(Keys.SubsCacheMaxSize, 500)
-	options.SetDefault(Keys.SubsCacheItemPrune, 50)
+	options.SetDefault(Keys.SubsCacheItemPrune, 10) // percent of cache to prune when full
 	options.SetDefault(Keys.AMSAcctMgmt11Msg, "Please have this user log into \"https://console.redhat.com/openshift\" to grant their account the required permissions, or try again later.")
 	options.SetDefault(Keys.ITServicesTimeoutSeconds, 10)
 	options.SetDefault(Keys.DisableSeatManager, true) // this feature is obsolete, see https://issues.redhat.com/browse/RHCLOUD-30697
