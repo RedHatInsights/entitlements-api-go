@@ -30,7 +30,7 @@ var configOptions = config.GetConfig().Options
 var cache = ccache.New(
 	ccache.Configure[types.FeatureStatus]().
 		MaxSize(configOptions.GetInt64(config.Keys.SubsCacheMaxSize)).
-		PercentToPrune(uint8(configOptions.GetUint32(config.Keys.SubsCacheItemPrune))),
+		PercentToPrune(configOptions.GetUint8(config.Keys.SubsCacheItemPrune)),
 )
 var cacheDuration = time.Second * time.Duration(configOptions.GetInt64(config.Keys.SubsCacheDuration))
 
