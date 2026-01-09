@@ -8,10 +8,10 @@ require (
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/getsentry/sentry-go v0.40.0
 	github.com/go-chi/chi/v5 v5.2.3
-	github.com/karlseguin/ccache/v3 v3.0.7
+	github.com/karlseguin/ccache/v3 v3.0.8
 	github.com/oapi-codegen/runtime v1.1.2
-	github.com/onsi/ginkgo/v2 v2.27.2
-	github.com/onsi/gomega v1.38.2
+	github.com/onsi/ginkgo/v2 v2.27.4
+	github.com/onsi/gomega v1.39.0
 	github.com/openshift-online/ocm-sdk-go v0.1.486
 	github.com/prometheus/client_golang v1.23.2
 	github.com/redhatinsights/app-common-go v1.6.9
@@ -77,7 +77,7 @@ require (
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/tools v0.40.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
