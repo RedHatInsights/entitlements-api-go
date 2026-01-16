@@ -39,6 +39,9 @@ RUN make
 # Using ubi9-minimal due to its smaller footprint
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1764794109
 
+# Fix CVE-2025-68973 - update gnupg2 to patched version
+RUN microdnf update gnupg2 -y && microdnf clean all
+
 WORKDIR /
 
 # Copy GO executable file and need directories from the builder image
