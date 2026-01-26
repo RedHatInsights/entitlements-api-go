@@ -128,9 +128,13 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse
 	if featuresQuery == "" { // build the static part of our query only once
 		setFeaturesQuery()
 	}
-	req := configOptions.GetString(config.Keys.SubsHost) +
-		configOptions.GetString(config.Keys.SubAPIBasePath) +
-		"featureStatus" + featuresQuery + "&accountId=" + orgID
+
+	req := fmt.Sprintf("%s%s%s&accountId=%s",
+			configOptions.GetString(config.Keys.SubsHost),
+			configOptions.GetString(config.Keys.FeatureStatusAPIPath),
+			featuresQuery,
+			orgID,
+		)
 
 	resp, err := getClient().Get(req)
 

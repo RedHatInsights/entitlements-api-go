@@ -22,6 +22,7 @@ import (
 )
 
 var dryRun bool
+var featuresURL string
 
 // assertEq compares two slices of strings and returns true if they are equal
 func assertEq(test []string, ans []string) bool {
@@ -142,15 +143,13 @@ func getBundlesConfig(cfg *viper.Viper) (map[string]t.Bundle, error) {
 }
 
 func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
-	url := fmt.Sprintf("%s%s", cfg.GetString(config.Keys.SubsHost), cfg.GetString(config.Keys.SubAPIBasePath))
-
 	if dryRun {
 		// print updates that would be made but don't actually run them
-		log.Printf("*** POST '%s' - '%s'", url, string(data))
+		log.Printf("*** POST '%s' - '%s'", featuresURL, string(data))
 		return nil
 	}
 
-	resp, err := client.Post(url, "application/json", strings.NewReader(string(data)))
+	resp, err := client.Post(featuresURL, "application/json", strings.NewReader(string(data)))
 	if err != nil {
 		return err
 	}
@@ -158,7 +157,7 @@ func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
 	if resp.StatusCode != http.StatusNoContent {
 		body, _ := io.ReadAll(resp.Body)
 		respBody := string(body)
-		return fmt.Errorf("error posting update -- response: '%s', status: '%d'. url: '%s', request body: '%s'", respBody, resp.StatusCode, url, string(data))
+		return fmt.Errorf("error posting update -- response: '%s', status: '%d'. url: '%s', request body: '%s'", respBody, resp.StatusCode, featuresURL, string(data))
 	}
 
 	defer resp.Body.Close()
@@ -181,9 +180,9 @@ func main() {
 		return
 	}
 
-	url := fmt.Sprintf("%s%s",
+	featuresURL = fmt.Sprintf("%s%s",
 		options.GetString(config.Keys.SubsHost),
-		options.GetString(config.Keys.SubAPIBasePath))
+		options.GetString(config.Keys.FeaturesAPIPath))
 
 	bundlesConfig, err := getBundlesConfig(options)
 	if err != nil {
@@ -210,7 +209,7 @@ func main() {
 		log.Printf("Checking for updates to %s\n", endpoint)
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
-		current, err := getCurrent(client, url+endpoint)
+		current, err := getCurrent(client, featuresURL+endpoint)
 		if err != nil {
 			log.Fatalf("Unable to get current features: %s", err)
 			os.Exit(1)
