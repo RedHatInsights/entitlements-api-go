@@ -218,6 +218,8 @@ github.com/openshift-online/ocm-api-model/clientapi v0.0.444 h1:7VzUUc+BSQShwQsG
 github.com/openshift-online/ocm-api-model/clientapi v0.0.444/go.mod h1:fZwy5HY2URG9nrExvQeXrDU/08TGqZ16f8oymVEN5lo=
 github.com/openshift-online/ocm-api-model/clientapi v0.0.446 h1:NqKdgNQZF8D57diDx4nMAyFBptT1Xg8DBD/51ni79TM=
 github.com/openshift-online/ocm-api-model/clientapi v0.0.446/go.mod h1:fZwy5HY2URG9nrExvQeXrDU/08TGqZ16f8oymVEN5lo=
+github.com/openshift-online/ocm-api-model/clientapi v0.0.448 h1:XMsU5Rk5zwWNlXgTeEv9uEXLrLbEVIz2YzE/6XCQgFw=
+github.com/openshift-online/ocm-api-model/clientapi v0.0.448/go.mod h1:fZwy5HY2URG9nrExvQeXrDU/08TGqZ16f8oymVEN5lo=
 github.com/openshift-online/ocm-api-model/model v0.0.437 h1:FxXKbDGODZ5jFpTK1Czpz1uRXm945fA/E1cLxeVsOmk=
 github.com/openshift-online/ocm-api-model/model v0.0.437/go.mod h1:PQIoq6P8Vlb7goOdRMLK8nJY+B7HH0RTqYAa4kyidTE=
 github.com/openshift-online/ocm-api-model/model v0.0.438 h1:etxY6kxlLv8OJ+LXsMPAe/q8BaovLY1BJMzTNbcwGpI=
@@ -234,6 +236,8 @@ github.com/openshift-online/ocm-api-model/model v0.0.444 h1:WAmzboe9lS3qy5gDnC9H
 github.com/openshift-online/ocm-api-model/model v0.0.444/go.mod h1:PQIoq6P8Vlb7goOdRMLK8nJY+B7HH0RTqYAa4kyidTE=
 github.com/openshift-online/ocm-api-model/model v0.0.446 h1:FbkSxBzoeC4NGJmCGRmoBtO1AX+Y7acepLPn3LtQCcE=
 github.com/openshift-online/ocm-api-model/model v0.0.446/go.mod h1:PQIoq6P8Vlb7goOdRMLK8nJY+B7HH0RTqYAa4kyidTE=
+github.com/openshift-online/ocm-api-model/model v0.0.448 h1:TbLHcMsyX/4UQtUlKIt1qGbE+CaIqmF0O2Z2vokvNh0=
+github.com/openshift-online/ocm-api-model/model v0.0.448/go.mod h1:PQIoq6P8Vlb7goOdRMLK8nJY+B7HH0RTqYAa4kyidTE=
 github.com/openshift-online/ocm-sdk-go v0.1.482 h1:vLj56Y7/nC3FBTn+uTNqYJRrOCKp9E4gTtJJSJF2tSc=
 github.com/openshift-online/ocm-sdk-go v0.1.482/go.mod h1:VEvdienFpwhq9rfrj92s3eMcyaT1A0MS9LwGEARG6Zw=
 github.com/openshift-online/ocm-sdk-go v0.1.483 h1:xDTrRD+CVr/7fQ4tYkMF0ztNXpBhj2WFMrcaOC7ka7c=
@@ -250,6 +254,8 @@ github.com/openshift-online/ocm-sdk-go v0.1.490 h1:y1gsztPcKjUGOHY8SajYWBnBZBoas
 github.com/openshift-online/ocm-sdk-go v0.1.490/go.mod h1:YVJUX9w8hZ6iEzQgSI7LPKj+09OSG77DPm0Y8kN6bqY=
 github.com/openshift-online/ocm-sdk-go v0.1.491 h1:gkj6YP5EACzjEyBLPzso4pPo2kb1/igTkID10XaX9sw=
 github.com/openshift-online/ocm-sdk-go v0.1.491/go.mod h1:2tO4+e1UzOpSCS7CSMOiB+tA2EIPdT91XMyw7mcKR+k=
+github.com/openshift-online/ocm-sdk-go v0.1.493 h1:+889zmbwN0guA8LFRr5WHpH2+VJNq8+r0fvrXY+x/6E=
+github.com/openshift-online/ocm-sdk-go v0.1.493/go.mod h1:ThqKHtIyvTvDA5AxGFZph80sllVr63lZ+sb4qQP57+o=
 github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
 github.com/pelletier/go-toml/v2 v2.2.4/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
 github.com/perimeterx/marshmallow v1.1.5 h1:a2LALqQ1BlHM8PZblsDdidgv1mWi1DgC2UmX50IvK2s=
