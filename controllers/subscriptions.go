@@ -304,14 +304,15 @@ func Services() func(http.ResponseWriter, *http.Request) {
 				}
 			}
 
+			isEntitled := true
+			isTrial := false
+
 			entitleAll := configOptions.GetBool(config.Keys.EntitleAll)
 			if entitleAll {
 				entitlementsResponse[bundle.Name] = setBundlePayload(true, false)
 				continue
 			}
 
-			isEntitled := false
-			isTrial := false
 			if bundle.IsSkuBased() {
 				_, featExists := subscriptionsMap[bundle.Name]
 				isEntitled = featExists
