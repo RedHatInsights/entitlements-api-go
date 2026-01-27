@@ -18,9 +18,9 @@ type FeatureResponse struct {
 }
 
 type Feature struct {
-	Name       string `json:"name"`
-	IsEval     bool   `json:"isEval"`
-	IsEntitled bool   `json:"isEntitled"`
+	Name       	string	`json:"name"`
+	StartDate	string	`json:"startDate"`
+	EndDate		string	`json:"endDate"`
 }
 
 type FeatureStatus struct {
