@@ -345,8 +345,6 @@ var _ = Describe("Services Controller", func() {
 					Features: []Feature{
 						{
 							Name:       "TestBundle1",
-							StartDate: "2018-05-24T04:00:00.000+0000",
-							EndDate:   "2027-07-29T03:59:59.000+0000",
 						},
 						{
 							Name:       "TestBundle2",
