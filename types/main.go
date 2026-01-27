@@ -17,6 +17,11 @@ type FeatureResponse struct {
 	Url        string
 }
 
+// Feature represents a feature as it exists in feature service
+// note: StartDate and EndDate are strings instead of time.Time since we don't use these fields
+// if that changes in the future, we should implement proper encoding and decoding
+// json encoder requires RFC3339 time spec, feature service uses ISO 8601 which should be compatible but there are some discrepancies
+// see here for more info: https://en.wikipedia.org/wiki/ISO_8601#Implementations, https://cs.opensource.google/go/go/+/go1.25.6:src/time/time.go;l=1600
 type Feature struct {
 	Name       	string	`json:"name"`
 	StartDate	string	`json:"startDate"`
