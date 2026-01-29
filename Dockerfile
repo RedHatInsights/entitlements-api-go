@@ -39,6 +39,10 @@ RUN make
 # Using ubi9-minimal due to its smaller footprint
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1769056855
 
+# Update packages to address CVEs in curl and openssl
+RUN microdnf update -y curl-minimal libcurl-minimal openssl-libs && \
+    microdnf clean all
+
 WORKDIR /
 
 # Copy GO executable file and need directories from the builder image
