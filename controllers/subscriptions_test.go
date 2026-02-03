@@ -345,11 +345,9 @@ var _ = Describe("Services Controller", func() {
 					Features: []Feature{
 						{
 							Name:       "TestBundle1",
-							IsEntitled: false,
 						},
 						{
 							Name:       "TestBundle2",
-							IsEntitled: true,
 						},
 					},
 				},
@@ -358,7 +356,7 @@ var _ = Describe("Services Controller", func() {
 
 			rr, body, _ := testRequestWithDefaultOrgId("GET", "/", fakeGetFeatureStatus(DEFAULT_ORG_ID, fakeResponse))
 			expectPass(rr.Result())
-			Expect(body["TestBundle1"].IsEntitled).To(Equal(false))
+			Expect(body["TestBundle1"].IsEntitled).To(Equal(true))
 			Expect(body["TestBundle2"].IsEntitled).To(Equal(true))
 			Expect(body["TestBundle6"].IsEntitled).To(Equal(false))
 		})
@@ -386,11 +384,9 @@ var _ = Describe("Services Controller", func() {
 					Features: []Feature{
 						{
 							Name:       "SplitBundle",
-							IsEntitled: true,
 						},
 						{
 							Name:       "SplitBundle_paid",
-							IsEntitled: true,
 						},
 					},
 				},
@@ -410,11 +406,6 @@ var _ = Describe("Services Controller", func() {
 					Features: []Feature{
 						{
 							Name:       "SplitBundle",
-							IsEntitled: true,
-						},
-						{
-							Name:       "SplitBundle_paid",
-							IsEntitled: false,
 						},
 					},
 				},
@@ -431,12 +422,7 @@ var _ = Describe("Services Controller", func() {
 			fakeResponse := FeatureResponse{
 				StatusCode: 200,
 				Data: FeatureStatus{
-					Features: []Feature{
-						{
-							Name:       "SplitBundle",
-							IsEntitled: false,
-						},
-					},
+					Features: []Feature{},
 				},
 				CacheHit: false,
 			}
@@ -454,7 +440,6 @@ var _ = Describe("Services Controller", func() {
 					Features: []Feature{
 						{
 							Name:       "RegularBundle",
-							IsEntitled: true,
 						},
 					},
 				},
@@ -775,7 +760,7 @@ var _ = Describe("Services Controller", func() {
 				StatusCode: 200,
 				Data: FeatureStatus{
 					Features: []Feature{
-						{Name: "TestBundle1", IsEntitled: true, IsEval: false},
+						{Name: "TestBundle1",},
 					},
 				},
 				CacheHit: false,

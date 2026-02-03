@@ -43,7 +43,8 @@ type EntitlementsConfigKeysType struct {
 	CwKey                    string
 	CwSecret                 string
 	Features                 string
-	SubAPIBasePath           string
+	FeaturesAPIPath			 string
+	FeatureStatusAPIPath	 string
 	CompAPIBasePath          string
 	RunBundleSync            string
 	EntitleAll               string
@@ -84,7 +85,8 @@ var Keys = EntitlementsConfigKeysType{
 	CwKey:                    "CW_KEY",
 	CwSecret:                 "CW_SECRET",
 	Features:                 "FEATURES",
-	SubAPIBasePath:           "SUB_API_BASE_PATH",
+	FeaturesAPIPath:		  "FEATURES_API_PATH",
+	FeatureStatusAPIPath:	  "FEATURE_STATUS_API_PATH",
 	CompAPIBasePath:          "COMP_API_BASE_PATH",
 	RunBundleSync:            "RUN_BUNDLE_SYNC",
 	EntitleAll:               "ENTITLE_ALL",
@@ -136,7 +138,8 @@ func initialize() {
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
 	options.SetDefault(Keys.CwLogStream, hostname)
 	options.SetDefault(Keys.CwRegion, "us-east-1")
-	options.SetDefault(Keys.SubAPIBasePath, "/features/v1/")
+	options.SetDefault(Keys.FeaturesAPIPath, "/features/v1/")
+	options.SetDefault(Keys.FeatureStatusAPIPath, "/features/v2/featureStatus")
 	options.SetDefault(Keys.CompAPIBasePath, "/v1/screening")
 	options.SetDefault(Keys.RunBundleSync, false)
 	options.SetDefault(Keys.EntitleAll, false)
