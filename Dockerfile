@@ -37,7 +37,7 @@ COPY . .
 RUN make
 
 # Using ubi9-minimal due to its smaller footprint
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1770203734
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1770267347
 
 # Update packages to address CVEs in curl and openssl
 RUN microdnf update -y curl-minimal libcurl-minimal openssl-libs && \
