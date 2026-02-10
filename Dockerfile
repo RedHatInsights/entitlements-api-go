@@ -24,11 +24,11 @@ COPY go.mod go.sum ./
 
 USER root
 
-# Install Go 1.25.6 to address CVE-2025-68119, CVE-2025-61731, CVE-2025-61726, CVE-2025-61730, CVE-2025-61728
-RUN curl -LO https://go.dev/dl/go1.25.6.linux-amd64.tar.gz && \
+# Install Go 1.25.7 to address CVEs
+RUN curl -LO https://go.dev/dl/go1.25.7.linux-amd64.tar.gz && \
     rm -rf /usr/local/go && \
-    tar -C /usr/local -xzf go1.25.6.linux-amd64.tar.gz && \
-    rm go1.25.6.linux-amd64.tar.gz
+    tar -C /usr/local -xzf go1.25.7.linux-amd64.tar.gz && \
+    rm go1.25.7.linux-amd64.tar.gz
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 RUN go mod download
