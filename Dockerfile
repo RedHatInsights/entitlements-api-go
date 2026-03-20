@@ -40,6 +40,9 @@ RUN make
 # Using ubi9-minimal due to its smaller footprint
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1773895075
 
+# Update libarchive to address CVE-2026-4111
+RUN microdnf update -y libarchive && microdnf clean all
+
 WORKDIR /
 
 # Copy GO executable file and need directories from the builder image
