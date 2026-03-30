@@ -6,16 +6,16 @@ require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
 	github.com/aws/aws-sdk-go v1.55.8
 	github.com/getkin/kin-openapi v0.133.0
-	github.com/getsentry/sentry-go v0.43.0
+	github.com/getsentry/sentry-go v0.44.1
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/karlseguin/ccache/v3 v3.0.8
-	github.com/oapi-codegen/runtime v1.3.0
+	github.com/oapi-codegen/runtime v1.3.1
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	github.com/openshift-online/ocm-sdk-go v0.1.498
 	github.com/prometheus/client_golang v1.23.2
 	github.com/redhatinsights/app-common-go v1.6.9
-	github.com/redhatinsights/platform-go-middlewares/v2 v2.0.0
+	github.com/redhatinsights/platform-go-middlewares/v2 v2.1.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/viper v1.21.0
 	golang.org/x/text v0.35.0
@@ -55,7 +55,7 @@ require (
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
 	github.com/openshift-online/ocm-api-model/clientapi v0.0.453 // indirect
 	github.com/openshift-online/ocm-api-model/model v0.0.453 // indirect
-	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
+	github.com/pelletier/go-toml/v2 v2.3.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
