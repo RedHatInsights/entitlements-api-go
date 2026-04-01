@@ -209,7 +209,7 @@ func main() {
 		log.Printf("Checking for updates to %s\n", endpoint)
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
-		current, err := getCurrent(client, featuresURL+endpoint)
+		current, err := getCurrent(client, featuresURL+"/"+endpoint)
 		if err != nil {
 			log.Fatalf("Unable to get current features: %s", err)
 			os.Exit(1)
