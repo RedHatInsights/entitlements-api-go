@@ -2,7 +2,7 @@
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
 
-FROM registry.access.redhat.com/ubi9/go-toolset:9.7-1774499506 as builder
+FROM registry.access.redhat.com/ubi9/go-toolset:9.7-1775042950 as builder
 
 LABEL name="entitlements-api-go" \
       summary="Red Hat Entitlements API Service" \
@@ -23,12 +23,6 @@ WORKDIR /go/src/app
 COPY go.mod go.sum ./
 
 USER root
-
-# Install Go 1.25.8 to address CVE-2026-25679, CVE-2026-27142, CVE-2026-27139
-ENV GO_VERSION=1.25.8
-RUN curl -LO https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
-    rm go${GO_VERSION}.linux-amd64.tar.gz
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
