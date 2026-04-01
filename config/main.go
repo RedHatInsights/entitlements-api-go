@@ -138,7 +138,7 @@ func initialize() {
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
 	options.SetDefault(Keys.CwLogStream, hostname)
 	options.SetDefault(Keys.CwRegion, "us-east-1")
-	options.SetDefault(Keys.FeaturesAPIPath, "/features/v1/")
+	options.SetDefault(Keys.FeaturesAPIPath, "/features/v1")
 	options.SetDefault(Keys.FeatureStatusAPIPath, "/features/v2/featureStatus")
 	options.SetDefault(Keys.CompAPIBasePath, "/v1/screening")
 	options.SetDefault(Keys.RunBundleSync, false)
