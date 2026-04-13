@@ -32,7 +32,7 @@ COPY . .
 RUN make
 
 # Using ubi9-minimal due to its smaller footprint
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1775623882
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1776104705
 
 # Update libarchive to address CVE-2026-4111
 RUN microdnf update -y libarchive && microdnf clean all
