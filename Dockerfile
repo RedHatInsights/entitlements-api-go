@@ -24,6 +24,12 @@ COPY go.mod go.sum ./
 
 USER root
 
+# Install Go 1.25.9 to address CVEs
+ENV GO_VERSION=1.25.9
+RUN curl -LO https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
+    rm go${GO_VERSION}.linux-amd64.tar.gz
+
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 RUN go mod download
