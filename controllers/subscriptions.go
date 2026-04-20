@@ -128,9 +128,13 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse
 	if featuresQuery == "" { // build the static part of our query only once
 		setFeaturesQuery()
 	}
-	req := configOptions.GetString(config.Keys.SubsHost) +
-		configOptions.GetString(config.Keys.SubAPIBasePath) +
-		"featureStatus" + featuresQuery + "&accountId=" + orgID
+
+	req := fmt.Sprintf("%s%s%s&accountId=%s",
+			configOptions.GetString(config.Keys.SubsHost),
+			configOptions.GetString(config.Keys.FeatureStatusAPIPath),
+			featuresQuery,
+			orgID,
+		)
 
 	resp, err := getClient().Get(req)
 
@@ -289,54 +293,48 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		}
 
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
-		for _, b := range bundleInfo {
+		for _, bundle := range bundleInfo {
 			if len(include_filter) > 0 {
-				if !slices.Contains(include_filter, b.Name) {
+				if !slices.Contains(include_filter, bundle.Name) {
 					continue
 				}
 			} else if len(exclude_filter) > 0 {
-				if slices.Contains(exclude_filter, b.Name) {
+				if slices.Contains(exclude_filter, bundle.Name) {
 					continue
 				}
 			}
 
 			isEntitled := true
 			isTrial := false
-			entitleAll := configOptions.GetString(config.Keys.EntitleAll)
 
-			if entitleAll == "true" {
-				entitlementsResponse[b.Name] = setBundlePayload(isEntitled, isTrial)
+			entitleAll := configOptions.GetBool(config.Keys.EntitleAll)
+			if entitleAll {
+				entitlementsResponse[bundle.Name] = setBundlePayload(true, false)
 				continue
 			}
 
-			if b.IsSkuBased() {
-				isEntitled = false
+			if bundle.IsSkuBased() {
+				_, featExists := subscriptionsMap[bundle.Name]
+				isEntitled = featExists
 
-				feature, featExists := subscriptionsMap[b.Name]
-				isEntitled = featExists && feature.IsEntitled
-
-				if isEntitled && b.IsPaid() {
-					paidFeature, paidFeatExists := subscriptionsMap[b.Name+paidFeatureSuffix]
-					isTrial = paidFeatExists && !paidFeature.IsEntitled
-				} else {
-					// this is needed for backwards compatibility while entitlements-config is being updated
-					// to be removed in this ticket: https://issues.redhat.com/browse/RHCLOUD-43575
-					isTrial = featExists && feature.IsEval
+				if isEntitled && bundle.IsPaid() {
+					_, paidFeatExists := subscriptionsMap[bundle.Name+paidFeatureSuffix]
+					isTrial = !paidFeatExists
 				}
 			}
 
-			if b.UseValidAccNum {
+			if bundle.UseValidAccNum {
 				isEntitled = validAccNum && isEntitled
 			}
 
-			if b.UseValidOrgId {
+			if bundle.UseValidOrgId {
 				isEntitled = validOrgId && isEntitled
 			}
 
-			if b.UseIsInternal {
+			if bundle.UseIsInternal {
 				isEntitled = validAccNum && isInternal && validEmailMatch
 			}
-			entitlementsResponse[b.Name] = setBundlePayload(isEntitled, isTrial)
+			entitlementsResponse[bundle.Name] = setBundlePayload(isEntitled, isTrial)
 		}
 
 		obj, err := json.Marshal(entitlementsResponse)
