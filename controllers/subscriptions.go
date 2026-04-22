@@ -237,9 +237,9 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			errMsg := "Unexpected error while talking to Feature Service"
 			l.Log.WithFields(logrus.Fields{"error": subscriptions.Error}).Error(errMsg)
 			sentry.WithScope(func(scope *sentry.Scope) {
-				scope.SetExtra("response_body", subscriptions.Body)
-				scope.SetExtra("response_status", subscriptions.StatusCode)
-				scope.SetExtra("url", subscriptions.Url)
+				scope.SetTag("response_body", subscriptions.Body)
+				scope.SetTag("response_status", strconv.Itoa(subscriptions.StatusCode))
+				scope.SetTag("url", subscriptions.Url)
 				sentry.CaptureException(fmt.Errorf("%s : %w", errMsg, subscriptions.Error))
 			})
 			// the request is degraded because we received an error from the feature service
@@ -277,9 +277,9 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			l.Log.WithFields(logrus.Fields{"code": subscriptions.StatusCode, "body": subscriptions.Body}).Error(errMsg)
 
 			sentry.WithScope(func(scope *sentry.Scope) {
-				scope.SetExtra("response_body", subscriptions.Body)
-				scope.SetExtra("response_status", subscriptions.StatusCode)
-				scope.SetExtra("url", subscriptions.Url)
+				scope.SetTag("response_body", subscriptions.Body)
+				scope.SetTag("response_status", strconv.Itoa(subscriptions.StatusCode))
+				scope.SetTag("url", subscriptions.Url)
 				sentry.CaptureException(errors.New(errMsg))
 			})
 
