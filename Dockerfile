@@ -2,7 +2,7 @@
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
 
-FROM registry.access.redhat.com/ubi9/go-toolset:9.7-1776962329 as builder
+FROM registry.access.redhat.com/ubi9/go-toolset:9.7-1777043046 as builder
 
 LABEL name="entitlements-api-go" \
       summary="Red Hat Entitlements API Service" \
@@ -24,12 +24,6 @@ COPY go.mod go.sum ./
 
 USER root
 
-# Install Go 1.25.9 to address CVEs
-ENV GO_VERSION=1.25.9
-RUN curl -LO https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
-    rm go${GO_VERSION}.linux-amd64.tar.gz
-
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 RUN go mod download
@@ -39,9 +33,6 @@ RUN make
 
 # Using ubi9-minimal due to its smaller footprint
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1776833838
-
-# Update libarchive to address CVE-2026-4111
-RUN microdnf update -y libarchive && microdnf clean all
 
 WORKDIR /
 
