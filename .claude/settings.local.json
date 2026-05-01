@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker build:*)",
+      "Bash(cmd /c \"docker build . --file ./Dockerfile --tag localbuild/testimage:latest\")",
+      "Bash(go build:*)",
+      "Bash(go vet:*)",
+      "WebSearch",
+      "Bash(go list:*)",
+      "Bash(go mod why:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(go mod graph:*)",
+      "Bash(go mod tidy:*)",
+      "Bash(go test:*)",
+      "Bash(gh pr view:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(go get:*)",
+      "Bash(make build:*)"
+    ]
+  }
+}
