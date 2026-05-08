@@ -41,6 +41,7 @@ COPY --from=builder /go/src/app/entitlements-api-go ./entitlements-api-go
 COPY --from=builder /go/src/app/bundle-sync ./bundle-sync
 COPY apispec ./apispec
 COPY bundles ./bundles
+COPY licenses /licenses
 
 USER 1001
 
