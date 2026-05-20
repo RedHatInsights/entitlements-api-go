@@ -43,6 +43,10 @@ LABEL name="entitlements-api-go" \
 
 WORKDIR /
 
+# TODO: Remove temp CVE patches once base image is updated
+# CVE-2026-40356, CVE-2026-40355 (krb5-libs), CVE-2025-14087, CVE-2025-14512 (glib2), CVE-2026-4878 (libcap)
+RUN microdnf update -y krb5-libs glib2 libcap && microdnf clean all
+
 # Copy GO executable file and need directories from the builder image
 COPY --from=builder /go/src/app/entitlements-api-go ./entitlements-api-go
 COPY --from=builder /go/src/app/bundle-sync ./bundle-sync
