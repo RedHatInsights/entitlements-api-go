@@ -25,7 +25,7 @@ COPY . .
 RUN make
 
 # Using ubi9-minimal due to its smaller footprint
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8-1777460003
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8-1779709832
 
 LABEL name="entitlements-api-go" \
       summary="Red Hat Entitlements API Service" \
