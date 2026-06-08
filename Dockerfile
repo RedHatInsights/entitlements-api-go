@@ -10,8 +10,8 @@ COPY go.mod go.sum ./
 
 USER root
 
-# TODO: Remove once base image includes Go 1.26.3 for Go toolset
-ENV GO_VERSION=1.26.3
+# TODO: Remove once base image includes Go 1.26.4 for Go toolset
+ENV GO_VERSION=1.26.4
 RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tar.gz && \
     rm -rf /usr/local/go && \
     tar -C /usr/local -xzf /tmp/go.tar.gz && \
@@ -42,10 +42,6 @@ LABEL name="entitlements-api-go" \
       maintainer="platform-accessmanagement@redhat.com"
 
 WORKDIR /
-
-# TODO: Remove temp CVE patches once base image is updated
-# CVE-2026-40356, CVE-2026-40355 (krb5-libs), CVE-2025-14087, CVE-2025-14512 (glib2), CVE-2026-4878 (libcap)
-RUN microdnf update -y krb5-libs glib2 libcap && microdnf clean all
 
 # Copy GO executable file and need directories from the builder image
 COPY --from=builder /go/src/app/entitlements-api-go ./entitlements-api-go
