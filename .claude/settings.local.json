@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go list *)",
+      "Bash(go mod *)",
+      "WebFetch(domain:github.com)",
+      "Bash(skopeo list-tags *)",
+      "Bash(curl -s \"https://registry.access.redhat.com/v2/ubi9/go-toolset/tags/list\")",
+      "Bash(python -c \"import sys,json; tags=json.load\\(sys.stdin\\).get\\('tags',[]\\); [print\\(t\\) for t in sorted\\(tags, reverse=True\\)[:50]]\")",
+      "Bash(python -c \"import sys,json; tags=json.load\\(sys.stdin\\).get\\('tags',[]\\); [print\\(t\\) for t in sorted\\([t for t in tags if t.startswith\\('9.'\\)], reverse=True\\)[:30]]\")",
+      "Bash(python -c \"import sys,json; tags=json.load\\(sys.stdin\\).get\\('tags',[]\\); rhel_tags=[t for t in tags if t.startswith\\('9.'\\)]; print\\('\\\\n'.join\\(sorted\\(rhel_tags, reverse=True\\)[:30]\\)\\)\")",
+      "WebSearch",
+      "Bash(gh api *)",
+      "WebFetch(domain:quay.io)",
+      "Bash(curl *)",
+      "Bash(git rebase *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)"
+    ]
+  }
+}
