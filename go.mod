@@ -10,7 +10,7 @@ require (
 	github.com/go-chi/chi/v5 v5.3.0
 	github.com/karlseguin/ccache/v3 v3.0.8
 	github.com/oapi-codegen/runtime v1.4.1
-	github.com/onsi/ginkgo/v2 v2.31.0
+	github.com/onsi/ginkgo/v2 v2.32.0
 	github.com/onsi/gomega v1.42.0
 	github.com/openshift-online/ocm-sdk-go v0.1.503
 	github.com/prometheus/client_golang v1.23.2
