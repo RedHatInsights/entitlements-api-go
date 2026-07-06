@@ -62,7 +62,7 @@ if idObj.User == nil || !idObj.User.OrgAdmin {
 
 - The Dockerfile runs the final image as `USER 1001` (non-root). Never add `USER root` to the runtime stage.
 - Only the compiled binary, API spec, bundles config, and licenses are copied to the runtime image. Source code and build tools are excluded.
-- Base images use pinned digests/tags from `registry.access.redhat.com/ubi9`. Do not switch to non-UBI base images.
+- Base images use pinned tags from the Hummingbird image registry (`registry.access.redhat.com/hi`). The builder uses `hi/go` (FIPS-enabled Go toolchain) and the runtime uses `hi/core-runtime` (minimal FIPS-enabled runtime).
 
 ## Debug Mode
 

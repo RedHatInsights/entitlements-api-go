@@ -2,7 +2,7 @@
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
 
-FROM registry.access.redhat.com/ubi9/go-toolset:9.8-1782980183 as builder
+FROM registry.access.redhat.com/hi/go:1.26.4-fips-builder as builder
 
 WORKDIR /go/src/app
 
@@ -10,22 +10,12 @@ COPY go.mod go.sum ./
 
 USER root
 
-# TODO: Remove once base image includes Go 1.26.4 for Go toolset
-ENV GO_VERSION=1.26.4
-RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tar.gz && \
-    rm -rf /usr/local/go && \
-    tar -C /usr/local -xzf /tmp/go.tar.gz && \
-    rm /tmp/go.tar.gz
-
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 RUN go mod download
 COPY . .
 
 RUN make
-
-# Using ubi9-minimal due to its smaller footprint
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8-1782797275
 
 LABEL name="entitlements-api-go" \
       summary="Red Hat Entitlements API Service" \
@@ -43,12 +33,16 @@ LABEL name="entitlements-api-go" \
 
 WORKDIR /
 
+FROM registry.access.redhat.com/hi/core-runtime:2.42-openssl-fips-builder
+
 # Copy GO executable file and need directories from the builder image
 COPY --from=builder /go/src/app/entitlements-api-go ./entitlements-api-go
 COPY --from=builder /go/src/app/bundle-sync ./bundle-sync
 COPY apispec ./apispec
 COPY bundles ./bundles
 COPY licenses /licenses
+
+ENV GODEBUG=fips140=on
 
 USER 1001
 

@@ -99,7 +99,7 @@ myHistogram.Observe(time.Since(start).Seconds())
 
 ## Build and Runtime
 
-- Multi-stage Docker build: `go-toolset` builder, `ubi9-minimal` runtime.
+- Multi-stage Docker build: `hi/go` FIPS builder, `hi/core-runtime` FIPS runtime.
 - The binary runs as non-root (USER 1001).
 - The server uses `http.ListenAndServe` with no graceful shutdown. Termination relies on the container orchestrator's SIGTERM handling.
 - CloudWatch log batching is configured with a 10-second flush interval in the logger.
