@@ -17,6 +17,10 @@ COPY . .
 
 RUN make
 
+WORKDIR /
+
+FROM registry.access.redhat.com/hi/core-runtime:2.42-openssl-fips-builder
+
 LABEL name="entitlements-api-go" \
       summary="Red Hat Entitlements API Service" \
       description="Go-based API service that manages user entitlements for Red Hat products, acting as a proxy to backend services including subscriptions and compliance" \
@@ -30,10 +34,6 @@ LABEL name="entitlements-api-go" \
       url="https://github.com/RedHatInsights/entitlements-go-api" \
       distribution-scope="private" \
       maintainer="platform-accessmanagement@redhat.com"
-
-WORKDIR /
-
-FROM registry.access.redhat.com/hi/core-runtime:2.42-openssl-fips-builder
 
 # Copy GO executable file and need directories from the builder image
 COPY --from=builder /go/src/app/entitlements-api-go ./entitlements-api-go
