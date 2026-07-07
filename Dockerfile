@@ -17,9 +17,9 @@ COPY . .
 
 RUN make
 
-WORKDIR /
-
 FROM registry.access.redhat.com/hi/core-runtime:2.42-openssl-fips-builder
+
+WORKDIR /
 
 LABEL name="entitlements-api-go" \
       summary="Red Hat Entitlements API Service" \
