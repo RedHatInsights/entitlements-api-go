@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(go mod *)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh pr *)",
+      "Bash(git fetch *)",
+      "Bash(git ls-remote *)"
+    ]
+  }
+}
