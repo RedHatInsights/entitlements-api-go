@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(rtk gh *)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh api *)"
+    ]
+  }
+}
