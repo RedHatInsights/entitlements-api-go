@@ -5,11 +5,11 @@ go 1.26.5
 require (
 	github.com/766b/chi-logger v0.0.0-20180309043024-d2679d398ce4
 	github.com/aws/aws-sdk-go v1.55.8
-	github.com/getkin/kin-openapi v0.141.0
-	github.com/getsentry/sentry-go v0.47.0
+	github.com/getkin/kin-openapi v0.142.0
+	github.com/getsentry/sentry-go v0.48.0
 	github.com/go-chi/chi/v5 v5.3.1
 	github.com/karlseguin/ccache/v3 v3.0.8
-	github.com/oapi-codegen/runtime v1.4.2
+	github.com/oapi-codegen/runtime v1.6.0
 	github.com/onsi/ginkgo/v2 v2.32.0
 	github.com/onsi/gomega v1.42.1
 	github.com/openshift-online/ocm-sdk-go v0.1.505
