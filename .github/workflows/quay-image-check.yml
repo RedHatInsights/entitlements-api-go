@@ -9,7 +9,7 @@ jobs:
   check-image:
     runs-on: ubuntu-latest
     if: >-
-      github.event.check_run.name == 'Red Hat Konflux / insights-rbac-on-push' &&
+      github.event.check_run.name == 'Red Hat Konflux / entitlements-api-go-on-push' &&
       github.event.check_run.conclusion == 'success' &&
       github.event.check_run.app.slug == 'red-hat-konflux'
     steps:
