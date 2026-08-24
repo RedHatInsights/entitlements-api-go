@@ -37,6 +37,12 @@ var cacheDuration = time.Second * time.Duration(configOptions.GetInt64(config.Ke
 var bundleInfo []types.Bundle
 var featuresQuery string
 var paidFeatureSuffix string
+
+// paidFeatures maps a SKU feature name to whether it has a "_paid" variant in the Feature
+// Service catalog. It is populated once at startup by InitPaidFeatures (from /features/v1)
+// and used only to decide is_trial. A nil map (e.g. in tests that don't init it) reads as
+// all-false, so is_trial safely defaults to false.
+var paidFeatures map[string]bool
 var subsFailure = promauto.NewCounterVec(
 	prometheus.CounterOpts{
 		Name: "it_feature_service_failure",
@@ -85,22 +91,102 @@ func SetBundleInfo(yamlFilePath string) error {
 	return nil
 }
 
-func setFeaturesQuery() {
-	features := strings.Split(configOptions.GetString(config.Keys.Features), ",")
-	paidFeatureSuffix = configOptions.GetString(config.Keys.PaidFeatureSuffix)
-
-	var skuBasedFeatures []string
+// nonSkuBundleNames returns the set of bundle names in bundles.yml that are NOT SKU-based.
+// These are still sourced from bundles.yml (acc num / org id / internal gating).
+func nonSkuBundleNames() map[string]bool {
+	names := make(map[string]bool)
 	for _, bundle := range bundleInfo {
-		if slices.Contains(features, bundle.Name) && bundle.IsSkuBased() {
-			skuBasedFeatures = append(skuBasedFeatures, bundle.Name)
-
-			if bundle.IsPaid() {
-				skuBasedFeatures = append(skuBasedFeatures, bundle.Name+paidFeatureSuffix)
-			}
+		if !bundle.IsSkuBased() {
+			names[bundle.Name] = true
 		}
 	}
+	return names
+}
 
-	featuresQuery = "?features=" + strings.Join(skuBasedFeatures, "&features=")
+// skuFeatures returns the SKU-based features to resolve against Feature Service: every
+// entry in ENT_FEATURES, minus any name that is a non-SKU bundle in bundles.yml. The
+// subtraction keeps non-SKU bundles (e.g. openshift) out of the SKU path even if they are
+// still listed in ENT_FEATURES during the config transition.
+func skuFeatures() []string {
+	nonSku := nonSkuBundleNames()
+	var features []string
+	for _, f := range strings.Split(configOptions.GetString(config.Keys.Features), ",") {
+		f = strings.TrimSpace(f)
+		if f == "" || nonSku[f] {
+			continue
+		}
+		features = append(features, f)
+	}
+	return features
+}
+
+func setFeaturesQuery() {
+	paidFeatureSuffix = configOptions.GetString(config.Keys.PaidFeatureSuffix)
+
+	// Query the base feature and its "_paid" variant for every SKU feature. Feature Service
+	// returns an empty result for features that do not exist, so querying a "_paid" variant
+	// that has not been defined is harmless.
+	var features []string
+	for _, feature := range skuFeatures() {
+		features = append(features, feature, feature+paidFeatureSuffix)
+	}
+
+	featuresQuery = "?features=" + strings.Join(features, "&features=")
+}
+
+// InitPaidFeatures loads the paid-feature catalog once at startup. Doing this here rather
+// than lazily in the request path avoids a data race on the paidFeatures package var under
+// concurrent first requests, and removes first-request latency. Must be called after
+// SetBundleInfo, since it depends on the SKU/non-SKU bundle split. It fails safe: on any
+// error paidFeatures is an empty (non-nil) map, so is_trial degrades to false.
+func InitPaidFeatures() {
+	paidFeatures = loadPaidFeatures()
+}
+
+// loadPaidFeatures queries the Feature Service catalog (/features/v1) to determine which
+// SKU features have a corresponding "_paid" variant. The result is used only to decide
+// is_trial. It always returns a non-nil map; on any failure it returns an empty map so
+// is_trial fails safe to false — entitlement correctness does not depend on this call.
+func loadPaidFeatures() map[string]bool {
+	result := make(map[string]bool)
+
+	suffix := configOptions.GetString(config.Keys.PaidFeatureSuffix)
+	url := fmt.Sprintf("%s%s",
+		configOptions.GetString(config.Keys.SubsHost),
+		configOptions.GetString(config.Keys.FeaturesAPIPath),
+	)
+
+	resp, err := getClient().Get(url)
+	if err != nil {
+		l.Log.WithFields(logrus.Fields{"error": err, "url": url}).Error("Unable to load feature catalog for trial detection")
+		sentry.CaptureException(err)
+		return result
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		l.Log.WithFields(logrus.Fields{"code": resp.StatusCode, "url": url}).Error("Non-200 loading feature catalog for trial detection")
+		return result
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	var catalog types.FeatureStatus
+	if err := json.Unmarshal(body, &catalog); err != nil {
+		l.Log.WithFields(logrus.Fields{"error": err}).Error("Unable to parse feature catalog for trial detection")
+		sentry.CaptureException(err)
+		return result
+	}
+
+	catalogNames := make(map[string]bool, len(catalog.Features))
+	for _, f := range catalog.Features {
+		catalogNames[f.Name] = true
+	}
+
+	for _, f := range skuFeatures() {
+		result[f] = catalogNames[f+suffix]
+	}
+
+	return result
 }
 
 // GetFeatureStatus calls the IT feature service features endpoint and returns the entitlements for specified features/bundles
@@ -292,49 +378,66 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			degraded = true
 		}
 
-		entitlementsResponse := make(map[string]types.EntitlementsSection)
-		for _, bundle := range bundleInfo {
+		entitleAll := configOptions.GetBool(config.Keys.EntitleAll)
+
+		passesFilter := func(name string) bool {
 			if len(include_filter) > 0 {
-				if !slices.Contains(include_filter, bundle.Name) {
-					continue
-				}
-			} else if len(exclude_filter) > 0 {
-				if slices.Contains(exclude_filter, bundle.Name) {
-					continue
-				}
+				return slices.Contains(include_filter, name)
+			}
+			if len(exclude_filter) > 0 {
+				return !slices.Contains(exclude_filter, name)
+			}
+			return true
+		}
+
+		entitlementsResponse := make(map[string]types.EntitlementsSection)
+
+		// SKU-based features are sourced from ENT_FEATURES and resolved against Feature
+		// Service. is_trial is true only for paid-capable features where the base feature is
+		// present but the "_paid" variant is not.
+		for _, feature := range skuFeatures() {
+			if !passesFilter(feature) {
+				continue
+			}
+			if entitleAll {
+				entitlementsResponse[feature] = setBundlePayload(true, false)
+				continue
 			}
 
-			isEntitled := true
+			_, isEntitled := subscriptionsMap[feature]
 			isTrial := false
+			if isEntitled && paidFeatures[feature] {
+				_, paidFeatExists := subscriptionsMap[feature+paidFeatureSuffix]
+				isTrial = !paidFeatExists
+			}
+			entitlementsResponse[feature] = setBundlePayload(isEntitled, isTrial)
+		}
 
-			entitleAll := configOptions.GetBool(config.Keys.EntitleAll)
+		// Non-SKU bundles are sourced from bundles.yml. SKU-based bundles are handled above
+		// via ENT_FEATURES (and are being removed from bundles.yml), so skip them here.
+		for _, bundle := range bundleInfo {
+			if bundle.IsSkuBased() {
+				continue
+			}
+			if !passesFilter(bundle.Name) {
+				continue
+			}
 			if entitleAll {
 				entitlementsResponse[bundle.Name] = setBundlePayload(true, false)
 				continue
 			}
 
-			if bundle.IsSkuBased() {
-				_, featExists := subscriptionsMap[bundle.Name]
-				isEntitled = featExists
-
-				if isEntitled && bundle.IsPaid() {
-					_, paidFeatExists := subscriptionsMap[bundle.Name+paidFeatureSuffix]
-					isTrial = !paidFeatExists
-				}
-			}
-
+			isEntitled := true
 			if bundle.UseValidAccNum {
 				isEntitled = validAccNum && isEntitled
 			}
-
 			if bundle.UseValidOrgId {
 				isEntitled = validOrgId && isEntitled
 			}
-
 			if bundle.UseIsInternal {
 				isEntitled = validAccNum && isInternal && validEmailMatch
 			}
-			entitlementsResponse[bundle.Name] = setBundlePayload(isEntitled, isTrial)
+			entitlementsResponse[bundle.Name] = setBundlePayload(isEntitled, false)
 		}
 
 		obj, err := json.Marshal(entitlementsResponse)
