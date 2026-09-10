@@ -2,5 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "baseBranchPatterns": [
     "main"
+  ],
+  "postUpdateOptions": [
+    "gomodTidy"
   ]
 }
