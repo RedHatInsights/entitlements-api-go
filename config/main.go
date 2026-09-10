@@ -42,6 +42,9 @@ type EntitlementsConfigKeysType struct {
 	CwRegion                 string
 	CwKey                    string
 	CwSecret                 string
+	// Features (ENT_FEATURES) is a comma-separated list of SKU-based features to query
+	// against Feature Service. The base feature is queried along with its "_paid" variant
+	// automatically. Non-SKU bundles (e.g. openshift) are configured in bundles.yml, not here.
 	Features                 string
 	FeaturesAPIPath			 string
 	FeatureStatusAPIPath	 string

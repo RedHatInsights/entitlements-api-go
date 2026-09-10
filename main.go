@@ -40,6 +40,11 @@ func main() {
 		logger.Log.WithFields(logrus.Fields{"error": err}).Fatal("Error reading bundles.yml")
 	}
 
+	// Load the paid-feature catalog once at startup (used only for is_trial). Depends on
+	// the bundle info loaded above; fails safe to is_trial=false if the catalog is
+	// unavailable, so it never blocks startup.
+	controllers.InitPaidFeatures()
+
 	server.Launch()
 
 	// Flush buffered events before the program terminates.
