@@ -13,6 +13,7 @@ import (
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/RedHatInsights/entitlements-api-go/securitylog"
 	"github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/getsentry/sentry-go"
 	"github.com/prometheus/client_golang/prometheus"
@@ -41,17 +42,21 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		start := time.Now()
 
 		userIdentity := identity.GetIdentity(req.Context()).Identity
+		resourceID := securitylog.ResourceIDOrFallback(userIdentity.AccountNumber, "compliance-screening")
+		if userIdentity.User != nil && strings.TrimSpace(userIdentity.User.Username) != "" {
+			resourceID = userIdentity.User.Username
+		}
 
 		// Service Accounts don't have User field and cannot be screened for compliance
 		if userIdentity.User == nil {
 			err := errors.New("compliance: Service Accounts are not supported for compliance screening")
-			failOnBadRequest(w, "Invalid identity type", err)
+			failOnBadRequest(w, userIdentity, resourceID, "Invalid identity type", err)
 			return
 		}
 
 		if len(strings.TrimSpace(userIdentity.User.Username)) == 0 {
 			err := errors.New("compliance: x-rh-identity header has a missing or whitespace username")
-			failOnBadRequest(w, "Invalid x-rh-identity header", err)
+			failOnBadRequest(w, userIdentity, resourceID, "Invalid x-rh-identity header", err)
 			return
 		}
 
@@ -59,7 +64,7 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 
 		reqBodyJson, err := json.Marshal(reqBody)
 		if err != nil {
-			failOnServiceError(w, "Unable to marshal request to compliance service", err)
+			failOnServiceError(w, userIdentity, resourceID, "Unable to marshal request to compliance service", err)
 			return
 		}
 
@@ -69,7 +74,7 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		complianceReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(reqBodyJson))
 
 		if err != nil {
-			failOnComplianceError(w, "Unexpected error while creating request to Export Compliance Service", err, url)
+			failOnComplianceError(w, userIdentity, resourceID, "Unexpected error while creating request to Export Compliance Service", err, url)
 			return
 		}
 
@@ -80,9 +85,9 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		if err != nil {
 			var urlError *u.Error
 			if errors.As(err, &urlError) && urlError.Timeout() {
-				failOnComplianceError(w, "Request to Export Compliance Service timed out", err, url)
+				failOnComplianceError(w, userIdentity, resourceID, "Request to Export Compliance Service timed out", err, url)
 			} else {
-				failOnComplianceError(w, "Unexpected error returned on request to Export Compliance Service", err, url)
+				failOnComplianceError(w, userIdentity, resourceID, "Unexpected error returned on request to Export Compliance Service", err, url)
 			}
 
 			return
@@ -98,6 +103,26 @@ func Compliance() func(http.ResponseWriter, *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(resp.StatusCode)
 		w.Write([]byte(respBody))
+		if resp.StatusCode >= http.StatusBadRequest {
+			// READ compliance failure - SEC-MON-REQ-1 compliance (EOI-1 pii_manipulation, EOI-7 invalid_login, EOI-11 warnings_or_errors)
+			l.Log.WithFields(logrus.Fields{"status": resp.StatusCode}).WithFields(securitylog.FieldsFromIdentity(
+				userIdentity,
+				"READ",
+				"export_compliance_screening",
+				resourceID,
+				securitylog.OutcomeFailure,
+			)).Warn("Compliance screening returned non-success status")
+			return
+		}
+
+		// READ compliance success - SEC-MON-REQ-1 compliance (EOI-1 pii_manipulation)
+		l.Log.WithFields(securitylog.FieldsFromIdentity(
+			userIdentity,
+			"READ",
+			"export_compliance_screening",
+			resourceID,
+			securitylog.OutcomeSuccess,
+		)).Info("Compliance screening succeeded")
 	}
 }
 
@@ -114,9 +139,16 @@ func constructComplianceRequestBody(userIdentity identity.Identity) types.Compli
 	return reqBody
 }
 
-func failOnBadRequest(w http.ResponseWriter, errMsg string, err error) {
+func failOnBadRequest(w http.ResponseWriter, idObj identity.Identity, resourceID string, errMsg string, err error) {
 	sentry.CaptureException(err)
-	l.Log.WithFields(logrus.Fields{"error": err}).Error(errMsg)
+	// READ compliance validation failure - SEC-MON-REQ-1 compliance (EOI-7 invalid_login, EOI-11 warnings_or_errors)
+	l.Log.WithFields(logrus.Fields{"error": err}).WithFields(securitylog.FieldsFromIdentity(
+		idObj,
+		"READ",
+		"export_compliance_screening",
+		resourceID,
+		securitylog.OutcomeFailure,
+	)).Warn(errMsg)
 	complianceFailure.WithLabelValues(strconv.Itoa(http.StatusBadRequest)).Inc()
 
 	response := types.RequestErrorResponse{
@@ -130,9 +162,16 @@ func failOnBadRequest(w http.ResponseWriter, errMsg string, err error) {
 	http.Error(w, string(responseJson), http.StatusBadRequest)
 }
 
-func failOnComplianceError(w http.ResponseWriter, errMsg string, err error, url string) {
+func failOnComplianceError(w http.ResponseWriter, idObj identity.Identity, resourceID, errMsg string, err error, url string) {
 	sentry.CaptureException(err)
-	l.Log.WithFields(logrus.Fields{"error": err}).Error(errMsg)
+	// READ compliance dependency failure - SEC-MON-REQ-1 compliance (EOI-1 pii_manipulation, EOI-11 warnings_or_errors)
+	l.Log.WithFields(logrus.Fields{"error": err, "url": url}).WithFields(securitylog.FieldsFromIdentity(
+		idObj,
+		"READ",
+		"export_compliance_screening",
+		resourceID,
+		securitylog.OutcomeFailure,
+	)).Error(errMsg)
 	complianceFailure.WithLabelValues(strconv.Itoa(http.StatusInternalServerError)).Inc()
 
 	response := types.DependencyErrorResponse{
@@ -149,8 +188,15 @@ func failOnComplianceError(w http.ResponseWriter, errMsg string, err error, url 
 	http.Error(w, string(responseJson), http.StatusInternalServerError)
 }
 
-func failOnServiceError(w http.ResponseWriter, errMsg string, err error) {
-	l.Log.WithFields(logrus.Fields{"error": err}).Error(errMsg)
+func failOnServiceError(w http.ResponseWriter, idObj identity.Identity, resourceID, errMsg string, err error) {
+	// READ compliance service failure - SEC-MON-REQ-1 compliance (EOI-1 pii_manipulation, EOI-11 warnings_or_errors)
+	l.Log.WithFields(logrus.Fields{"error": err}).WithFields(securitylog.FieldsFromIdentity(
+		idObj,
+		"READ",
+		"export_compliance_screening",
+		resourceID,
+		securitylog.OutcomeFailure,
+	)).Error(errMsg)
 	sentry.CaptureException(err)
 	http.Error(w, http.StatusText(http.StatusInternalServerError)+": "+errMsg+": "+err.Error(), http.StatusInternalServerError)
 }

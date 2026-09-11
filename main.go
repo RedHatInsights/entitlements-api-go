@@ -7,6 +7,7 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/controllers"
 	"github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/RedHatInsights/entitlements-api-go/securitylog"
 	"github.com/RedHatInsights/entitlements-api-go/server"
 
 	"github.com/sirupsen/logrus"
@@ -26,7 +27,13 @@ func main() {
 			Dsn: dsn,
 		})
 		if err != nil {
-			logger.Log.WithFields(logrus.Fields{"error": err}).Error("Error loading Sentry SDK with GLITCHTIP_DSN")
+			logger.Log.WithFields(logrus.Fields{"error": err}).WithFields(securitylog.Fields(
+				"STARTUP",
+				"glitchtip_configuration",
+				"GLITCHTIP_DSN",
+				securitylog.OutcomeFailure,
+				securitylog.ProcessPrincipal("entitlements-api-go"),
+			)).Error("Error loading Sentry SDK with GLITCHTIP_DSN")
 		} else {
 			logger.Log.Info("Sentry SDK initialization using Glitchtip was successful!")
 		}
@@ -37,7 +44,14 @@ func main() {
 	// init config here
 	if err := controllers.SetBundleInfo(config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml)); err != nil {
 		sentry.CaptureException(err)
-		logger.Log.WithFields(logrus.Fields{"error": err}).Fatal("Error reading bundles.yml")
+		// Bundle config startup failure - SEC-MON-REQ-1 compliance (EOI-5 process_status, EOI-11 warnings_or_errors)
+		logger.Log.WithFields(logrus.Fields{"error": err}).WithFields(securitylog.Fields(
+			"STARTUP",
+			"bundle_configuration",
+			config.GetConfig().Options.GetString(config.Keys.BundleInfoYaml),
+			securitylog.OutcomeFailure,
+			securitylog.ProcessPrincipal("entitlements-api-go"),
+		)).Fatal("Error reading bundles.yml")
 	}
 
 	server.Launch()
