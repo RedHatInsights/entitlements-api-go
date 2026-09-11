@@ -7,6 +7,9 @@ all: generate build
 build:
 	$(GO) build -o entitlements-api-go main.go
 	$(GO) build -o ./bundle-sync bundle_sync/main.go
+build-debug:
+	$(GO) build -gcflags='all=-N -l' -o entitlements-api-go main.go
+	$(GO) build -gcflags='all=-N -l' -o ./bundle-sync bundle_sync/main.go
 clean:
 	find . -name "*.gen.go" | xargs rm
 	$(GO) clean -cache
@@ -19,7 +22,7 @@ generate: $(gen_files)
 
 image:
 	podman build -t entitlements-api-go .
-exe: all
+exe:
 	./entitlements-api-go
 debug-run: generate
 	ENT_DEBUG=1 \
