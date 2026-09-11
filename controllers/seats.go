@@ -10,6 +10,7 @@ import (
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/RedHatInsights/entitlements-api-go/securitylog"
 	v1 "github.com/openshift-online/ocm-sdk-go/accountsmgmt/v1"
 	"github.com/sirupsen/logrus"
 
@@ -38,14 +39,16 @@ func NewSeatManagerApi(amsClient ams.AMSInterface, bopClient bop.Bop) *SeatManag
 var errorMapper SeatsErrorMapper = NewErrorMapper(config.GetConfig())
 
 // doError will construct an api.Error reponse and write it to the response writer
-func doError(w http.ResponseWriter, httpStatusCode int, err error, source string) {
+func doError(w http.ResponseWriter, idObj identity.Identity, action, resourceType, resourceID string, httpStatusCode int, err error, source string) {
 	response := errorMapper.MapResponse(err, httpStatusCode)
 
-	log := logger.Log.WithFields(logrus.Fields{"error": err, "status": httpStatusCode, "source": source})
+	log := logger.Log.WithFields(logrus.Fields{"error": err, "status": httpStatusCode, "source": source}).WithFields(
+		securitylog.FieldsFromIdentity(idObj, action, resourceType, resourceID, securitylog.OutcomeFailure),
+	)
 	if *response.Status == http.StatusInternalServerError {
 		log.Error("ams internal server error")
 	} else {
-		log.Debug("ams request error")
+		log.Warn("ams request error")
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -58,41 +61,50 @@ func (s *SeatManagerApi) DeleteSeatsId(w http.ResponseWriter, r *http.Request, i
 
 	// Service Accounts don't have User field and cannot be org admins
 	if idObj.User == nil || !idObj.User.OrgAdmin {
-		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s. User must be org admin", id), "")
+		// DELETE seat authorization failure - SEC-MON-REQ-1 compliance (EOI-3 admin_action, EOI-8 authorization_failure)
+		doError(w, idObj, "DELETE", "seat_subscription", id, http.StatusForbidden, fmt.Errorf("Not allowed to delete subscription %s. User must be org admin", id), "")
 		return
 	}
 
 	subscription, err := s.ams.GetSubscription(id)
 	if err != nil {
-		doError(w, http.StatusInternalServerError, err, "AMS GetSubscription")
+		doError(w, idObj, "DELETE", "seat_subscription", id, http.StatusInternalServerError, err, "AMS GetSubscription")
 		return
 	}
 
 	subOrgId, ok := subscription.GetOrganizationID()
 	if !ok {
-		doError(w, http.StatusInternalServerError,
+		doError(w, idObj, "DELETE", "seat_subscription", id, http.StatusInternalServerError,
 			fmt.Errorf("Subscription with id [%s] does not have a corresponding ams org id, cannot verify subscription org", id), "")
 		return
 	}
 
 	amsUserOrgId, err := s.ams.ConvertUserOrgId(idObj.Internal.OrgID)
 	if err != nil {
-		doError(w, http.StatusInternalServerError, err, "AMS ConvertUserOrgId")
+		doError(w, idObj, "DELETE", "seat_subscription", id, http.StatusInternalServerError, err, "AMS ConvertUserOrgId")
 		return
 	}
 
 	if subOrgId != amsUserOrgId {
-		doError(w, http.StatusForbidden,
+		doError(w, idObj, "DELETE", "seat_subscription", id, http.StatusForbidden,
 			fmt.Errorf("Not allowed to delete subscription %s. Subscription org [%s] must match user ams org id [%s]}. User org [%s]",
 				id, subOrgId, amsUserOrgId, idObj.Internal.OrgID), "")
 		return
 	}
 
 	if err = s.ams.DeleteSubscription(id); err != nil {
-		doError(w, http.StatusInternalServerError, err, "AMS DeleteSubscription")
+		doError(w, idObj, "DELETE", "seat_subscription", id, http.StatusInternalServerError, err, "AMS DeleteSubscription")
 		return
 	}
 
+	// DELETE seat success - SEC-MON-REQ-1 compliance (EOI-1 pii_manipulation, EOI-3 admin_action)
+	logger.Log.WithFields(securitylog.FieldsFromIdentity(
+		idObj,
+		"DELETE",
+		"seat_subscription",
+		id,
+		securitylog.OutcomeSuccess,
+	)).Info("Seat subscription deleted")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -121,12 +133,12 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 	offset := int(*params.Offset)
 
 	if limit < 1 {
-		doError(w, http.StatusBadRequest, fmt.Errorf("limit must be > 0"), "")
+		doError(w, idObj, "READ", "seat_subscription", securitylog.ResourceIDOrFallback(idObj.Internal.OrgID, "seats"), http.StatusBadRequest, fmt.Errorf("limit must be > 0"), "")
 		return
 	}
 
 	if offset < 0 {
-		doError(w, http.StatusBadRequest, fmt.Errorf("offset must be >= 0"), "")
+		doError(w, idObj, "READ", "seat_subscription", securitylog.ResourceIDOrFallback(idObj.Internal.OrgID, "seats"), http.StatusBadRequest, fmt.Errorf("offset must be >= 0"), "")
 		return
 	}
 
@@ -134,13 +146,13 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 
 	subs, err := s.ams.GetSubscriptions(idObj.Internal.OrgID, params, limit, page)
 	if err != nil {
-		doError(w, http.StatusInternalServerError, err, "AMS GetSubscriptions")
+		doError(w, idObj, "READ", "seat_subscription", securitylog.ResourceIDOrFallback(idObj.Internal.OrgID, "seats"), http.StatusInternalServerError, err, "AMS GetSubscriptions")
 		return
 	}
 
 	quotaCost, err := s.ams.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
-		doError(w, http.StatusInternalServerError, err, "AMS GetQuotaCost")
+		doError(w, idObj, "READ", "seat_subscription", securitylog.ResourceIDOrFallback(idObj.Internal.OrgID, "seats"), http.StatusInternalServerError, err, "AMS GetQuotaCost")
 		return
 	}
 
@@ -188,10 +200,18 @@ func (s *SeatManagerApi) GetSeats(w http.ResponseWriter, r *http.Request, params
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err = json.NewEncoder(w).Encode(resp); err != nil {
-		doError(w, http.StatusInternalServerError, fmt.Errorf("Unexpected error encoding response [%w]", err), "")
+		doError(w, idObj, "READ", "seat_subscription", securitylog.ResourceIDOrFallback(idObj.Internal.OrgID, "seats"), http.StatusInternalServerError, fmt.Errorf("Unexpected error encoding response [%w]", err), "")
 		return
 	}
 
+	// READ seats success - SEC-MON-REQ-1 compliance (EOI-1 pii_manipulation)
+	logger.Log.WithFields(securitylog.FieldsFromIdentity(
+		idObj,
+		"READ",
+		"seat_subscription",
+		securitylog.ResourceIDOrFallback(idObj.Internal.OrgID, "seats"),
+		securitylog.OutcomeSuccess,
+	)).Info("Seat subscriptions listed")
 }
 
 func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
@@ -199,46 +219,47 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 
 	// Service Accounts don't have User field and cannot be org admins
 	if idObj.User == nil || !idObj.User.OrgAdmin {
-		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats, must be an org admin."), "")
+		// CREATE seat authorization failure - SEC-MON-REQ-1 compliance (EOI-3 admin_action, EOI-8 authorization_failure)
+		doError(w, idObj, "CREATE", "seat_assignment", "seat-assignment", http.StatusForbidden, fmt.Errorf("Not allowed to assign seats, must be an org admin."), "")
 		return
 	}
 
 	seat := new(api.SeatRequest)
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(seat); err != nil {
-		doError(w, http.StatusBadRequest, fmt.Errorf("PostSeats [%w]", err), "")
+		doError(w, idObj, "CREATE", "seat_assignment", "seat-assignment", http.StatusBadRequest, fmt.Errorf("PostSeats [%w]", err), "")
 		return
 	}
 
 	user, err := s.bop.GetUser(seat.AccountUsername)
 	if err != nil {
-		doError(w, http.StatusInternalServerError, err, "BOP GetUser")
+		doError(w, idObj, "CREATE", "seat_assignment", seat.AccountUsername, http.StatusInternalServerError, err, "BOP GetUser")
 		return
 	}
 
 	if user.OrgId != idObj.Internal.OrgID {
-		doError(w, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats to users outside of Organization %s", idObj.Internal.OrgID), "")
+		doError(w, idObj, "CREATE", "seat_assignment", seat.AccountUsername, http.StatusForbidden, fmt.Errorf("Not allowed to assign seats to users outside of Organization %s", idObj.Internal.OrgID), "")
 		return
 	}
 
 	quotaCost, err := s.ams.GetQuotaCost(idObj.Internal.OrgID)
 	if err != nil {
-		doError(w, http.StatusInternalServerError, err, "AMS GetQuotaCost")
+		doError(w, idObj, "CREATE", "seat_assignment", seat.AccountUsername, http.StatusInternalServerError, err, "AMS GetQuotaCost")
 		return
 	}
 
 	resp, err := s.ams.QuotaAuthorization(seat.AccountUsername, quotaCost.Version())
 	if err != nil {
-		doError(w, http.StatusInternalServerError, err, "AMS QuotaAuthorization")
+		doError(w, idObj, "CREATE", "seat_assignment", seat.AccountUsername, http.StatusInternalServerError, err, "AMS QuotaAuthorization")
 		return
 	}
 
 	if !resp.Allowed() {
 		if len(resp.ExcessResources()) > 0 {
-			doError(w, http.StatusConflict, fmt.Errorf("Assignment request was denied due to excessive resource requests"), "")
+			doError(w, idObj, "CREATE", "seat_assignment", seat.AccountUsername, http.StatusConflict, fmt.Errorf("Assignment request was denied due to excessive resource requests"), "")
 			return
 		}
-		doError(w, http.StatusForbidden, fmt.Errorf("Assignment request was denied"), "")
+		doError(w, idObj, "CREATE", "seat_assignment", seat.AccountUsername, http.StatusForbidden, fmt.Errorf("Assignment request was denied"), "")
 		return
 	}
 
@@ -252,7 +273,16 @@ func (s *SeatManagerApi) PostSeats(w http.ResponseWriter, r *http.Request) {
 		SubscriptionId:  &subId,
 		AccountUsername: &userName,
 	}); err != nil {
-		doError(w, http.StatusInternalServerError, fmt.Errorf("Unexpected error encoding response [%w]", err), "")
+		doError(w, idObj, "CREATE", "seat_assignment", seat.AccountUsername, http.StatusInternalServerError, fmt.Errorf("Unexpected error encoding response [%w]", err), "")
 		return
 	}
+
+	// CREATE seat success - SEC-MON-REQ-1 compliance (EOI-1 pii_manipulation, EOI-3 admin_action)
+	logger.Log.WithFields(securitylog.FieldsFromIdentity(
+		idObj,
+		"CREATE",
+		"seat_assignment",
+		seat.AccountUsername,
+		securitylog.OutcomeSuccess,
+	)).Info("Seat assignment created")
 }

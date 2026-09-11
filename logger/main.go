@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
+	"github.com/RedHatInsights/entitlements-api-go/securitylog"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	lc "github.com/redhatinsights/platform-go-middlewares/v2/logging/cloudwatch"
@@ -25,7 +26,16 @@ func InitLogger() *logrus.Logger {
 		logLevel := confOpts.GetString(config.Keys.LogLevel)
 		logrusLogLevel, err := logrus.ParseLevel(logLevel)
 		if err != nil {
-			panic(err)
+			securitylog.NewLogger().WithFields(logrus.Fields{
+				"configured_log_level": logLevel,
+				"error":                err,
+			}).WithFields(securitylog.Fields(
+				"STARTUP",
+				"logger_configuration",
+				config.Keys.LogLevel,
+				securitylog.OutcomeFailure,
+				securitylog.ProcessPrincipal("entitlements-api-go"),
+			)).Panic("Invalid logger configuration")
 		}
 
 		cwKey := confOpts.GetString(config.Keys.CwKey)
