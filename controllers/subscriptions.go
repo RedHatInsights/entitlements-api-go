@@ -15,6 +15,7 @@ import (
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	l "github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/RedHatInsights/entitlements-api-go/securitylog"
 	"github.com/RedHatInsights/entitlements-api-go/types"
 	"github.com/redhatinsights/platform-go-middlewares/v2/identity"
 
@@ -130,11 +131,11 @@ var GetFeatureStatus = func(params GetFeatureStatusParams) types.FeatureResponse
 	}
 
 	req := fmt.Sprintf("%s%s%s&accountId=%s",
-			configOptions.GetString(config.Keys.SubsHost),
-			configOptions.GetString(config.Keys.FeatureStatusAPIPath),
-			featuresQuery,
-			orgID,
-		)
+		configOptions.GetString(config.Keys.SubsHost),
+		configOptions.GetString(config.Keys.FeatureStatusAPIPath),
+		featuresQuery,
+		orgID,
+	)
 
 	resp, err := getClient().Get(req)
 
@@ -340,10 +341,38 @@ func Services() func(http.ResponseWriter, *http.Request) {
 		obj, err := json.Marshal(entitlementsResponse)
 
 		if err != nil {
-			l.Log.WithFields(logrus.Fields{"error": err}).Error("Unexpected error while unmarshalling JSON data from Subs Service")
+			// READ entitlements failure - SEC-MON-REQ-1 compliance (EOI-1 pii_manipulation, EOI-11 warnings_or_errors)
+			l.Log.WithFields(logrus.Fields{"error": err}).WithFields(securitylog.FieldsFromIdentity(
+				idObj,
+				"READ",
+				"entitlements",
+				securitylog.ResourceIDOrFallback(orgId, "entitlements"),
+				securitylog.OutcomeFailure,
+			)).Error("Unexpected error while unmarshalling JSON data from Subs Service")
 			sentry.CaptureException(err)
 			http.Error(w, http.StatusText(500), 500)
 			return
+		}
+
+		resourceID := securitylog.ResourceIDOrFallback(orgId, "entitlements")
+		if degraded {
+			// READ entitlements degraded - SEC-MON-REQ-1 compliance (EOI-1 pii_manipulation, EOI-11 warnings_or_errors)
+			l.Log.WithFields(logrus.Fields{"degraded": true}).WithFields(securitylog.FieldsFromIdentity(
+				idObj,
+				"READ",
+				"entitlements",
+				resourceID,
+				securitylog.OutcomeFailure,
+			)).Warn("Entitlements read returned degraded response")
+		} else {
+			// READ entitlements success - SEC-MON-REQ-1 compliance (EOI-1 pii_manipulation)
+			l.Log.WithFields(securitylog.FieldsFromIdentity(
+				idObj,
+				"READ",
+				"entitlements",
+				resourceID,
+				securitylog.OutcomeSuccess,
+			)).Info("Entitlements read succeeded")
 		}
 
 		w.Header().Set("Content-Type", "application/json")

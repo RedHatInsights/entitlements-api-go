@@ -16,13 +16,16 @@ import (
 	"time"
 
 	"github.com/RedHatInsights/entitlements-api-go/config"
+	"github.com/RedHatInsights/entitlements-api-go/securitylog"
 	t "github.com/RedHatInsights/entitlements-api-go/types"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
 var dryRun bool
 var featuresURL string
+var securityLogger = securitylog.NewLogger()
 
 // assertEq compares two slices of strings and returns true if they are equal
 func assertEq(test []string, ans []string) bool {
@@ -49,23 +52,72 @@ func getClient(cfg *config.EntitlementsConfig) *http.Client {
 	return client
 }
 
-func getCurrent(client *http.Client, url string) (t.SubModel, error) {
+func getCurrent(client *http.Client, endpoint, url string) (t.SubModel, error) {
 	resp, err := client.Get(url)
+	fields := securitylog.Fields(
+		"READ",
+		"feature_definition",
+		endpoint,
+		securitylog.OutcomeSuccess,
+		securitylog.ProcessPrincipal("bundle_sync"),
+	)
+
+	if err != nil {
+		securityLogger.WithFields(logrus.Fields{
+			"error":      err,
+			"target_url": url,
+		}).WithFields(securitylog.Fields(
+			"READ",
+			"feature_definition",
+			endpoint,
+			securitylog.OutcomeFailure,
+			securitylog.ProcessPrincipal("bundle_sync"),
+		)).Error("Failed to read feature definition")
+		return t.SubModel{}, err
+	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode == 404 {
 		// since `postUpdates` is an upsert, this will allow us to add new features
 		// into our config, and `getUpdates` will source the feature SKU list and
 		// create the new feature when it's not found.
+		securityLogger.WithFields(logrus.Fields{
+			"response_status": resp.StatusCode,
+			"target_url":      url,
+			"not_found":       true,
+		}).WithFields(fields).Info("Feature definition not found during read")
 		return t.SubModel{}, nil
 	}
 
-	if err != nil {
-		return t.SubModel{}, err
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		respBody := string(body)
+		securityLogger.WithFields(logrus.Fields{
+			"response_status": resp.StatusCode,
+			"response_body":   respBody,
+			"target_url":      url,
+		}).WithFields(securitylog.Fields(
+			"READ",
+			"feature_definition",
+			endpoint,
+			securitylog.OutcomeFailure,
+			securitylog.ProcessPrincipal("bundle_sync"),
+		)).Error("Feature definition read rejected by features API")
+		return t.SubModel{}, fmt.Errorf("error reading current feature definition -- response: '%s', status: '%d', url: '%s'", respBody, resp.StatusCode, url)
 	}
-	defer resp.Body.Close()
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
+		securityLogger.WithFields(logrus.Fields{
+			"error":      err,
+			"target_url": url,
+		}).WithFields(securitylog.Fields(
+			"READ",
+			"feature_definition",
+			endpoint,
+			securitylog.OutcomeFailure,
+			securitylog.ProcessPrincipal("bundle_sync"),
+		)).Error("Failed to read feature definition response body")
 		return t.SubModel{}, err
 	}
 
@@ -74,8 +126,22 @@ func getCurrent(client *http.Client, url string) (t.SubModel, error) {
 	var currentSubs t.SubModel
 	err = json.Unmarshal(data, &currentSubs)
 	if err != nil {
+		securityLogger.WithFields(logrus.Fields{
+			"error":      err,
+			"target_url": url,
+		}).WithFields(securitylog.Fields(
+			"READ",
+			"feature_definition",
+			endpoint,
+			securitylog.OutcomeFailure,
+			securitylog.ProcessPrincipal("bundle_sync"),
+		)).Error("Failed to decode feature definition response")
 		return t.SubModel{}, err
 	}
+
+	securityLogger.WithFields(logrus.Fields{
+		"target_url": url,
+	}).WithFields(fields).Info("Read feature definition")
 	return currentSubs, nil
 }
 
@@ -142,25 +208,62 @@ func getBundlesConfig(cfg *viper.Viper) (map[string]t.Bundle, error) {
 
 }
 
-func postUpdates(cfg *viper.Viper, client *http.Client, data []byte) error {
+func postUpdates(cfg *viper.Viper, client *http.Client, endpoint string, data []byte) error {
+	fields := securitylog.Fields(
+		"UPDATE",
+		"feature_definition",
+		endpoint,
+		securitylog.OutcomeSuccess,
+		securitylog.ProcessPrincipal("bundle_sync"),
+	)
+
 	if dryRun {
 		// print updates that would be made but don't actually run them
 		log.Printf("*** POST '%s' - '%s'", featuresURL, string(data))
+		securityLogger.WithFields(logrus.Fields{
+			"dry_run":     true,
+			"target_url":  featuresURL,
+			"requestBody": string(data),
+		}).WithFields(fields).Info("Prepared feature definition update")
 		return nil
 	}
 
 	resp, err := client.Post(featuresURL, "application/json", strings.NewReader(string(data)))
 	if err != nil {
+		securityLogger.WithFields(logrus.Fields{
+			"error":      err,
+			"target_url": featuresURL,
+		}).WithFields(securitylog.Fields(
+			"UPDATE",
+			"feature_definition",
+			endpoint,
+			securitylog.OutcomeFailure,
+			securitylog.ProcessPrincipal("bundle_sync"),
+		)).Error("Failed to post feature definition update")
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent {
 		body, _ := io.ReadAll(resp.Body)
 		respBody := string(body)
+		securityLogger.WithFields(logrus.Fields{
+			"response_status": resp.StatusCode,
+			"response_body":   respBody,
+			"target_url":      featuresURL,
+		}).WithFields(securitylog.Fields(
+			"UPDATE",
+			"feature_definition",
+			endpoint,
+			securitylog.OutcomeFailure,
+			securitylog.ProcessPrincipal("bundle_sync"),
+		)).Error("Feature definition update rejected by features API")
 		return fmt.Errorf("error posting update -- response: '%s', status: '%d'. url: '%s', request body: '%s'", respBody, resp.StatusCode, featuresURL, string(data))
 	}
 
-	defer resp.Body.Close()
+	securityLogger.WithFields(logrus.Fields{
+		"target_url": featuresURL,
+	}).WithFields(fields).Info("Updated feature definition")
 
 	return nil
 
@@ -209,7 +312,7 @@ func main() {
 		log.Printf("Checking for updates to %s\n", endpoint)
 		skus := make(map[string][]string)
 		current_skus := make(map[string][]string)
-		current, err := getCurrent(client, featuresURL+"/"+endpoint)
+		current, err := getCurrent(client, endpoint, featuresURL+"/"+endpoint)
 		if err != nil {
 			log.Fatalf("Unable to get current features: %s", err)
 			os.Exit(1)
@@ -246,7 +349,7 @@ func main() {
 				log.Fatalf("Failed to Marshal updated JSON: %s", err)
 				os.Exit(1)
 			}
-			err = postUpdates(options, client, b)
+			err = postUpdates(options, client, endpoint, b)
 			if err != nil {
 				log.Fatalf("Unable to post updates to features API: %s", err)
 				os.Exit(1)
