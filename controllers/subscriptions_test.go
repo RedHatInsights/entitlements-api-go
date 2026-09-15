@@ -122,6 +122,13 @@ var _ = Describe("Services Controller", func() {
 		if err := SetBundleInfo("../test_data/test_bundle.yml"); err != nil {
 			panic("Error in test_bundle.yml")
 		}
+		// SKU-based entitlements are now driven by ENT_FEATURES; declare the SKU bundles
+		// from test_bundle.yml so they appear in the response.
+		config.GetConfig().Options.Set(config.Keys.Features, "TestBundle1,TestBundle2,TestBundle6")
+		paidFeatureSuffix = config.GetConfig().Options.GetString(config.Keys.PaidFeatureSuffix)
+		// Pin paidFeatures to an empty (non-nil) map so Services() does not make a live
+		// /features/v1 call during tests. Trial-specific specs override this.
+		paidFeatures = map[string]bool{}
 	})
 
 	It("should call GetFeatureStatus with the org_id on the context", func() {
@@ -134,11 +141,12 @@ var _ = Describe("Services Controller", func() {
 		testRequest("GET", "/", DEFAULT_ACCOUNT_NUMBER, "deadbeef12", DEFAULT_IS_INTERNAL, DEFAULT_EMAIL, fakeGetFeatureStatus("deadbeef12", fakeResponse))
 	})
 
-	It("should build the subscriptions query with only sku based features", func() {
+	It("should build the subscriptions query from ENT_FEATURES, excluding non-SKU bundles and appending _paid", func() {
 		cfg := config.GetConfig()
+		// TestBundle3/4/5/7 are non-SKU bundles in test_bundle.yml and must be excluded.
 		cfg.Options.Set(config.Keys.Features, "TestBundle1,TestBundle3,TestBundle4,TestBundle5,TestBundle6,TestBundle7")
 		setFeaturesQuery()
-		Expect(featuresQuery).To(BeEquivalentTo("?features=TestBundle1&features=TestBundle6"))
+		Expect(featuresQuery).To(BeEquivalentTo("?features=TestBundle1&features=TestBundle1_paid&features=TestBundle6&features=TestBundle6_paid"))
 	})
 
 	Context("When bundles have paid and eval SKUs", func() {
@@ -375,6 +383,9 @@ var _ = Describe("Services Controller", func() {
 					Skus: []string{"SKU1"},
 				},
 			}
+			config.GetConfig().Options.Set(config.Keys.Features, "SplitBundle,RegularBundle")
+			// SplitBundle is paid-capable (has a _paid variant); RegularBundle is not.
+			paidFeatures = map[string]bool{"SplitBundle": true, "RegularBundle": false}
 		})
 
 		It("should set isTrial to false when user has paid SKU", func() {
@@ -623,6 +634,7 @@ var _ = Describe("Services Controller", func() {
 
 		When("trial_activated param is valid", func() {
 			var subsServer *ghttp.Server
+			var origSubsHost string
 
 			BeforeEach(func() {
 				GetFeatureStatus = realGetFeatureStatus
@@ -641,9 +653,12 @@ var _ = Describe("Services Controller", func() {
 					}
 				]}`, http.Header{"Content-Type": {"application/json"}}))
 
-				// this points our http client to our mock server setup above
+				// this points our http client to our mock server setup above. Use Set (not
+				// SetDefault): once any other spec has Set SubsHost, SetDefault is silently
+				// ignored and the real GetFeatureStatus would hit the live host.
 				cfg := config.GetConfig().Options
-				cfg.SetDefault(config.Keys.SubsHost, subsServer.URL())
+				origSubsHost = cfg.GetString(config.Keys.SubsHost)
+				cfg.Set(config.Keys.SubsHost, subsServer.URL())
 
 				// fill cache
 				params := GetFeatureStatusParams{
@@ -655,6 +670,7 @@ var _ = Describe("Services Controller", func() {
 
 			AfterEach(func() {
 				subsServer.Close()
+				config.GetConfig().Options.Set(config.Keys.SubsHost, origSubsHost)
 			})
 
 			It("serves cached data when req param is false", func() {
