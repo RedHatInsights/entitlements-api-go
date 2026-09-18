@@ -5,11 +5,5 @@
   ],
   "postUpdateOptions": [
     "gomodTidy"
-  ],
-  "postUpgradeTasks": {
-    "commands": [
-      "make generate"
-    ],
-    "executionMode": "branch"
-  }
+  ]
 }
