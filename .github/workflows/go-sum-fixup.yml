@@ -1,4 +1,4 @@
-name: bot-gosum-fixup
+name: go-sum-fixup
 on:
   pull_request:
     paths:
