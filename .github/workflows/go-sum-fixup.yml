@@ -21,6 +21,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{github.repository}}
         run: |
           if [ -f go.sum ]; then
             echo "go.sum already exists, skipping"
@@ -28,7 +29,7 @@ jobs:
             exit 0
           fi
 
-          conclusion=$(gh api repos/${{ github.repository }}/commits/$HEAD_SHA/status --jq '.state')
+          conclusion=$(gh api repos/$REPO/commits/$HEAD_SHA/status --jq '.state')
           if [ "$conclusion" != "failure" ]; then
             echo "CI is not failing (state=$conclusion), skipping"
             echo "proceed=false" >> "$GITHUB_OUTPUT"
@@ -50,11 +51,13 @@ jobs:
 
       - name: Commit go.sum if changed
         if: steps.precheck.outputs.proceed == 'true'
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           if ! git diff --quiet -- go.sum; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add go.sum
             git commit -m "fixup: regenerate go.sum"
-            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+            git push origin HEAD:$HEAD_REF
           fi
