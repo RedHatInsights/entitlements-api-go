@@ -1,0 +1,36 @@
+name: bot-gosum-fixup
+on:
+  pull_request:
+    paths:
+      - go.mod
+
+permissions:
+  contents: write
+
+jobs:
+  fixup:
+    if: github.event.pull_request.user.login == 'red-hat-konflux[bot]' || startsWith(github.event.pull_request.head.ref, 'konflux/mintmaker/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Generate and tidy
+        run: |
+          make generate
+          go mod tidy
+
+      - name: Commit go.sum if changed
+        run: |
+          if ! git diff --quiet -- go.sum; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add go.sum
+            git commit -m "fixup: regenerate go.sum"
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          fi
