@@ -1,0 +1,62 @@
+# Prod-shaped bundle fixture for the /services response regression suite.
+# Mirrors the shape of entitlements-config prod bundles.yml: the SKU-based bundles
+# (ansible/smart_management/acs are paid-capable via eval+paid skus; rhods/rhoam/rhosak
+# are skus-only) plus the non-SKU bundles gated by use_valid_*/use_is_internal.
+# SKU bundle names here intentionally match the prod ENT_FEATURES list (minus openshift).
+
+- name: ansible
+  eval_skus:
+    - RH00798
+  paid_skus:
+    - MCT3311
+
+- name: smart_management
+  eval_skus:
+    - RH00066
+  paid_skus:
+    - SVC3124
+
+- name: acs
+  eval_skus:
+    - SER0798
+  paid_skus:
+    - MW02159
+
+- name: rhods
+  skus:
+    - MCT4217MO
+
+- name: rhoam
+  skus:
+    - MW01459
+
+- name: rhosak
+  skus:
+    - MW01882
+
+- name: cost_management
+  use_valid_org_id: true
+
+- name: insights
+  use_valid_org_id: true
+
+- name: migrations
+  use_valid_org_id: true
+
+- name: subscriptions
+  use_valid_org_id: true
+
+- name: settings
+  use_valid_org_id: true
+
+- name: user_preferences
+  use_valid_org_id: true
+
+- name: openshift
+  use_valid_acc_num: false
+
+- name: internal
+  use_is_internal: true
+
+- name: rhel
+  use_valid_org_id: true
