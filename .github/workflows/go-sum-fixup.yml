@@ -1,0 +1,63 @@
+name: go-sum-fixup
+on:
+  pull_request:
+    paths:
+      - go.mod
+
+permissions:
+  contents: write
+
+jobs:
+  fixup:
+    if: github.event.pull_request.user.login == 'red-hat-konflux[bot]' || startsWith(github.event.pull_request.head.ref, 'konflux/mintmaker/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Check preconditions
+        id: precheck
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{github.repository}}
+        run: |
+          if [ -f go.sum ]; then
+            echo "go.sum already exists, skipping"
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          conclusion=$(gh api repos/$REPO/commits/$HEAD_SHA/status --jq '.state')
+          if [ "$conclusion" != "failure" ]; then
+            echo "CI is not failing (state=$conclusion), skipping"
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "proceed=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-go@v5
+        if: steps.precheck.outputs.proceed == 'true'
+        with:
+          go-version-file: go.mod
+
+      - name: Generate and tidy
+        if: steps.precheck.outputs.proceed == 'true'
+        run: |
+          make generate
+          go mod tidy
+
+      - name: Commit go.sum if changed
+        if: steps.precheck.outputs.proceed == 'true'
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if ! git diff --quiet -- go.sum; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add go.sum
+            git commit -m "fixup: regenerate go.sum"
+            git push origin HEAD:$HEAD_REF
+          fi
