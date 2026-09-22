@@ -38,7 +38,7 @@ jobs:
 
           echo "proceed=true" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         if: steps.precheck.outputs.proceed == 'true'
         with:
           go-version-file: go.mod
