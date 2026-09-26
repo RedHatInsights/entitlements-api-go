@@ -59,7 +59,7 @@ require (
 	github.com/openshift-online/ocm-api-model/model v0.0.446 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
-	github.com/prometheus/client_model v0.6.2 // indirect
+	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.19.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
