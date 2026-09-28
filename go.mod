@@ -11,10 +11,10 @@ require (
 	github.com/karlseguin/ccache/v3 v3.0.8
 	github.com/oapi-codegen/runtime v1.7.0
 	github.com/onsi/ginkgo/v2 v2.33.0
-	github.com/onsi/gomega v1.43.1
-	github.com/openshift-online/ocm-sdk-go v0.1.513
+	github.com/onsi/gomega v1.44.0
+	github.com/openshift-online/ocm-sdk-go v0.1.514
 	github.com/prometheus/client_golang v1.24.1
-	github.com/redhatinsights/app-common-go v1.6.9
+	github.com/redhatinsights/app-common-go v1.7.0
 	github.com/redhatinsights/platform-go-middlewares/v2 v2.1.0
 	github.com/sirupsen/logrus v1.10.2
 	github.com/spf13/viper v1.21.0
@@ -33,7 +33,7 @@ require (
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
-	github.com/go-openapi/jsonpointer v1.0.1 // indirect
+	github.com/go-openapi/jsonpointer v1.0.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
