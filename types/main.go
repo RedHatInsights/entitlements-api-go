@@ -34,13 +34,17 @@ type FeatureStatus struct {
 
 // Bundle is a struct that is used to unmarshal the bundle info from bundles.yml
 type Bundle struct {
-	Name           string   `yaml:"name"`
-	UseValidAccNum bool     `yaml:"use_valid_acc_num"`
-	UseValidOrgId  bool     `yaml:"use_valid_org_id"`
-	UseIsInternal  bool     `yaml:"use_is_internal"`
-	Skus           []string `yaml:"skus"`
-	EvalSkus       []string `yaml:"eval_skus"`
-	PaidSkus       []string `yaml:"paid_skus"`
+	Name string `yaml:"name"`
+	// UseFeatureService marks a bundle whose entitlement is resolved by Feature Service
+	// (Feature Service owns the SKU/engId/etc. mapping; the bundle name is the feature key).
+	// This supersedes the ENT_FEATURES env var. See RHCLOUD-49553.
+	UseFeatureService bool     `yaml:"use_feature_service"`
+	UseValidAccNum    bool     `yaml:"use_valid_acc_num"`
+	UseValidOrgId     bool     `yaml:"use_valid_org_id"`
+	UseIsInternal     bool     `yaml:"use_is_internal"`
+	Skus              []string `yaml:"skus"`
+	EvalSkus          []string `yaml:"eval_skus"`
+	PaidSkus          []string `yaml:"paid_skus"`
 }
 
 func (b *Bundle) IsPaid() bool {

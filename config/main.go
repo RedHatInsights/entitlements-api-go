@@ -44,9 +44,11 @@ type EntitlementsConfigKeysType struct {
 	CwRegion                 string
 	CwKey                    string
 	CwSecret                 string
-	// Features (ENT_FEATURES) is a comma-separated list of SKU-based features to query
+	// Features (ENT_FEATURES) is a comma-separated list of feature-service features to query
 	// against Feature Service. The base feature is queried along with its "_paid" variant
-	// automatically. Non-SKU bundles (e.g. openshift) are configured in bundles.yml, not here.
+	// automatically. DEPRECATED (RHCLOUD-49553): superseded by `use_feature_service: true`
+	// on bundles in bundles.yml. It is still read as a transition fallback and will be
+	// removed once all environments declare feature-service bundles in bundles.yml.
 	Features                 string
 	FeaturesAPIPath          string
 	FeatureStatusAPIPath     string
