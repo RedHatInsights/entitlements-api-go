@@ -97,38 +97,61 @@ func SetBundleInfo(yamlFilePath string) error {
 func nonSkuBundleNames() map[string]bool {
 	names := make(map[string]bool)
 	for _, bundle := range bundleInfo {
-		if !bundle.IsSkuBased() {
+		if !bundle.IsSkuBased() && !bundle.UseFeatureService {
 			names[bundle.Name] = true
 		}
 	}
 	return names
 }
 
-// skuFeatures returns the SKU-based features to resolve against Feature Service: every
-// entry in ENT_FEATURES, minus any name that is a non-SKU bundle in bundles.yml. The
-// subtraction keeps non-SKU bundles (e.g. openshift) out of the SKU path even if they are
-// still listed in ENT_FEATURES during the config transition.
-func skuFeatures() []string {
-	nonSku := nonSkuBundleNames()
+// featureServiceFeatures returns the bundle/feature names whose entitlement is resolved by
+// Feature Service. A bundle opts in with `use_feature_service: true` in bundles.yml (the
+// end state). During the migration away from the ENT_FEATURES env var, the flagged set is
+// unioned with ENT_FEATURES (minus any non-SKU bundle name, which keeps a non-SKU bundle
+// such as openshift out of the Feature Service path even if still listed in ENT_FEATURES).
+// Once ENT_FEATURES is retired the fallback loop can be removed and this collapses to the
+// flagged set. Order is stable: flagged bundles (in bundleInfo order) first, then remaining
+// ENT_FEATURES entries.
+func featureServiceFeatures() []string {
+	seen := make(map[string]bool)
 	var features []string
+	add := func(name string) {
+		name = strings.TrimSpace(name)
+		if name == "" || seen[name] {
+			return
+		}
+		seen[name] = true
+		features = append(features, name)
+	}
+
+	// Explicit opt-in via bundles.yml (the end state).
+	for _, bundle := range bundleInfo {
+		if bundle.UseFeatureService {
+			add(bundle.Name)
+		}
+	}
+
+	// Legacy ENT_FEATURES fallback (transition only).
+	nonSku := nonSkuBundleNames()
 	for _, f := range strings.Split(configOptions.GetString(config.Keys.Features), ",") {
 		f = strings.TrimSpace(f)
 		if f == "" || nonSku[f] {
 			continue
 		}
-		features = append(features, f)
+		add(f)
 	}
+
 	return features
 }
 
 func setFeaturesQuery() {
 	paidFeatureSuffix = configOptions.GetString(config.Keys.PaidFeatureSuffix)
 
-	// Query the base feature and its "_paid" variant for every SKU feature. Feature Service
-	// returns an empty result for features that do not exist, so querying a "_paid" variant
-	// that has not been defined is harmless.
+	// Query the base feature and its "_paid" variant for every feature-service feature.
+	// Feature Service returns an empty result for features that do not exist, so querying a
+	// "_paid" variant that has not been defined is harmless.
 	var features []string
-	for _, feature := range skuFeatures() {
+	for _, feature := range featureServiceFeatures() {
 		features = append(features, feature, feature+paidFeatureSuffix)
 	}
 
@@ -183,7 +206,7 @@ func loadPaidFeatures() map[string]bool {
 		catalogNames[f.Name] = true
 	}
 
-	for _, f := range skuFeatures() {
+	for _, f := range featureServiceFeatures() {
 		result[f] = catalogNames[f+suffix]
 	}
 
@@ -393,10 +416,13 @@ func Services() func(http.ResponseWriter, *http.Request) {
 
 		entitlementsResponse := make(map[string]types.EntitlementsSection)
 
-		// SKU-based features are sourced from ENT_FEATURES and resolved against Feature
-		// Service. is_trial is true only for paid-capable features where the base feature is
-		// present but the "_paid" variant is not.
-		for _, feature := range skuFeatures() {
+		// Feature-service features are resolved against Feature Service. is_trial is true
+		// only for paid-capable features where the base feature is present but the "_paid"
+		// variant is not.
+		featureServiceNames := featureServiceFeatures()
+		isFeatureService := make(map[string]bool, len(featureServiceNames))
+		for _, feature := range featureServiceNames {
+			isFeatureService[feature] = true
 			if !passesFilter(feature) {
 				continue
 			}
@@ -414,10 +440,11 @@ func Services() func(http.ResponseWriter, *http.Request) {
 			entitlementsResponse[feature] = setBundlePayload(isEntitled, isTrial)
 		}
 
-		// Non-SKU bundles are sourced from bundles.yml. SKU-based bundles are handled above
-		// via ENT_FEATURES (and are being removed from bundles.yml), so skip them here.
+		// The remaining bundles are identity-gated and sourced from bundles.yml. Feature-
+		// service bundles are handled above, so skip them here (also skip any lingering
+		// SKU-listed bundle during the transition).
 		for _, bundle := range bundleInfo {
-			if bundle.IsSkuBased() {
+			if isFeatureService[bundle.Name] || bundle.IsSkuBased() {
 				continue
 			}
 			if !passesFilter(bundle.Name) {
