@@ -2,7 +2,24 @@
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
 
-FROM registry.access.redhat.com/ubi9/go-toolset:9.7-1768393489@sha256:e8938564f866174a6d79e55dfe577c2ed184b1f53e91d782173fb69b07ce69ef as builder
+FROM registry.access.redhat.com/hi/go:1.27.0-fips-builder@sha256:f61df82b9277aa825678ba9b19960bee25c84d6e07f5db269790fbd9462751f1 as builder
+
+WORKDIR /go/src/app
+
+COPY go.mod go.sum ./
+
+USER root
+
+ENV PATH="/usr/local/go/bin:${PATH}"
+
+RUN go mod download
+COPY . .
+
+RUN make
+
+FROM registry.access.redhat.com/hi/core-runtime:2.43-openssl-fips-builder@sha256:3136b8d6f717066e04f2e85d9c320d3c3850c12bd09b5cc46f9c9702c27d469b
+
+WORKDIR /
 
 LABEL name="entitlements-api-go" \
       summary="Red Hat Entitlements API Service" \
@@ -18,34 +35,14 @@ LABEL name="entitlements-api-go" \
       distribution-scope="private" \
       maintainer="platform-accessmanagement@redhat.com"
 
-WORKDIR /go/src/app
-
-COPY go.mod go.sum ./
-
-USER root
-
-# Install Go 1.25.5 to address CVE-2025-61729 (Until new ubi9 minimal image supports this go version)
-RUN curl -LO https://go.dev/dl/go1.25.5.linux-amd64.tar.gz && \
-    rm -rf /usr/local/go && \
-    tar -C /usr/local -xzf go1.25.5.linux-amd64.tar.gz && \
-    rm go1.25.5.linux-amd64.tar.gz
-ENV PATH="/usr/local/go/bin:${PATH}"
-
-RUN go mod download
-COPY . .
-
-RUN make
-
-# Using ubi9-minimal due to its smaller footprint
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1768783948@sha256:90bd85dcd061d1ad6dbda70a867c41958c04a86462d05c631f8205e8870f28f8
-
-WORKDIR /
-
 # Copy GO executable file and need directories from the builder image
 COPY --from=builder /go/src/app/entitlements-api-go ./entitlements-api-go
 COPY --from=builder /go/src/app/bundle-sync ./bundle-sync
 COPY apispec ./apispec
 COPY bundles ./bundles
+COPY licenses /licenses
+
+ENV GODEBUG=fips140=on
 
 USER 1001
 

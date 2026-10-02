@@ -216,9 +216,9 @@ parameters:
   name: GLITCHTIP_SECRET
   required: false
   value: 'entitlements-secret'
-- description: List of feature bundles to onboard during bundle sync
+- description: Comma-separated list of SKU-based features to resolve against Feature Service (the "_paid" variant is queried automatically). Non-SKU bundles (e.g. openshift) are configured in bundles.yml, not here.
   name: FEATURES
-  value: ansible,rhods,openshift,acs
+  value: ansible,rhods,acs
   required: false
 - description: Flag to disable seat manager by not exposing any of the apis related to the feature
   name: DISABLE_SEAT_MANAGER

@@ -166,6 +166,18 @@ This will run the program but won't actually POST any updates, it will just prin
     make bench
     ```
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [AGENTS.md](AGENTS.md) | Onboarding doc for AI agents and contributors: project structure, naming conventions, build workflow, and architectural context |
+| [docs/security-guidelines.md](docs/security-guidelines.md) | Identity/auth, input validation, TLS, secrets, fail-closed behavior |
+| [docs/performance-guidelines.md](docs/performance-guidelines.md) | Caching, HTTP clients, Prometheus metrics, concurrency |
+| [docs/error-handling-guidelines.md](docs/error-handling-guidelines.md) | Logging, Sentry, custom error types, error wrapping |
+| [docs/api-contracts-guidelines.md](docs/api-contracts-guidelines.md) | OpenAPI spec, oapi-codegen, schema conventions, pagination |
+| [docs/testing-guidelines.md](docs/testing-guidelines.md) | Ginkgo/Gomega, mock patterns, test structure |
+| [docs/integration-guidelines.md](docs/integration-guidelines.md) | AMS, BOP, Feature Service, Compliance Service clients |
+
 ## Releases
 
 **Versioning:** All releases should follow [SemVer](http://semver.org) versioning.

@@ -12,11 +12,13 @@ import (
 	"github.com/RedHatInsights/entitlements-api-go/config"
 	"github.com/RedHatInsights/entitlements-api-go/controllers"
 	log "github.com/RedHatInsights/entitlements-api-go/logger"
+	"github.com/RedHatInsights/entitlements-api-go/securitylog"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redhatinsights/platform-go-middlewares/v2/identity"
+	"github.com/sirupsen/logrus"
 )
 
 // DoRoutes sets up the routes used by the server.
@@ -39,10 +41,17 @@ func DoRoutes() chi.Router {
 
 	// Setup identity enforcement with logging
 	enforceIdentity := identity.EnforceIdentityWithLogger(func(ctx context.Context, id, msg string) {
-		log.Log.WithFields(map[string]interface{}{
+		// Identity validation failure - SEC-MON-REQ-1 compliance (EOI-7 invalid_login)
+		log.Log.WithFields(logrus.Fields{
 			"identity_header": id,
 			"error":           msg,
-		}).Error("Identity validation failed")
+		}).WithFields(securitylog.Fields(
+			"AUTHENTICATE",
+			"identity_header",
+			"x-rh-identity",
+			securitylog.OutcomeFailure,
+			securitylog.UnknownPrincipal(),
+		)).Error("Identity validation failed")
 	})
 
 	configOptions := config.GetConfig().Options
@@ -56,11 +65,27 @@ func DoRoutes() chi.Router {
 
 		amsClient, err := ams.NewClient(debug)
 		if err != nil {
+			// AMS client startup failure - SEC-MON-REQ-1 compliance (EOI-5 process_status, EOI-11 warnings_or_errors)
+			log.Log.WithFields(logrus.Fields{"error": err}).WithFields(securitylog.Fields(
+				"STARTUP",
+				"dependency_client",
+				"ams",
+				securitylog.OutcomeFailure,
+				securitylog.ProcessPrincipal("entitlements-api-go"),
+			)).Error("Error constructing ams client")
 			panic(fmt.Sprintf("Error constructing ams client: [%s]", err))
 		}
 
 		bopClient, err := bop.NewClient(debug)
 		if err != nil {
+			// BOP client startup failure - SEC-MON-REQ-1 compliance (EOI-5 process_status, EOI-11 warnings_or_errors)
+			log.Log.WithFields(logrus.Fields{"error": err}).WithFields(securitylog.Fields(
+				"STARTUP",
+				"dependency_client",
+				"bop",
+				securitylog.OutcomeFailure,
+				securitylog.ProcessPrincipal("entitlements-api-go"),
+			)).Error("Error constructing bop client")
 			panic(fmt.Sprintf("Error constructing bop client: [%s]", err))
 		}
 

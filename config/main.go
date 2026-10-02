@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/RedHatInsights/entitlements-api-go/securitylog"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	clowder "github.com/redhatinsights/app-common-go/pkg/api/v1"
@@ -42,8 +44,12 @@ type EntitlementsConfigKeysType struct {
 	CwRegion                 string
 	CwKey                    string
 	CwSecret                 string
+	// Features (ENT_FEATURES) is a comma-separated list of SKU-based features to query
+	// against Feature Service. The base feature is queried along with its "_paid" variant
+	// automatically. Non-SKU bundles (e.g. openshift) are configured in bundles.yml, not here.
 	Features                 string
-	SubAPIBasePath           string
+	FeaturesAPIPath          string
+	FeatureStatusAPIPath     string
 	CompAPIBasePath          string
 	RunBundleSync            string
 	EntitleAll               string
@@ -84,7 +90,8 @@ var Keys = EntitlementsConfigKeysType{
 	CwKey:                    "CW_KEY",
 	CwSecret:                 "CW_SECRET",
 	Features:                 "FEATURES",
-	SubAPIBasePath:           "SUB_API_BASE_PATH",
+	FeaturesAPIPath:          "FEATURES_API_PATH",
+	FeatureStatusAPIPath:     "FEATURE_STATUS_API_PATH",
 	CompAPIBasePath:          "COMP_API_BASE_PATH",
 	RunBundleSync:            "RUN_BUNDLE_SYNC",
 	EntitleAll:               "ENTITLE_ALL",
@@ -136,7 +143,8 @@ func initialize() {
 	options.SetDefault(Keys.CwLogGroup, "platform-dev")
 	options.SetDefault(Keys.CwLogStream, hostname)
 	options.SetDefault(Keys.CwRegion, "us-east-1")
-	options.SetDefault(Keys.SubAPIBasePath, "/features/v1/")
+	options.SetDefault(Keys.FeaturesAPIPath, "/features/v1")
+	options.SetDefault(Keys.FeatureStatusAPIPath, "/features/v2/featureStatus")
 	options.SetDefault(Keys.CompAPIBasePath, "/v1/screening")
 	options.SetDefault(Keys.RunBundleSync, false)
 	options.SetDefault(Keys.EntitleAll, false)
@@ -164,6 +172,14 @@ func initialize() {
 	// Load the certificates.
 	err = loadCertificates(config)
 	if err != nil {
+		// Certificate load failure - SEC-MON-REQ-1 compliance (EOI-5 process_status, EOI-11 warnings_or_errors)
+		securitylog.NewLogger().WithFields(logrus.Fields{"error": err}).WithFields(securitylog.Fields(
+			"STARTUP",
+			"tls_certificates",
+			"entitlements-api-go",
+			securitylog.OutcomeFailure,
+			securitylog.ProcessPrincipal("entitlements-api-go"),
+		)).Error("Failed to load certificates")
 		panic(fmt.Sprintf("unable to load certificates: %s", err))
 	}
 
