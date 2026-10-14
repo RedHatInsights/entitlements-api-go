@@ -14,11 +14,11 @@ jobs:
   json-yaml-validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: json-yaml-validate
         id: json-yaml-validate
-        uses: GrantBirki/json-yaml-validate@250fa0dc7d7f4a888b24dc2a6b2ff589753fba70 # v3.3.2 # https://github.com/GrantBirki/json-yaml-validate/
+        uses: GrantBirki/json-yaml-validate@9dbc6e6ff950c53200156e8afbc16ef1355f1c8d # v5.0.1 # https://github.com/GrantBirki/json-yaml-validate/
         with:
           comment: "true" # enable comment mode
           use_dot_match: "true" # directories like .github, etc will be searched
