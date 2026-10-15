@@ -28,22 +28,22 @@ type EntitlementsConfig struct {
 
 // EntitlementsConfigKeysType is the definition of the struct hat houses all the env variables key names
 type EntitlementsConfigKeysType struct {
-	CaCert                   string
-	Cert                     string
-	Key                      string
-	Port                     string
-	LogLevel                 string
-	CertsFromEnv             string
-	SubsHost                 string
-	ComplianceHost           string
-	CaPath                   string
-	OpenAPISpecPath          string
-	BundleInfoYaml           string
-	CwLogGroup               string
-	CwLogStream              string
-	CwRegion                 string
-	CwKey                    string
-	CwSecret                 string
+	CaCert          string
+	Cert            string
+	Key             string
+	Port            string
+	LogLevel        string
+	CertsFromEnv    string
+	SubsHost        string
+	ComplianceHost  string
+	CaPath          string
+	OpenAPISpecPath string
+	BundleInfoYaml  string
+	CwLogGroup      string
+	CwLogStream     string
+	CwRegion        string
+	CwKey           string
+	CwSecret        string
 	// Features (ENT_FEATURES) is a comma-separated list of feature-service features to query
 	// against Feature Service. The base feature is queried along with its "_paid" variant
 	// automatically. DEPRECATED (RHCLOUD-49553): superseded by `use_feature_service: true`
