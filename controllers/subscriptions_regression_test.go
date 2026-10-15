@@ -170,7 +170,7 @@ var _ = Describe("Services response regression", func() {
 		_, body, _ := testRequest("GET", "/?include_bundles=ansible,insights", "123456", DEFAULT_ORG_ID, true, DEFAULT_EMAIL,
 			fakeGetFeatureStatus(DEFAULT_ORG_ID, featureResp("ansible", "ansible_paid")))
 		Expect(body).To(Equal(map[string]EntitlementsSection{
-			"ansible": sku(true, false),
+			"ansible":  sku(true, false),
 			"insights": {IsEntitled: true, IsTrial: false},
 		}))
 	})

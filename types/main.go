@@ -23,9 +23,9 @@ type FeatureResponse struct {
 // json encoder requires RFC3339 time spec, feature service uses ISO 8601 which should be compatible but there are some discrepancies
 // see here for more info: https://en.wikipedia.org/wiki/ISO_8601#Implementations, https://cs.opensource.google/go/go/+/go1.25.6:src/time/time.go;l=1600
 type Feature struct {
-	Name       	string	`json:"name"`
-	StartDate	string	`json:"startDate"`
-	EndDate		string	`json:"endDate"`
+	Name      string `json:"name"`
+	StartDate string `json:"startDate"`
+	EndDate   string `json:"endDate"`
 }
 
 type FeatureStatus struct {
@@ -34,13 +34,14 @@ type FeatureStatus struct {
 
 // Bundle is a struct that is used to unmarshal the bundle info from bundles.yml
 type Bundle struct {
-	Name           string   `yaml:"name"`
-	UseValidAccNum bool     `yaml:"use_valid_acc_num"`
-	UseValidOrgId  bool     `yaml:"use_valid_org_id"`
-	UseIsInternal  bool     `yaml:"use_is_internal"`
-	Skus           []string `yaml:"skus"`
-	EvalSkus       []string `yaml:"eval_skus"`
-	PaidSkus       []string `yaml:"paid_skus"`
+	Name              string   `yaml:"name"`
+	UseFeatureService bool     `yaml:"use_feature_service"`
+	UseValidAccNum    bool     `yaml:"use_valid_acc_num"`
+	UseValidOrgId     bool     `yaml:"use_valid_org_id"`
+	UseIsInternal     bool     `yaml:"use_is_internal"`
+	Skus              []string `yaml:"skus"`
+	EvalSkus          []string `yaml:"eval_skus"`
+	PaidSkus          []string `yaml:"paid_skus"`
 }
 
 func (b *Bundle) IsPaid() bool {
