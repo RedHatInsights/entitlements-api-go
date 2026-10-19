@@ -352,10 +352,10 @@ var _ = Describe("Services Controller", func() {
 				Data: FeatureStatus{
 					Features: []Feature{
 						{
-							Name:       "TestBundle1",
+							Name: "TestBundle1",
 						},
 						{
-							Name:       "TestBundle2",
+							Name: "TestBundle2",
 						},
 					},
 				},
@@ -394,10 +394,10 @@ var _ = Describe("Services Controller", func() {
 				Data: FeatureStatus{
 					Features: []Feature{
 						{
-							Name:       "SplitBundle",
+							Name: "SplitBundle",
 						},
 						{
-							Name:       "SplitBundle_paid",
+							Name: "SplitBundle_paid",
 						},
 					},
 				},
@@ -416,7 +416,7 @@ var _ = Describe("Services Controller", func() {
 				Data: FeatureStatus{
 					Features: []Feature{
 						{
-							Name:       "SplitBundle",
+							Name: "SplitBundle",
 						},
 					},
 				},
@@ -450,7 +450,7 @@ var _ = Describe("Services Controller", func() {
 				Data: FeatureStatus{
 					Features: []Feature{
 						{
-							Name:       "RegularBundle",
+							Name: "RegularBundle",
 						},
 					},
 				},
@@ -776,7 +776,7 @@ var _ = Describe("Services Controller", func() {
 				StatusCode: 200,
 				Data: FeatureStatus{
 					Features: []Feature{
-						{Name: "TestBundle1",},
+						{Name: "TestBundle1"},
 					},
 				},
 				CacheHit: false,
