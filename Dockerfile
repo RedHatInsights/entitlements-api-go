@@ -2,7 +2,7 @@
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
 
-FROM registry.access.redhat.com/hi/go:1.27.0-fips-builder@sha256:f61df82b9277aa825678ba9b19960bee25c84d6e07f5db269790fbd9462751f1 as builder
+FROM registry.access.redhat.com/hi/go:1.27.2-fips-builder@sha256:08949f405667fd34ee37cd65d3e628c3f18decc5150af68243cbbb9e5a41b33d as builder
 
 WORKDIR /go/src/app
 
