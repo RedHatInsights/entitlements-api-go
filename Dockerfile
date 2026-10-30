@@ -2,7 +2,7 @@
 # Use go-toolset as the builder image
 # Once built, copys GO executable to a smaller image and runs it from there
 
-FROM registry.access.redhat.com/ubi9/go-toolset:9.8-1791928822@sha256:f9e171ed4a2ecfd284b6d977d60f6a0ed33eac8628ad806a80cdf3521cb8bede as builder
+FROM registry.access.redhat.com/ubi9/go-toolset:9.8-1793294290@sha256:cab9089469c52029e4d8a4e9f717e87c51ab22eed448ebcada101b811f97dfe7 as builder
 
 LABEL name="entitlements-api-go" \
       summary="Red Hat Entitlements API Service" \
