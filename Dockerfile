@@ -17,7 +17,7 @@ COPY . .
 
 RUN make
 
-FROM registry.access.redhat.com/hi/core-runtime:2.43-openssl-fips-builder@sha256:ebfc75423917a084d6a351dc3e4984582118d39e67ef703aa915c8cb1d69ee8d
+FROM registry.access.redhat.com/hi/core-runtime:2.43-openssl-fips-builder@sha256:5203b0dd9854cd020e1cbd884602724815359fdf245d6a08e47261be255f5c00
 
 WORKDIR /
 
