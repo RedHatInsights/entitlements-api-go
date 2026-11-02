@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	chilogger "github.com/766b/chi-logger"
 	"github.com/RedHatInsights/entitlements-api-go/ams"
 	"github.com/RedHatInsights/entitlements-api-go/api"
 	"github.com/RedHatInsights/entitlements-api-go/apispec"
@@ -36,7 +35,7 @@ func DoRoutes() chi.Router {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
-	r.Use(chilogger.NewLogrusMiddleware("router", log.Log))
+	r.Use(requestLogger("router", log.Log))
 	r.Use(sentryMiddleware.Handle)
 
 	// Setup identity enforcement with logging
