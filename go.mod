@@ -51,7 +51,7 @@ require (
 	github.com/oasdiff/yaml3 v0.0.16 // indirect
 	github.com/openshift-online/ocm-api-model/clientapi v0.0.472 // indirect
 	github.com/openshift-online/ocm-api-model/model v0.0.472 // indirect
-	github.com/pandatix/go-abnf v0.5.3 // indirect
+	github.com/pandatix/go-abnf v0.5.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.73.1 // indirect
